@@ -344,6 +344,43 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </button>
               )}
 
+              {/* Saved Users on this Device */}
+              {(() => {
+                const savedUsers = StorageService.getUsersRegistry().filter((u) => u.email);
+                if (savedUsers.length === 0) return null;
+                return (
+                  <div className="pt-2 space-y-1.5 border-t border-surface-container-high/60">
+                    <span className="text-[10px] font-bold text-outline block">
+                      חשבונות שמורים במכשיר:
+                    </span>
+                    <div className="space-y-1">
+                      {savedUsers.map((u) => (
+                        <div
+                          key={u.id}
+                          onClick={() => {
+                            const loggedIn: UserProfile = { ...u, isLoggedIn: true };
+                            onLoginSuccess(loggedIn);
+                            onClose();
+                          }}
+                          className="p-2 rounded-xl bg-surface-container-low hover:bg-surface-container border border-surface-container-high/60 flex items-center justify-between cursor-pointer transition-all"
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-lg bg-primary/10 text-primary font-bold text-[10px] flex items-center justify-center">
+                              {u.name ? u.name.charAt(0) : 'U'}
+                            </div>
+                            <div>
+                              <span className="font-bold text-xs text-on-surface block">{u.name}</span>
+                              <span className="text-[9px] text-outline">{u.email}</span>
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-bold text-primary">התחבר בלחיצה ←</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* Continue as Guest */}
               <div className="pt-2 text-center">
                 <button

@@ -110,19 +110,27 @@ export function App() {
     amount: number,
     unit: string
   ) => {
-    const updated = StorageService.addFoodToMeal(currentDate, mealType, food, grams, amount, unit);
+    const updated = StorageService.addFoodToMeal(
+      currentDate,
+      mealType,
+      food,
+      grams,
+      amount,
+      unit,
+      userProfile.id
+    );
     setDayLogs({ ...dayLogs, [currentDate]: updated });
     showToast(`נוסף בהצלחה: ${food.name} (${Math.round((food.calories * grams) / 100)} קק"ל)`);
   };
 
   const handleDeleteItem = (mealType: MealType, logId: string) => {
-    const updated = StorageService.removeFoodFromMeal(currentDate, mealType, logId);
+    const updated = StorageService.removeFoodFromMeal(currentDate, mealType, logId, userProfile.id);
     setDayLogs({ ...dayLogs, [currentDate]: updated });
     showToast('המאכל הוסר מהיומן');
   };
 
   const handleUpdateWater = (newCount: number) => {
-    const updated = StorageService.updateWater(currentDate, newCount);
+    const updated = StorageService.updateWater(currentDate, newCount, userProfile.id);
     setDayLogs({ ...dayLogs, [currentDate]: updated });
   };
 
@@ -147,24 +155,31 @@ export function App() {
           food,
           item.grams,
           1,
-          item.amountDesc
+          item.amountDesc,
+          userProfile.id
         );
       });
     });
 
-    setDayLogs(StorageService.getAllDayLogs());
+    setDayLogs(StorageService.getAllDayLogs(userProfile.id));
     showToast(`תפריט "${plan.title}" הוחל בהצלחה על יומן היום! 🎉`);
+  };
+
+  const syncUserData = (user: UserProfile) => {
+    setUserProfile(user);
+    setDayLogs(StorageService.getAllDayLogs(user.id));
+    setFoodDatabase(StorageService.getFoodDatabase(user.id));
+    setNotifications(StorageService.getNotifications(user.id));
   };
 
   const handleSaveProfile = (newProfile: UserProfile) => {
     StorageService.saveProfile(newProfile);
-    setUserProfile(newProfile);
+    syncUserData(newProfile);
     showToast('הפרופיל והיעדים עודכנו בהצלחה!');
   };
 
   const handleLoginSuccess = (loggedInUser: UserProfile) => {
     StorageService.saveProfile(loggedInUser);
-    setUserProfile(loggedInUser);
 
     if (loggedInUser.isOnboarded) {
       const today = getTodayDateString();
@@ -173,54 +188,53 @@ export function App() {
         waterGlasses: 0,
         meals: { breakfast: [], lunch: [], dinner: [], snack: [] },
       };
-      StorageService.saveDayLog(cleanDayLog);
-      setDayLogs(StorageService.getAllDayLogs());
+      StorageService.saveDayLog(cleanDayLog, loggedInUser.id);
     }
 
+    syncUserData(loggedInUser);
     showToast(`ברוך הבא, ${loggedInUser.name}! 👋`);
   };
 
   const handleLogout = () => {
     const guest = StorageService.logout();
-    setUserProfile(guest);
+    syncUserData(guest);
     setIsProfileModalOpen(false);
     showToast('התנתקת מהחשבון בהצלחה');
   };
 
   const handleSaveCustomFood = (newFood: Omit<FoodItem, 'id'>) => {
-    const saved = StorageService.saveCustomFood(newFood);
-    setFoodDatabase(StorageService.getFoodDatabase());
+    const saved = StorageService.saveCustomFood(newFood, userProfile.id);
+    setFoodDatabase(StorageService.getFoodDatabase(userProfile.id));
     showToast(`מאכל חדש נוסף למאגר: ${saved.name}`);
   };
 
   const handleToggleFavorite = (foodId: string) => {
-    StorageService.toggleFavorite(foodId);
-    setFoodDatabase(StorageService.getFoodDatabase());
+    StorageService.toggleFavorite(foodId, userProfile.id);
+    setFoodDatabase(StorageService.getFoodDatabase(userProfile.id));
   };
 
   const handleMarkNotificationsAsRead = () => {
-    StorageService.markNotificationsAsRead();
-    setNotifications(StorageService.getNotifications());
+    StorageService.markNotificationsAsRead(userProfile.id);
+    setNotifications(StorageService.getNotifications(userProfile.id));
   };
 
   const handleExportData = () => {
-    const jsonStr = StorageService.exportAllData();
+    const jsonStr = StorageService.exportAllData(userProfile.id);
     const blob = new Blob([jsonStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `nutritrack_backup_${getTodayDateString()}.json`;
+    a.download = `nutritrack_backup_${userProfile.name || 'user'}_${getTodayDateString()}.json`;
     a.click();
     URL.revokeObjectURL(url);
     showToast('קובץ הגיבוי הורד בהצלחה!');
   };
 
   const handleImportData = (jsonStr: string) => {
-    const success = StorageService.importAllData(jsonStr);
+    const success = StorageService.importAllData(jsonStr, userProfile.id);
     if (success) {
-      setUserProfile(StorageService.getProfile());
-      setDayLogs(StorageService.getAllDayLogs());
-      setFoodDatabase(StorageService.getFoodDatabase());
+      const profile = StorageService.getProfile(userProfile.id);
+      syncUserData(profile);
       showToast('הנתונים יובאו בהצלחה!');
     } else {
       showToast('שגיאה בייבוא הנתונים. ודא שמבנה ה-JSON תקין.', 'error');
@@ -228,11 +242,9 @@ export function App() {
   };
 
   const handleResetData = () => {
-    StorageService.resetAllData();
-    setUserProfile(StorageService.getProfile());
-    setDayLogs(StorageService.getAllDayLogs());
-    setFoodDatabase(StorageService.getFoodDatabase());
-    setNotifications(StorageService.getNotifications());
+    StorageService.resetAllData(userProfile.id);
+    const defaultProf = StorageService.getProfile(userProfile.id);
+    syncUserData(defaultProf);
     showToast('הנתונים אופסו לברירת המחדל');
   };
 

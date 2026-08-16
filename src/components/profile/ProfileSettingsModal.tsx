@@ -23,6 +23,7 @@ import type { UserProfile, FitnessGoal, ActivityLevel } from '../../types';
 import { calculateScientificTargets } from '../../services/nutritionCalculator';
 import { NotificationService } from '../../services/notificationService';
 import { BiometricAuthService } from '../../services/biometricAuthService';
+import { StorageService } from '../../services/storageService';
 
 interface ProfileSettingsModalProps {
   isOpen: boolean;
@@ -792,6 +793,49 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
 
                 {/* Account Actions */}
                 <div className="pt-2 flex flex-col gap-2">
+                  {/* Saved User Accounts on this Device */}
+                  {(() => {
+                    const otherUsers: UserProfile[] = StorageService.getUsersRegistry().filter(
+                      (u: UserProfile) => u.id !== formData.id && u.email
+                    );
+                    if (otherUsers.length === 0) return null;
+                    return (
+                      <div className="space-y-1.5 p-2.5 rounded-2xl bg-surface-container-low border border-surface-container-high/60">
+                        <span className="text-[10px] font-bold text-outline block mb-1">
+                          חשבונות נוספים במכשיר:
+                        </span>
+                        {otherUsers.map((u: UserProfile) => (
+                          <div
+                            key={u.id}
+                            className="p-2 rounded-xl bg-surface-container flex items-center justify-between gap-2"
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <div className="w-6 h-6 rounded-lg bg-primary/10 text-primary font-bold text-[10px] flex items-center justify-center flex-shrink-0">
+                                {u.name ? u.name.charAt(0) : 'U'}
+                              </div>
+                              <div className="truncate">
+                                <span className="font-bold text-[11px] text-on-surface block truncate">
+                                  {u.name}
+                                </span>
+                                <span className="text-[9px] text-outline truncate">{u.email}</span>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                onSaveProfile(u);
+                                setFormData(u);
+                              }}
+                              className="px-2.5 py-1 rounded-lg bg-primary/15 hover:bg-primary/25 text-primary font-bold text-[10px] transition-all flex-shrink-0"
+                            >
+                              החלף למשתמש זה
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
+
                   {onOpenAuth && (
                     <button
                       onClick={() => {
@@ -801,7 +845,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                       className="w-full py-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-bold text-xs flex items-center justify-center gap-2 border border-surface-container-high transition-all active:scale-98"
                     >
                       <User className="w-4 h-4 text-primary" />
-                      <span>החלף משתמש / התחבר בחשבון אחר</span>
+                      <span>התחבר בחשבון אחר / משתמש חדש</span>
                     </button>
                   )}
                   {onLogout && (

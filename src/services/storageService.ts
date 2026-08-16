@@ -2,11 +2,14 @@ import type { DayLog, FoodItem, LoggedFoodItem, MealType, UserProfile, Notificat
 import { INITIAL_FOOD_DATABASE } from '../data/foodDatabase';
 import { calculateItemNutrition, getTodayDateString } from './nutritionCalculator';
 
-const PROFILE_KEY = 'nutritrack_user_profile_v1';
-const USERS_KEY = 'nutritrack_users_registry_v1';
-const DAY_LOGS_KEY = 'nutritrack_day_logs_v1';
-const FOOD_DB_KEY = 'nutritrack_custom_food_db_v1';
-const NOTIFICATIONS_KEY = 'nutritrack_notifications_v1';
+const ACTIVE_USER_ID_KEY = 'nutritrack_active_user_id_v1';
+const PROFILE_KEY_LEGACY = 'nutritrack_user_profile_v1';
+const PROFILE_KEY_PREFIX = 'nutritrack_user_profile_v1_';
+const USERS_REGISTRY_KEY = 'nutritrack_users_registry_v1';
+const DAY_LOGS_PREFIX = 'nutritrack_day_logs_v1_';
+const FOOD_DB_PREFIX = 'nutritrack_custom_food_db_v1_';
+const CUSTOM_MEAL_PLANS_PREFIX = 'nutritrack_custom_meal_plans_v1_';
+const NOTIFICATIONS_PREFIX = 'nutritrack_notifications_v1_';
 
 export const DEFAULT_USER_PROFILE: UserProfile = {
   id: 'usr_default_1',
@@ -159,27 +162,83 @@ export const INITIAL_NOTIFICATIONS: NotificationItem[] = [
 ];
 
 export const StorageService = {
-  getProfile(): UserProfile {
+  // Active User Identifier
+  getActiveUserId(): string {
     try {
-      const data = localStorage.getItem(PROFILE_KEY);
-      return data ? { ...DEFAULT_USER_PROFILE, ...JSON.parse(data) } : DEFAULT_USER_PROFILE;
+      const activeId = localStorage.getItem(ACTIVE_USER_ID_KEY);
+      if (activeId) return activeId;
+      const legacyProfileStr = localStorage.getItem(PROFILE_KEY_LEGACY);
+      if (legacyProfileStr) {
+        const parsed = JSON.parse(legacyProfileStr);
+        if (parsed.id) {
+          localStorage.setItem(ACTIVE_USER_ID_KEY, parsed.id);
+          return parsed.id;
+        }
+      }
+      return DEFAULT_USER_PROFILE.id || 'usr_default_1';
+    } catch {
+      return DEFAULT_USER_PROFILE.id || 'usr_default_1';
+    }
+  },
+
+  setActiveUserId(userId: string): void {
+    try {
+      localStorage.setItem(ACTIVE_USER_ID_KEY, userId);
+    } catch (e) {
+      console.warn(e);
+    }
+  },
+
+  // Profile Management (User-Scoped)
+  getProfile(userId?: string): UserProfile {
+    const uid = userId || this.getActiveUserId();
+    try {
+      // 1. Check user-specific storage key
+      const userSpecificData = localStorage.getItem(PROFILE_KEY_PREFIX + uid);
+      if (userSpecificData) {
+        return { ...DEFAULT_USER_PROFILE, ...JSON.parse(userSpecificData) };
+      }
+
+      // 2. Check users registry
+      const registry = this.getUsersRegistry();
+      const userInRegistry = registry.find((u) => u.id === uid);
+      if (userInRegistry) {
+        return { ...DEFAULT_USER_PROFILE, ...userInRegistry };
+      }
+
+      // 3. Check legacy key if default
+      const legacyData = localStorage.getItem(PROFILE_KEY_LEGACY);
+      if (legacyData) {
+        const parsed = JSON.parse(legacyData);
+        if (parsed.id === uid || uid === DEFAULT_USER_PROFILE.id) {
+          return { ...DEFAULT_USER_PROFILE, ...parsed };
+        }
+      }
+
+      return DEFAULT_USER_PROFILE;
     } catch {
       return DEFAULT_USER_PROFILE;
     }
   },
 
   saveProfile(profile: UserProfile): void {
-    localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
-    // Also sync to registered users registry if email exists
-    if (profile.email) {
-      this.syncUserToRegistry(profile);
+    const uid = profile.id || `usr_${Date.now()}`;
+    const userToSave: UserProfile = { ...profile, id: uid };
+
+    try {
+      this.setActiveUserId(uid);
+      localStorage.setItem(PROFILE_KEY_PREFIX + uid, JSON.stringify(userToSave));
+      localStorage.setItem(PROFILE_KEY_LEGACY, JSON.stringify(userToSave));
+      this.syncUserToRegistry(userToSave);
+    } catch (e) {
+      console.warn('Failed to save profile', e);
     }
   },
 
-  // Multi-user & Auth management
+  // Users Registry (All registered users on this device)
   getUsersRegistry(): UserProfile[] {
     try {
-      const data = localStorage.getItem(USERS_KEY);
+      const data = localStorage.getItem(USERS_REGISTRY_KEY);
       return data ? JSON.parse(data) : [DEFAULT_USER_PROFILE];
     } catch {
       return [DEFAULT_USER_PROFILE];
@@ -187,50 +246,76 @@ export const StorageService = {
   },
 
   syncUserToRegistry(user: UserProfile): void {
-    const users = this.getUsersRegistry();
-    const idx = users.findIndex((u) => u.email === user.email || u.id === user.id);
-    if (idx >= 0) {
-      users[idx] = { ...users[idx], ...user };
-    } else {
-      users.push(user);
+    try {
+      const users = this.getUsersRegistry();
+      const idx = users.findIndex((u) => u.id === user.id || (u.email && u.email === user.email));
+      if (idx >= 0) {
+        users[idx] = { ...users[idx], ...user };
+      } else {
+        users.push(user);
+      }
+      localStorage.setItem(USERS_REGISTRY_KEY, JSON.stringify(users));
+    } catch (e) {
+      console.warn(e);
     }
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
   },
 
   logout(): UserProfile {
+    const guestId = `guest_${Date.now()}`;
     const guestProfile: UserProfile = {
       ...DEFAULT_USER_PROFILE,
-      id: `guest_${Date.now()}`,
+      id: guestId,
       name: 'אורח',
       email: '',
       isLoggedIn: false,
       hasBiometrics: false,
     };
+    this.setActiveUserId(guestId);
     this.saveProfile(guestProfile);
     return guestProfile;
   },
 
-  getAllDayLogs(): Record<string, DayLog> {
+  // Day Logs (Per-User Isolated)
+  getAllDayLogs(userId?: string): Record<string, DayLog> {
+    const uid = userId || this.getActiveUserId();
+    const key = DAY_LOGS_PREFIX + uid;
+
     try {
-      const data = localStorage.getItem(DAY_LOGS_KEY);
+      const data = localStorage.getItem(key);
       if (data) {
         return JSON.parse(data);
       }
-      const initialLogs: Record<string, DayLog> = {
-        [INITIAL_TODAY_LOG.date]: INITIAL_TODAY_LOG,
-      };
-      localStorage.setItem(DAY_LOGS_KEY, JSON.stringify(initialLogs));
-      return initialLogs;
+
+      // Check legacy single-user log if it's the initial default demo user
+      if (uid === DEFAULT_USER_PROFILE.id || uid === 'usr_default_1') {
+        const legacy = localStorage.getItem('nutritrack_day_logs_v1');
+        if (legacy) {
+          const parsed = JSON.parse(legacy);
+          localStorage.setItem(key, JSON.stringify(parsed));
+          return parsed;
+        }
+        const initial: Record<string, DayLog> = {
+          [INITIAL_TODAY_LOG.date]: INITIAL_TODAY_LOG,
+        };
+        localStorage.setItem(key, JSON.stringify(initial));
+        return initial;
+      }
+
+      // For any newly registered or authenticated user, start with clean state
+      return {};
     } catch {
-      return { [INITIAL_TODAY_LOG.date]: INITIAL_TODAY_LOG };
+      return {};
     }
   },
 
-  getDayLog(date: string): DayLog {
-    const logs = this.getAllDayLogs();
+  getDayLog(date: string, userId?: string): DayLog {
+    const uid = userId || this.getActiveUserId();
+    const logs = this.getAllDayLogs(uid);
+
     if (logs[date]) {
       return logs[date];
     }
+
     const emptyLog: DayLog = {
       date,
       waterGlasses: 0,
@@ -244,10 +329,17 @@ export const StorageService = {
     return emptyLog;
   },
 
-  saveDayLog(dayLog: DayLog): void {
-    const logs = this.getAllDayLogs();
+  saveDayLog(dayLog: DayLog, userId?: string): void {
+    const uid = userId || this.getActiveUserId();
+    const key = DAY_LOGS_PREFIX + uid;
+    const logs = this.getAllDayLogs(uid);
+
     logs[dayLog.date] = dayLog;
-    localStorage.setItem(DAY_LOGS_KEY, JSON.stringify(logs));
+    try {
+      localStorage.setItem(key, JSON.stringify(logs));
+    } catch (e) {
+      console.warn('Failed to save day log', e);
+    }
   },
 
   addFoodToMeal(
@@ -256,9 +348,11 @@ export const StorageService = {
     food: FoodItem,
     grams: number,
     amount: number,
-    unit: string
+    unit: string,
+    userId?: string
   ): DayLog {
-    const dayLog = this.getDayLog(date);
+    const uid = userId || this.getActiveUserId();
+    const dayLog = this.getDayLog(date, uid);
     const calculated = calculateItemNutrition(food, grams);
 
     const now = new Date();
@@ -282,29 +376,38 @@ export const StorageService = {
     }
 
     dayLog.meals[mealType].push(loggedItem);
-    this.saveDayLog(dayLog);
+    this.saveDayLog(dayLog, uid);
     return dayLog;
   },
 
-  removeFoodFromMeal(date: string, mealType: MealType, logId: string): DayLog {
-    const dayLog = this.getDayLog(date);
+  removeFoodFromMeal(date: string, mealType: MealType, logId: string, userId?: string): DayLog {
+    const uid = userId || this.getActiveUserId();
+    const dayLog = this.getDayLog(date, uid);
+
     if (dayLog.meals[mealType]) {
-      dayLog.meals[mealType] = dayLog.meals[mealType].filter((item) => item.logId !== logId && item.id !== logId);
-      this.saveDayLog(dayLog);
+      dayLog.meals[mealType] = dayLog.meals[mealType].filter(
+        (item) => item.logId !== logId && item.id !== logId
+      );
+      this.saveDayLog(dayLog, uid);
     }
     return dayLog;
   },
 
-  updateWater(date: string, glasses: number): DayLog {
-    const dayLog = this.getDayLog(date);
+  updateWater(date: string, glasses: number, userId?: string): DayLog {
+    const uid = userId || this.getActiveUserId();
+    const dayLog = this.getDayLog(date, uid);
     dayLog.waterGlasses = Math.max(0, glasses);
-    this.saveDayLog(dayLog);
+    this.saveDayLog(dayLog, uid);
     return dayLog;
   },
 
-  getFoodDatabase(): FoodItem[] {
+  // Custom Foods (Per-User Isolated)
+  getFoodDatabase(userId?: string): FoodItem[] {
+    const uid = userId || this.getActiveUserId();
+    const key = FOOD_DB_PREFIX + uid;
+
     try {
-      const customData = localStorage.getItem(FOOD_DB_KEY);
+      const customData = localStorage.getItem(key);
       if (customData) {
         const customFoods: FoodItem[] = JSON.parse(customData);
         return [...customFoods, ...INITIAL_FOOD_DATABASE];
@@ -315,100 +418,159 @@ export const StorageService = {
     }
   },
 
-  saveCustomFood(food: Omit<FoodItem, 'id'>): FoodItem {
+  saveCustomFood(food: Omit<FoodItem, 'id'>, userId?: string): FoodItem {
+    const uid = userId || this.getActiveUserId();
+    const key = FOOD_DB_PREFIX + uid;
+
     const newFood: FoodItem = {
       ...food,
       id: 'custom_' + Date.now(),
       isCustom: true,
     };
+
     try {
-      const customData = localStorage.getItem(FOOD_DB_KEY);
+      const customData = localStorage.getItem(key);
       const customFoods: FoodItem[] = customData ? JSON.parse(customData) : [];
       customFoods.unshift(newFood);
-      localStorage.setItem(FOOD_DB_KEY, JSON.stringify(customFoods));
+      localStorage.setItem(key, JSON.stringify(customFoods));
     } catch (e) {
       console.warn(e);
     }
     return newFood;
   },
 
-  toggleFavorite(foodId: string): void {
-    const database = this.getFoodDatabase();
+  toggleFavorite(foodId: string, userId?: string): void {
+    const uid = userId || this.getActiveUserId();
+    const key = FOOD_DB_PREFIX + uid;
+
+    const database = this.getFoodDatabase(uid);
     const item = database.find((f) => f.id === foodId);
     if (item) {
       item.isFavorite = !item.isFavorite;
-      const customData = localStorage.getItem(FOOD_DB_KEY);
-      const customFoods: FoodItem[] = customData ? JSON.parse(customData) : [];
-      const cIndex = customFoods.findIndex((f) => f.id === foodId);
-      if (cIndex >= 0) {
-        customFoods[cIndex].isFavorite = item.isFavorite;
-        localStorage.setItem(FOOD_DB_KEY, JSON.stringify(customFoods));
+      try {
+        const customData = localStorage.getItem(key);
+        const customFoods: FoodItem[] = customData ? JSON.parse(customData) : [];
+        const cIndex = customFoods.findIndex((f) => f.id === foodId);
+        if (cIndex >= 0) {
+          customFoods[cIndex].isFavorite = item.isFavorite;
+          localStorage.setItem(key, JSON.stringify(customFoods));
+        }
+      } catch (e) {
+        console.warn(e);
       }
     }
   },
 
-  getNotifications(): NotificationItem[] {
+  // Notifications (Per-User Isolated)
+  getNotifications(userId?: string): NotificationItem[] {
+    const uid = userId || this.getActiveUserId();
+    const key = NOTIFICATIONS_PREFIX + uid;
+
     try {
-      const data = localStorage.getItem(NOTIFICATIONS_KEY);
-      return data ? JSON.parse(data) : INITIAL_NOTIFICATIONS;
+      const data = localStorage.getItem(key);
+      if (data) {
+        return JSON.parse(data);
+      }
+      // Demo notifications for default user only
+      if (uid === DEFAULT_USER_PROFILE.id || uid === 'usr_default_1') {
+        return INITIAL_NOTIFICATIONS;
+      }
+      return [];
     } catch {
-      return INITIAL_NOTIFICATIONS;
+      return [];
     }
   },
 
-  markNotificationsAsRead(): void {
-    const list = this.getNotifications().map((n) => ({ ...n, read: true }));
-    localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(list));
+  markNotificationsAsRead(userId?: string): void {
+    const uid = userId || this.getActiveUserId();
+    const key = NOTIFICATIONS_PREFIX + uid;
+    const list = this.getNotifications(uid).map((n) => ({ ...n, read: true }));
+    try {
+      localStorage.setItem(key, JSON.stringify(list));
+    } catch (e) {
+      console.warn(e);
+    }
   },
 
-  // Custom Meal Plans Management
-  getCustomMealPlans(): MealPlanPreset[] {
+  // Custom Meal Plans (Per-User Isolated)
+  getCustomMealPlans(userId?: string): MealPlanPreset[] {
+    const uid = userId || this.getActiveUserId();
+    const key = CUSTOM_MEAL_PLANS_PREFIX + uid;
+
     try {
-      const data = localStorage.getItem('nutritrack_custom_meal_plans_v1');
+      const data = localStorage.getItem(key);
       return data ? JSON.parse(data) : [];
     } catch {
       return [];
     }
   },
 
-  saveCustomMealPlan(plan: MealPlanPreset): MealPlanPreset {
-    const plans = this.getCustomMealPlans();
+  saveCustomMealPlan(plan: MealPlanPreset, userId?: string): MealPlanPreset {
+    const uid = userId || this.getActiveUserId();
+    const key = CUSTOM_MEAL_PLANS_PREFIX + uid;
+
+    const plans = this.getCustomMealPlans(uid);
     const idx = plans.findIndex((p) => p.id === plan.id);
     if (idx >= 0) {
       plans[idx] = plan;
     } else {
       plans.unshift(plan);
     }
-    localStorage.setItem('nutritrack_custom_meal_plans_v1', JSON.stringify(plans));
+
+    try {
+      localStorage.setItem(key, JSON.stringify(plans));
+    } catch (e) {
+      console.warn(e);
+    }
     return plan;
   },
 
-  deleteCustomMealPlan(planId: string): void {
-    const plans = this.getCustomMealPlans().filter((p) => p.id !== planId);
-    localStorage.setItem('nutritrack_custom_meal_plans_v1', JSON.stringify(plans));
+  deleteCustomMealPlan(planId: string, userId?: string): void {
+    const uid = userId || this.getActiveUserId();
+    const key = CUSTOM_MEAL_PLANS_PREFIX + uid;
+    const plans = this.getCustomMealPlans(uid).filter((p) => p.id !== planId);
+    try {
+      localStorage.setItem(key, JSON.stringify(plans));
+    } catch (e) {
+      console.warn(e);
+    }
   },
 
-  exportAllData(): string {
+  // Backup Export / Import (Per User)
+  exportAllData(userId?: string): string {
+    const uid = userId || this.getActiveUserId();
     const data = {
-      profile: this.getProfile(),
-      dayLogs: this.getAllDayLogs(),
-      customFoods: localStorage.getItem(FOOD_DB_KEY) ? JSON.parse(localStorage.getItem(FOOD_DB_KEY)!) : [],
-      customPlans: this.getCustomMealPlans(),
-      notifications: this.getNotifications(),
+      profile: this.getProfile(uid),
+      dayLogs: this.getAllDayLogs(uid),
+      customFoods: this.getFoodDatabase(uid).filter((f) => f.isCustom),
+      customPlans: this.getCustomMealPlans(uid),
+      notifications: this.getNotifications(uid),
       exportDate: new Date().toISOString(),
-      version: '1.0.0',
+      version: '2.0.0',
     };
     return JSON.stringify(data, null, 2);
   },
 
-  importAllData(jsonString: string): boolean {
+  importAllData(jsonString: string, userId?: string): boolean {
     try {
       const parsed = JSON.parse(jsonString);
-      if (parsed.profile) localStorage.setItem(PROFILE_KEY, JSON.stringify(parsed.profile));
-      if (parsed.dayLogs) localStorage.setItem(DAY_LOGS_KEY, JSON.stringify(parsed.dayLogs));
-      if (parsed.customFoods) localStorage.setItem(FOOD_DB_KEY, JSON.stringify(parsed.customFoods));
-      if (parsed.customPlans) localStorage.setItem('nutritrack_custom_meal_plans_v1', JSON.stringify(parsed.customPlans));
-      if (parsed.notifications) localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(parsed.notifications));
+      const uid = userId || parsed.profile?.id || this.getActiveUserId();
+
+      if (parsed.profile) {
+        this.saveProfile(parsed.profile);
+      }
+      if (parsed.dayLogs) {
+        localStorage.setItem(DAY_LOGS_PREFIX + uid, JSON.stringify(parsed.dayLogs));
+      }
+      if (parsed.customFoods) {
+        localStorage.setItem(FOOD_DB_PREFIX + uid, JSON.stringify(parsed.customFoods));
+      }
+      if (parsed.customPlans) {
+        localStorage.setItem(CUSTOM_MEAL_PLANS_PREFIX + uid, JSON.stringify(parsed.customPlans));
+      }
+      if (parsed.notifications) {
+        localStorage.setItem(NOTIFICATIONS_PREFIX + uid, JSON.stringify(parsed.notifications));
+      }
       return true;
     } catch (e) {
       console.warn('Import failed', e);
@@ -416,11 +578,12 @@ export const StorageService = {
     }
   },
 
-  resetAllData(): void {
-    localStorage.removeItem(PROFILE_KEY);
-    localStorage.removeItem(DAY_LOGS_KEY);
-    localStorage.removeItem(FOOD_DB_KEY);
-    localStorage.removeItem(NOTIFICATIONS_KEY);
-    localStorage.removeItem('nutritrack_custom_meal_plans_v1');
+  resetAllData(userId?: string): void {
+    const uid = userId || this.getActiveUserId();
+    localStorage.removeItem(PROFILE_KEY_PREFIX + uid);
+    localStorage.removeItem(DAY_LOGS_PREFIX + uid);
+    localStorage.removeItem(FOOD_DB_PREFIX + uid);
+    localStorage.removeItem(NOTIFICATIONS_PREFIX + uid);
+    localStorage.removeItem(CUSTOM_MEAL_PLANS_PREFIX + uid);
   },
 };
