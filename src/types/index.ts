@@ -12,7 +12,7 @@ export type FoodCategory =
   | 'beverages'
   | 'favorites';
 
-export type FitnessGoal = 'lose_weight' | 'maintain' | 'gain_muscle';
+export type FitnessGoal = 'lose_weight' | 'maintain' | 'lean_bulk' | 'gain_muscle';
 
 export type ActivityLevel =
   | 'sedentary'
@@ -82,6 +82,7 @@ export interface UserProfile {
   email?: string;
   password?: string;
   isLoggedIn?: boolean;
+  isOnboarded?: boolean;
   hasBiometrics?: boolean;
   biometricCredentialId?: string;
   gender: 'male' | 'female';

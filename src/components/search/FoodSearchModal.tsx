@@ -42,6 +42,7 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
   const [amountValue, setAmountValue] = useState<number>(1);
   const [portionMode, setPortionMode] = useState<'standard' | 'grams'>('standard');
   const [customGrams, setCustomGrams] = useState<number>(100);
+  const [showPortionGuide, setShowPortionGuide] = useState(false);
 
   // Sync defaultMealType when modal opens
   React.useEffect(() => {
@@ -214,6 +215,47 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
               <PlusCircle className="w-4 h-4" />
               <span>צור מאכל מותאם</span>
             </button>
+          </div>
+
+          {/* Smart Visual Portion Guide Banner */}
+          <div className="rounded-2xl bg-surface-container-low border border-surface-container-high overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setShowPortionGuide(!showPortionGuide)}
+              className="w-full p-2.5 flex items-center justify-between text-xs font-bold text-on-surface hover:bg-surface-container transition-all"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-sm">🖐️</span>
+                <span className="text-[11px] text-primary">לא שוקל במאזניים? לחץ למדריך כמויות מהיר</span>
+              </div>
+              <span className="text-[10px] text-outline">{showPortionGuide ? 'סגור' : 'הצג מדריך'}</span>
+            </button>
+
+            {showPortionGuide && (
+              <div className="p-3 pt-1 border-t border-surface-container-high/60 bg-surface-container-lowest text-[11px] space-y-2 animate-in fade-in duration-150">
+                <p className="text-outline text-[10px] leading-relaxed">
+                  אינך צריך משקל מטבח! השתמש בהערכות ויזואליות או בחר באפשרות <strong>"לפי יחידות"</strong>:
+                </p>
+                <div className="grid grid-cols-2 gap-2 text-[10px]">
+                  <div className="p-2 rounded-xl bg-surface-container-low border border-surface-container-high/60">
+                    <span className="font-bold text-primary block">🖐️ כף יד פתוחה</span>
+                    <span className="text-outline">מנת חלבון (בשר, עוף, קציצות ~ 120-150g)</span>
+                  </div>
+                  <div className="p-2 rounded-xl bg-surface-container-low border border-surface-container-high/60">
+                    <span className="font-bold text-primary block">✊ אגרוף סגור</span>
+                    <span className="text-outline">מנת פחמימה (אורז, פתיתים, פסטה ~ כוס)</span>
+                  </div>
+                  <div className="p-2 rounded-xl bg-surface-container-low border border-surface-container-high/60">
+                    <span className="font-bold text-primary block">🤲 שתי כפות ידיים</span>
+                    <span className="text-outline">סלט וירקות מבושלים (~ 200g)</span>
+                  </div>
+                  <div className="p-2 rounded-xl bg-surface-container-low border border-surface-container-high/60">
+                    <span className="font-bold text-primary block">👍 אגודל מלא</span>
+                    <span className="text-outline">שומן וממרח (כף טחינה, שמן זית ~ 15g)</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Category Chips with smooth padding */}

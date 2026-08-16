@@ -47,19 +47,30 @@ export function calculateTDEE(
   const maintenance = Math.round(bmr * getActivityMultiplier(activityLevel));
   let target = maintenance;
 
+  let proteinPercent = 0.30;
+  let carbsPercent = 0.40;
+  let fatPercent = 0.30;
+
   if (goal === 'lose_weight') {
     target = Math.max(1200, Math.round(maintenance - 450)); // גירעון מבוקר
+    proteinPercent = 0.35; // דגש על שימור שריר
+    carbsPercent = 0.35;
+    fatPercent = 0.30;
+  } else if (goal === 'lean_bulk') {
+    target = Math.round(maintenance + 250); // עודף קלורי קל ונקי לבניית שריר ללא שומן
+    proteinPercent = 0.32; // חלבון גבוה (כ-2.2 גרם לק"ג)
+    carbsPercent = 0.43; // אנרגיה לאימונים
+    fatPercent = 0.25;
   } else if (goal === 'gain_muscle') {
-    target = Math.round(maintenance + 350); // עודף קלורי מבוקר
+    target = Math.round(maintenance + 450); // עודף קלורי מלא
+    proteinPercent = 0.28;
+    carbsPercent = 0.47;
+    fatPercent = 0.25;
   }
 
-  // חלוקת מאקרו מומלצת:
-  // חלבון: 30% מסך הקלוריות (4 קלוריות לגרם)
-  // פחמימות: 40% מסך הקלוריות (4 קלוריות לגרם)
-  // שומן: 30% מסך הקלוריות (9 קלוריות לגרם)
-  const proteinGrams = Math.round((target * 0.30) / 4);
-  const carbsGrams = Math.round((target * 0.40) / 4);
-  const fatGrams = Math.round((target * 0.30) / 9);
+  const proteinGrams = Math.round((target * proteinPercent) / 4);
+  const carbsGrams = Math.round((target * carbsPercent) / 4);
+  const fatGrams = Math.round((target * fatPercent) / 9);
 
   return {
     maintenanceCalories: maintenance,

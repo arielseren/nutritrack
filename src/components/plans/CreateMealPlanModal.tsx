@@ -136,6 +136,7 @@ export const CreateMealPlanModal: React.FC<CreateMealPlanModalProps> = ({
     const badgeMap: Record<FitnessGoal, string> = {
       lose_weight: 'חיטוב מותאם',
       maintain: 'תפריט מאוזן',
+      lean_bulk: 'מסה נקייה',
       gain_muscle: 'מסה וכוח',
     };
 
@@ -252,6 +253,7 @@ export const CreateMealPlanModal: React.FC<CreateMealPlanModalProps> = ({
                 >
                   <option value="lose_weight">חיטוב וירידה במשקל</option>
                   <option value="maintain">שמירה על משקל (ניטרלי)</option>
+                  <option value="lean_bulk">עלייה נקייה במסת שריר (Lean Bulk)</option>
                   <option value="gain_muscle">עלייה במסת שריר ומסה</option>
                 </select>
               </div>

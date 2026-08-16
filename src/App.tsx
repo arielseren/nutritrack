@@ -165,6 +165,18 @@ export function App() {
   const handleLoginSuccess = (loggedInUser: UserProfile) => {
     StorageService.saveProfile(loggedInUser);
     setUserProfile(loggedInUser);
+
+    if (loggedInUser.isOnboarded) {
+      const today = getTodayDateString();
+      const cleanDayLog: DayLog = {
+        date: today,
+        waterGlasses: 0,
+        meals: { breakfast: [], lunch: [], dinner: [], snack: [] },
+      };
+      StorageService.saveDayLog(cleanDayLog);
+      setDayLogs(StorageService.getAllDayLogs());
+    }
+
     showToast(`ברוך הבא, ${loggedInUser.name}! 👋`);
   };
 
@@ -272,38 +284,28 @@ export function App() {
           )}
 
           {activeTab === 'plans' && (
-            <div className="space-y-4">
-              <div className="pt-2">
-                <h2 className="font-headline text-2xl font-bold text-on-surface">תפריטי תזונה</h2>
-                <p className="text-xs text-outline">בחר תפריט מומלץ או בנה תפריט אישי והחל אותו בלחיצה אחת</p>
-              </div>
-              <MealPlansModal
-                isOpen={true}
-                onClose={() => setActiveTab('dashboard')}
-                onApplyPlan={handleApplyMealPlan}
-                foodDatabase={foodDatabase}
-              />
-            </div>
+            <MealPlansModal
+              isOpen={true}
+              isInline={true}
+              onClose={() => setActiveTab('dashboard')}
+              onApplyPlan={handleApplyMealPlan}
+              foodDatabase={foodDatabase}
+            />
           )}
 
           {activeTab === 'profile' && (
-            <div className="space-y-4">
-              <div className="pt-2">
-                <h2 className="font-headline text-2xl font-bold text-on-surface">פרופיל והגדרות</h2>
-                <p className="text-xs text-outline">נהל את יעדי הקלוריות, המאקרו, ההתראות והאבטחה שלך</p>
-              </div>
-              <ProfileSettingsModal
-                isOpen={true}
-                onClose={() => setActiveTab('dashboard')}
-                userProfile={userProfile}
-                onSaveProfile={handleSaveProfile}
-                onExportData={handleExportData}
-                onImportData={handleImportData}
-                onResetData={handleResetData}
-                onLogout={handleLogout}
-                onOpenAuth={() => setIsAuthModalOpen(true)}
-              />
-            </div>
+            <ProfileSettingsModal
+              isOpen={true}
+              isInline={true}
+              onClose={() => setActiveTab('dashboard')}
+              userProfile={userProfile}
+              onSaveProfile={handleSaveProfile}
+              onExportData={handleExportData}
+              onImportData={handleImportData}
+              onResetData={handleResetData}
+              onLogout={handleLogout}
+              onOpenAuth={() => setIsAuthModalOpen(true)}
+            />
           )}
         </div>
       </main>

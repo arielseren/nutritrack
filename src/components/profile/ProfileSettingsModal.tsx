@@ -34,6 +34,7 @@ interface ProfileSettingsModalProps {
   onResetData: () => void;
   onLogout?: () => void;
   onOpenAuth?: () => void;
+  isInline?: boolean;
 }
 
 type AccordionSection = 'personal' | 'targets' | 'notifications' | 'security' | 'backup';
@@ -48,6 +49,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
   onResetData,
   onLogout,
   onOpenAuth,
+  isInline = false,
 }) => {
   // Active open accordion section
   const [openSections, setOpenSections] = useState<Record<AccordionSection, boolean>>({
@@ -77,31 +79,8 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
     }));
   };
 
-  // Personal details save & cancel
   const handleSavePersonal = () => {
-    onSaveProfile(formData);
-    setIsEditingPersonal(false);
-  };
-
-  const handleCancelPersonal = () => {
-    setFormData(userProfile);
-    setIsEditingPersonal(false);
-  };
-
-  // Targets save & cancel
-  const handleSaveTargets = () => {
-    onSaveProfile(formData);
-    setIsEditingTargets(false);
-  };
-
-  const handleCancelTargets = () => {
-    setFormData(userProfile);
-    setIsEditingTargets(false);
-  };
-
-  // Auto calculate targets from BMR / TDEE
-  const handleAutoRecalculateTargets = () => {
-    const calc = calculateScientificTargets(
+    const calculated = calculateScientificTargets(
       formData.gender,
       formData.age,
       formData.height,
@@ -112,16 +91,54 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
 
     const updated: UserProfile = {
       ...formData,
-      dailyCalorieTarget: calc.calories,
-      dailyProteinTarget: calc.protein,
-      dailyCarbsTarget: calc.carbs,
-      dailyFatTarget: calc.fat,
+      dailyCalorieTarget: calculated.calories,
+      dailyProteinTarget: calculated.protein,
+      dailyCarbsTarget: calculated.carbs,
+      dailyFatTarget: calculated.fat,
     };
+
+    setFormData(updated);
+    onSaveProfile(updated);
+    setIsEditingPersonal(false);
+  };
+
+  const handleCancelPersonal = () => {
+    setFormData(userProfile);
+    setIsEditingPersonal(false);
+  };
+
+  const handleSaveTargets = () => {
+    onSaveProfile(formData);
+    setIsEditingTargets(false);
+  };
+
+  const handleCancelTargets = () => {
+    setFormData(userProfile);
+    setIsEditingTargets(false);
+  };
+
+  const handleAutoRecalculateTargets = () => {
+    const calculated = calculateScientificTargets(
+      formData.gender,
+      formData.age,
+      formData.height,
+      formData.currentWeight,
+      formData.activityLevel,
+      formData.goal
+    );
+
+    const updated: UserProfile = {
+      ...formData,
+      dailyCalorieTarget: calculated.calories,
+      dailyProteinTarget: calculated.protein,
+      dailyCarbsTarget: calculated.carbs,
+      dailyFatTarget: calculated.fat,
+    };
+
     setFormData(updated);
     onSaveProfile(updated);
   };
 
-  // Push Notifications toggle
   const handleTogglePushNotifications = async () => {
     if (!formData.pushNotificationsEnabled) {
       const granted = await NotificationService.requestPermission();
@@ -148,7 +165,6 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
     }
   };
 
-  // Test Push notification
   const handleSendTestPush = async () => {
     setPushTestMessage('שולח התראת בדיקה למכשיר...');
     const sent = await NotificationService.sendTestPushNotification();
@@ -160,7 +176,6 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
     setTimeout(() => setPushTestMessage(null), 4000);
   };
 
-  // Biometrics toggle (Fingerprint / Face ID)
   const handleToggleBiometrics = async () => {
     setBiometricLoading(true);
     setBiometricMessage(null);
@@ -195,17 +210,18 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
     setBiometricLoading(false);
   };
 
-  // File import helper
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const content = event.target?.result as string;
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      if (content) {
         onImportData(content);
-      };
-      reader.readAsText(file);
-    }
+      }
+    };
+    reader.readAsText(file);
   };
 
   const activityLabels: Record<ActivityLevel, string> = {
@@ -219,26 +235,29 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
   const goalLabels: Record<FitnessGoal, string> = {
     lose_weight: 'ירידה במשקל וחיטוב (גירעון קלורי)',
     maintain: 'שמירה על משקל נוכחי (מאזן ניטרלי)',
-    gain_muscle: 'עלייה במסת שריר ומסה (עודף קלורי)',
+    lean_bulk: 'עלייה נקייה במסת שריר (Lean Bulk - עודף קלורי מתון)',
+    gain_muscle: 'עלייה במסת שריר ומסה (עודף קלורי מלא)',
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-surface rounded-3xl w-full max-w-[480px] max-h-[90dvh] flex flex-col shadow-2xl border border-outline-variant/30 overflow-hidden animate-modal-sheet">
-        
-        {/* Modal Header */}
-        <div className="px-5 py-4 flex items-center justify-between border-b border-surface-container-high bg-surface-container-lowest flex-shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-bold text-base shadow-xs">
-              {formData.name ? formData.name.charAt(0) : 'U'}
-            </div>
-            <div>
-              <h2 className="font-headline font-bold text-base text-on-surface">פרופיל והגדרות</h2>
-              <p className="text-[11px] text-outline">
-                {formData.email ? formData.email : 'משתמש רשום ב-NutriTrack'}
-              </p>
-            </div>
+  const contentMarkup = (
+    <div className={`bg-surface rounded-3xl w-full max-w-[480px] flex flex-col border border-surface-container-high overflow-hidden ${
+      isInline ? 'shadow-xs animate-page-enter' : 'shadow-2xl max-h-[90dvh] animate-modal-sheet'
+    }`}>
+      
+      {/* Modal / Card Header */}
+      <div className="px-5 py-4 flex items-center justify-between border-b border-surface-container-high bg-surface-container-lowest flex-shrink-0">
+        <div className="flex items-center gap-2.5">
+          <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-bold text-base shadow-xs">
+            {formData.name ? formData.name.charAt(0) : 'U'}
           </div>
+          <div>
+            <h2 className="font-headline font-bold text-base text-on-surface">פרופיל והגדרות</h2>
+            <p className="text-[11px] text-outline">
+              {formData.email ? formData.email : 'משתמש רשום ב-NutriTrack'}
+            </p>
+          </div>
+        </div>
+        {!isInline && (
           <button
             onClick={onClose}
             aria-label="סגור"
@@ -246,7 +265,8 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
           >
             <X className="w-5 h-5" />
           </button>
-        </div>
+        )}
+      </div>
 
         {/* Modal Scrollable Body */}
         <div className="p-4 overflow-y-auto space-y-3 flex-1 divide-y divide-surface-container-high/40">
@@ -421,7 +441,8 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                       >
                         <option value="lose_weight">ירידה במשקל וחיטוב (גירעון קלורי)</option>
                         <option value="maintain">שמירה על משקל נוכחי (מאזן ניטרלי)</option>
-                        <option value="gain_muscle">עלייה במסת שריר ומסה (עודף קלורי)</option>
+                        <option value="lean_bulk">עלייה נקייה במסת שריר (Lean Bulk - עודף קלורי מתון)</option>
+                        <option value="gain_muscle">עלייה במסת שריר ומסה (עודף קלורי מלא)</option>
                       </select>
                     </div>
 
@@ -861,17 +882,28 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
 
         </div>
 
-        {/* Modal Footer */}
-        <div className="p-4 bg-surface-container-lowest border-t border-surface-container-high flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-6 py-2.5 rounded-2xl bg-primary hover:bg-primary/90 text-on-primary font-headline font-bold text-xs shadow-md active:scale-95 transition-all"
-          >
-            סגור
-          </button>
-        </div>
+        {/* Modal / Card Footer */}
+        {!isInline && (
+          <div className="p-4 bg-surface-container-lowest border-t border-surface-container-high flex justify-end">
+            <button
+              onClick={onClose}
+              className="px-6 py-2.5 rounded-2xl bg-primary hover:bg-primary/90 text-on-primary font-headline font-bold text-xs shadow-md active:scale-95 transition-all"
+            >
+              סגור
+            </button>
+          </div>
+        )}
 
       </div>
+  );
+
+  if (isInline) {
+    return contentMarkup;
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
+      {contentMarkup}
     </div>
   );
 };
