@@ -1,4 +1,4 @@
-import type { ActivityLevel, FitnessGoal, DayLog, LoggedFoodItem } from '../types';
+import type { ActivityLevel, FitnessGoal, DayLog, LoggedFoodItem, WorkoutDayType, UserProfile } from '../types';
 
 /**
  * מחושב לפי משוואת מיפלין סנט ג'ור (Mifflin-St Jeor)
@@ -177,4 +177,158 @@ export function getTodayDateString(): string {
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+export interface WorkoutConfig {
+  type: WorkoutDayType;
+  title: string;
+  emoji: string;
+  badge: string;
+  defaultBurnedKcal: number;
+  description: string;
+  carbBoostGrams: number;
+  proteinBoostGrams: number;
+}
+
+export const WORKOUT_CONFIGS: Record<WorkoutDayType, WorkoutConfig> = {
+  rest: {
+    type: 'rest',
+    title: 'יום מנוחה והתאוששות',
+    emoji: '🛋️',
+    badge: 'מנוחה',
+    defaultBurnedKcal: 0,
+    description: 'מאזן בסיסי לשיקום השרירים',
+    carbBoostGrams: 0,
+    proteinBoostGrams: 0,
+  },
+  light_strength: {
+    type: 'light_strength',
+    title: 'אימון כוח / פלג גוף עליון',
+    emoji: '🏋️',
+    badge: 'אימון כוח',
+    defaultBurnedKcal: 250,
+    description: '+250 קק"ל ופחמימות למילוי מאגרים',
+    carbBoostGrams: 40,
+    proteinBoostGrams: 10,
+  },
+  heavy_strength: {
+    type: 'heavy_strength',
+    title: 'אימון כבד / רגליים / עצימות גבוהה',
+    emoji: '🔥',
+    badge: 'אימון כבד',
+    defaultBurnedKcal: 450,
+    description: '+450 קק"ל לבניית שריר ואנרגיה מקסימלית',
+    carbBoostGrams: 75,
+    proteinBoostGrams: 15,
+  },
+  cardio: {
+    type: 'cardio',
+    title: 'אירובי / ריצה / רכיבה / שחייה',
+    emoji: '🏃',
+    badge: 'אירובי',
+    defaultBurnedKcal: 350,
+    description: '+350 קק"ל ופחמימות זמינות',
+    carbBoostGrams: 60,
+    proteinBoostGrams: 5,
+  },
+  hiit: {
+    type: 'hiit',
+    title: 'אימון אינטרוולים / קרוספיט',
+    emoji: '⚡',
+    badge: 'HIIT',
+    defaultBurnedKcal: 400,
+    description: '+400 קק"ל לשריפת אנרגיה מוגברת',
+    carbBoostGrams: 65,
+    proteinBoostGrams: 10,
+  },
+  custom: {
+    type: 'custom',
+    title: 'אימון מותאם אישית',
+    emoji: '🎯',
+    badge: 'מותאם אישית',
+    defaultBurnedKcal: 300,
+    description: 'הזנת קלוריות שנשרפו באימון ידנית',
+    carbBoostGrams: 50,
+    proteinBoostGrams: 10,
+  },
+};
+
+export const DEFAULT_WEEKLY_WORKOUT_SCHEDULE: Record<number, WorkoutDayType> = {
+  0: 'light_strength', // ראשון: כוח
+  1: 'rest',           // שני: מנוחה
+  2: 'heavy_strength', // שלישי: כבד/רגליים
+  3: 'rest',           // רביעי: מנוחה
+  4: 'light_strength', // חמישי: כוח
+  5: 'cardio',         // שישי: אירובי
+  6: 'rest',           // שבת: מנוחה
+};
+
+export function getDailyAdjustedTargets(
+  userProfile: UserProfile,
+  dayLog?: DayLog,
+  dateStr?: string
+): {
+  targetCalories: number;
+  targetProtein: number;
+  targetCarbs: number;
+  targetFat: number;
+  workoutType: WorkoutDayType;
+  burnedCalories: number;
+  workoutTitle: string;
+  workoutEmoji: string;
+  workoutBadge: string;
+  isAdjusted: boolean;
+  baseCalories: number;
+} {
+  const baseCalories = userProfile.dailyCalorieTarget || 2000;
+  const baseProtein = userProfile.dailyProteinTarget || 140;
+  const baseCarbs = userProfile.dailyCarbsTarget || 200;
+  const baseFat = userProfile.dailyFatTarget || 65;
+
+  let workoutType: WorkoutDayType = 'rest';
+
+  // 1. If explicit in dayLog
+  if (dayLog?.workoutType) {
+    workoutType = dayLog.workoutType;
+  } else if (dateStr) {
+    // 2. Or fallback to weekly schedule
+    const schedule = userProfile.weeklyWorkoutSchedule || DEFAULT_WEEKLY_WORKOUT_SCHEDULE;
+    const dayOfWeek = new Date(dateStr + 'T12:00:00').getDay();
+    if (schedule[dayOfWeek]) {
+      workoutType = schedule[dayOfWeek];
+    }
+  }
+
+  const config = WORKOUT_CONFIGS[workoutType] || WORKOUT_CONFIGS.rest;
+  const burned =
+    dayLog?.workoutBurnedCalories !== undefined
+      ? dayLog.workoutBurnedCalories
+      : config.defaultBurnedKcal;
+
+  let targetCalories = baseCalories;
+  let targetProtein = baseProtein;
+  let targetCarbs = baseCarbs;
+  let targetFat = baseFat;
+
+  if (burned > 0) {
+    targetCalories += burned;
+    // 65% of additional calories from carbs, 20% protein, 15% fats
+    targetCarbs += Math.round((burned * 0.65) / 4);
+    targetProtein += Math.round((burned * 0.20) / 4);
+    targetFat += Math.round((burned * 0.15) / 9);
+  }
+
+  return {
+    targetCalories,
+    targetProtein,
+    targetCarbs,
+    targetFat,
+    workoutType,
+    burnedCalories: burned,
+    workoutTitle: dayLog?.workoutTitle || config.title,
+    workoutEmoji: config.emoji,
+    workoutBadge: config.badge,
+    isAdjusted: burned > 0,
+    baseCalories,
+  };
 }

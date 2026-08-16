@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import type { FoodItem, MealType, MealPlanPreset, UserProfile, DayLog, NotificationItem } from './types';
+import type { FoodItem, MealType, MealPlanPreset, UserProfile, DayLog, NotificationItem, WorkoutDayType } from './types';
 import { StorageService } from './services/storageService';
-import { getTodayDateString } from './services/nutritionCalculator';
+import { getTodayDateString, WORKOUT_CONFIGS } from './services/nutritionCalculator';
 import { NotificationService } from './services/notificationService';
 import { Header } from './components/layout/Header';
 import { BottomNav } from './components/layout/BottomNav';
@@ -165,6 +165,26 @@ export function App() {
     showToast(`תפריט "${plan.title}" הוחל בהצלחה על יומן היום! 🎉`);
   };
 
+  const handleUpdateDayWorkout = (
+    date: string,
+    workoutType: WorkoutDayType,
+    burnedCalories?: number,
+    title?: string,
+    durationMinutes?: number
+  ) => {
+    const updated = StorageService.setDayWorkout(
+      date,
+      workoutType,
+      burnedCalories,
+      title,
+      durationMinutes,
+      userProfile.id
+    );
+    setDayLogs({ ...dayLogs, [date]: updated });
+    const cfg = WORKOUT_CONFIGS[workoutType];
+    showToast(`מצב אימון עודכן: ${cfg.emoji} ${title || cfg.title}`);
+  };
+
   const syncUserData = (user: UserProfile) => {
     setUserProfile(user);
     setDayLogs(StorageService.getAllDayLogs(user.id));
@@ -280,6 +300,7 @@ export function App() {
               onNavigateToDiary={() => setActiveTab('diary')}
               onUpdateWater={handleUpdateWater}
               onDeleteItem={handleDeleteItem}
+              onUpdateDayWorkout={handleUpdateDayWorkout}
             />
           )}
 
@@ -292,6 +313,7 @@ export function App() {
               onOpenDatePicker={() => setIsDatePickerModalOpen(true)}
               onAddFoodToMeal={(mealType) => handleOpenQuickAdd(mealType)}
               onDeleteItem={handleDeleteItem}
+              onUpdateDayWorkout={handleUpdateDayWorkout}
             />
           )}
 

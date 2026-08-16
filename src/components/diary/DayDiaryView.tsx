@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ChevronRight,
   ChevronLeft,
@@ -9,13 +9,16 @@ import {
   Sun,
   Sunset,
   Cookie,
+  SlidersHorizontal,
 } from 'lucide-react';
-import type { DayLog, MealType, UserProfile } from '../../types';
+import type { DayLog, MealType, UserProfile, WorkoutDayType } from '../../types';
 import {
   formatHebrewDate,
   calculateDayTotals,
   getTodayDateString,
+  getDailyAdjustedTargets,
 } from '../../services/nutritionCalculator';
+import { WorkoutModeModal } from '../dashboard/WorkoutModeModal';
 
 interface DayDiaryViewProps {
   currentDate: string;
@@ -25,6 +28,13 @@ interface DayDiaryViewProps {
   onOpenDatePicker: () => void;
   onAddFoodToMeal: (mealType: MealType) => void;
   onDeleteItem: (mealType: MealType, logId: string) => void;
+  onUpdateDayWorkout?: (
+    date: string,
+    workoutType: WorkoutDayType,
+    burnedCalories?: number,
+    title?: string,
+    durationMinutes?: number
+  ) => void;
 }
 
 export const DayDiaryView: React.FC<DayDiaryViewProps> = ({
@@ -35,9 +45,12 @@ export const DayDiaryView: React.FC<DayDiaryViewProps> = ({
   onOpenDatePicker,
   onAddFoodToMeal,
   onDeleteItem,
+  onUpdateDayWorkout,
 }) => {
+  const [isWorkoutModalOpen, setIsWorkoutModalOpen] = useState(false);
   const totals = calculateDayTotals(dayLog);
-  const remainingCalories = userProfile.dailyCalorieTarget - totals.totalCalories;
+  const adjusted = getDailyAdjustedTargets(userProfile, dayLog, currentDate);
+  const remainingCalories = adjusted.targetCalories - totals.totalCalories;
 
   const handlePrevDay = () => {
     const d = new Date(currentDate);
@@ -125,10 +138,24 @@ export const DayDiaryView: React.FC<DayDiaryViewProps> = ({
         </button>
       </div>
 
-      {/* Daily Summary Banner */}
+      {/* Daily Summary Banner & Workout Mode */}
       <div className="p-4 rounded-3xl bg-surface-container-lowest border border-surface-container-high shadow-sm space-y-2.5">
         <div className="flex justify-between items-center">
-          <span className="text-xs font-bold text-outline">סיכום תזונה יומי</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-outline">סיכום יומי</span>
+            {/* Workout badge button */}
+            <button
+              onClick={() => setIsWorkoutModalOpen(true)}
+              className="px-2 py-0.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary font-bold text-[10px] flex items-center gap-1 transition-all"
+              title="שנה מצב אימון"
+            >
+              <span>{adjusted.workoutEmoji}</span>
+              <span>{adjusted.workoutBadge}</span>
+              {adjusted.isAdjusted && <span>(+{adjusted.burnedCalories})</span>}
+              <SlidersHorizontal className="w-2.5 h-2.5 mr-0.5" />
+            </button>
+          </div>
+
           <span
             className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
               remainingCalories >= 0
@@ -148,7 +175,7 @@ export const DayDiaryView: React.FC<DayDiaryViewProps> = ({
             <span className="font-headline font-extrabold text-tertiary">
               {totals.totalCalories}
             </span>
-            <span className="text-[9px] text-outline block">/ {userProfile.dailyCalorieTarget}</span>
+            <span className="text-[9px] text-outline block">/ {adjusted.targetCalories}</span>
           </div>
 
           <div>
@@ -156,7 +183,7 @@ export const DayDiaryView: React.FC<DayDiaryViewProps> = ({
             <span className="font-headline font-bold text-on-surface">
               {totals.totalProtein}g
             </span>
-            <span className="text-[9px] text-outline block">/ {userProfile.dailyProteinTarget}g</span>
+            <span className="text-[9px] text-outline block">/ {adjusted.targetProtein}g</span>
           </div>
 
           <div>
@@ -164,106 +191,106 @@ export const DayDiaryView: React.FC<DayDiaryViewProps> = ({
             <span className="font-headline font-bold text-on-surface">
               {totals.totalCarbs}g
             </span>
-            <span className="text-[9px] text-outline block">/ {userProfile.dailyCarbsTarget}g</span>
+            <span className="text-[9px] text-outline block">/ {adjusted.targetCarbs}g</span>
           </div>
 
           <div>
-            <span className="text-[10px] text-outline block mb-0.5">שומנים</span>
+            <span className="text-[10px] text-outline block mb-0.5">שומן</span>
             <span className="font-headline font-bold text-on-surface">
               {totals.totalFat}g
             </span>
-            <span className="text-[9px] text-outline block">/ {userProfile.dailyFatTarget}g</span>
+            <span className="text-[9px] text-outline block">/ {adjusted.targetFat}g</span>
           </div>
         </div>
       </div>
 
-      {/* 4 Meal Cards */}
+      {/* 4 Meals Accordions/Cards */}
       <div className="space-y-3">
         {mealsConfig.map(({ type, title, icon }) => {
           const items = dayLog.meals[type] || [];
-          const mealCalories = items.reduce(
-            (acc, curr) => acc + (curr.calculatedCalories || curr.calories || 0),
-            0
-          );
-          const mealProtein = items.reduce(
-            (acc, curr) => acc + (curr.calculatedProtein || curr.protein || 0),
-            0
-          );
+          const mealCalories = items.reduce((sum, i) => sum + (i.calculatedCalories || 0), 0);
+          const mealProtein = items.reduce((sum, i) => sum + (i.calculatedProtein || 0), 0);
+          const mealCarbs = items.reduce((sum, i) => sum + (i.calculatedCarbs || 0), 0);
+          const mealFat = items.reduce((sum, i) => sum + (i.calculatedFat || 0), 0);
 
           return (
             <div
               key={type}
-              className="rounded-3xl bg-surface-container-lowest border border-surface-container-high shadow-xs overflow-hidden transition-all"
+              className="rounded-3xl bg-surface-container-lowest border border-surface-container-high shadow-xs overflow-hidden"
             >
-              {/* Meal Card Header */}
-              <div className="p-3.5 flex items-center justify-between border-b border-surface-container-high/60 bg-surface-container-low/40">
+              {/* Meal Header */}
+              <div className="p-3.5 flex items-center justify-between border-b border-surface-container-high/60 bg-surface-container-low/50">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-xl bg-surface-container-lowest shadow-xs flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xl bg-surface-container flex items-center justify-center">
                     {icon}
                   </div>
                   <div>
                     <h3 className="font-headline font-bold text-xs text-on-surface">{title}</h3>
-                    <div className="flex items-center gap-1.5 text-[10px] text-outline">
-                      <span className="font-bold text-tertiary">{mealCalories} קק"ל</span>
+                    <div className="flex items-center gap-1.5 text-[10px] text-outline mt-0.5">
+                      <span>{Math.round(mealCalories)} קק"ל</span>
                       <span>•</span>
-                      <span>{mealProtein}g חלבון</span>
+                      <span>ח: {Math.round(mealProtein * 10) / 10}g</span>
+                      <span>•</span>
+                      <span>פ: {Math.round(mealCarbs * 10) / 10}g</span>
+                      <span>•</span>
+                      <span>ש: {Math.round(mealFat * 10) / 10}g</span>
                     </div>
                   </div>
                 </div>
 
                 <button
                   onClick={() => onAddFoodToMeal(type)}
-                  className="px-2.5 py-1 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-bold text-xs flex items-center gap-1 active:scale-95 transition-all"
+                  className="px-3 py-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-bold text-xs flex items-center gap-1 active:scale-95 transition-all"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>הוסף</span>
                 </button>
               </div>
 
-              {/* Items List */}
-              <div className="p-2 space-y-1.5">
+              {/* Meal Logged Items List */}
+              <div className="p-2 divide-y divide-surface-container-high/40">
                 {items.length === 0 ? (
-                  <div className="py-4 text-center">
-                    <p className="text-[11px] text-outline">אין פריטים רשומים בארוחה זו</p>
+                  <div className="py-4 text-center text-outline/60 text-xs">
+                    טרם נרשמו מאכלים לארוחה זו
                   </div>
                 ) : (
                   items.map((item) => (
                     <div
-                      key={item.logId || item.id || `${item.name}-${Math.random()}`}
-                      className="p-2.5 rounded-2xl bg-surface-container-low/60 hover:bg-surface-container-low border border-surface-container-high/50 flex items-center justify-between gap-2.5 transition-all text-xs"
+                      key={item.logId || item.id}
+                      className="py-2.5 px-2 flex items-center justify-between gap-2 hover:bg-surface-container-low/40 rounded-xl transition-all"
                     >
-                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                        {item.imageUrl ? (
-                          <img
-                            src={item.imageUrl}
-                            alt={item.name}
-                            className="w-9 h-9 rounded-lg object-cover bg-surface-container flex-shrink-0"
-                          />
-                        ) : (
-                          <div className="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-outline flex-shrink-0">
-                            <Utensils className="w-4 h-4" />
-                          </div>
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <h4 className="font-bold text-on-surface truncate text-xs">{item.name}</h4>
-                          <div className="text-[11px] text-outline flex items-center gap-1.5 mt-0.5">
-                            <span>
-                              {item.amount} {item.unit} ({item.totalGrams || item.grams || 100}g)
-                            </span>
-                            <span>•</span>
-                            <span className="font-bold text-tertiary">
-                              {item.calculatedCalories || item.calories || 0} קק"ל
-                            </span>
-                            <span>•</span>
-                            <span>{item.calculatedProtein || item.protein || 0}g חלבון</span>
-                          </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-baseline justify-between">
+                          <span className="font-bold text-xs text-on-surface truncate">
+                            {item.name}
+                          </span>
+                          <span className="font-bold text-xs text-primary flex-shrink-0">
+                            {item.calculatedCalories} קק"ל
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] text-outline mt-0.5">
+                          <span>
+                            {item.amount} {item.unit} ({item.totalGrams}g)
+                          </span>
+                          <span>•</span>
+                          <span>ח: {item.calculatedProtein}g</span>
+                          <span>•</span>
+                          <span>פ: {item.calculatedCarbs}g</span>
+                          <span>•</span>
+                          <span>ש: {item.calculatedFat}g</span>
+                          {item.timestamp && (
+                            <>
+                              <span>•</span>
+                              <span>{item.timestamp}</span>
+                            </>
+                          )}
                         </div>
                       </div>
 
                       <button
                         onClick={() => onDeleteItem(type, item.logId || item.id || '')}
-                        className="p-1.5 text-outline hover:text-error hover:bg-error-container/20 rounded-lg transition-all"
-                        title="הסר פריט"
+                        aria-label="מחק פריט"
+                        className="p-1.5 rounded-lg text-outline hover:bg-error-container/20 hover:text-error transition-all"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -275,6 +302,18 @@ export const DayDiaryView: React.FC<DayDiaryViewProps> = ({
           );
         })}
       </div>
+
+      {/* Workout Mode Customization Modal */}
+      {onUpdateDayWorkout && (
+        <WorkoutModeModal
+          isOpen={isWorkoutModalOpen}
+          onClose={() => setIsWorkoutModalOpen(false)}
+          currentDate={currentDate}
+          dayLog={dayLog}
+          userProfile={userProfile}
+          onSaveWorkout={onUpdateDayWorkout}
+        />
+      )}
     </div>
   );
 };

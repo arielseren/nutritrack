@@ -1,4 +1,4 @@
-import type { DayLog, FoodItem, LoggedFoodItem, MealType, UserProfile, NotificationItem, MealPlanPreset } from '../types';
+import type { DayLog, FoodItem, LoggedFoodItem, MealType, UserProfile, NotificationItem, MealPlanPreset, WorkoutDayType } from '../types';
 import { INITIAL_FOOD_DATABASE } from '../data/foodDatabase';
 import { calculateItemNutrition, getTodayDateString } from './nutritionCalculator';
 
@@ -397,6 +397,24 @@ export const StorageService = {
     const uid = userId || this.getActiveUserId();
     const dayLog = this.getDayLog(date, uid);
     dayLog.waterGlasses = Math.max(0, glasses);
+    this.saveDayLog(dayLog, uid);
+    return dayLog;
+  },
+
+  setDayWorkout(
+    date: string,
+    workoutType: WorkoutDayType,
+    burnedCalories?: number,
+    title?: string,
+    durationMinutes?: number,
+    userId?: string
+  ): DayLog {
+    const uid = userId || this.getActiveUserId();
+    const dayLog = this.getDayLog(date, uid);
+    dayLog.workoutType = workoutType;
+    if (burnedCalories !== undefined) dayLog.workoutBurnedCalories = burnedCalories;
+    if (title !== undefined) dayLog.workoutTitle = title;
+    if (durationMinutes !== undefined) dayLog.workoutDurationMinutes = durationMinutes;
     this.saveDayLog(dayLog, uid);
     return dayLog;
   },

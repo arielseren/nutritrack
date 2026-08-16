@@ -4,13 +4,23 @@ import { Target, TrendingUp } from 'lucide-react';
 interface CalorieRingProps {
   consumed: number;
   target: number;
+  baseCalories?: number;
+  workoutBadge?: string;
+  workoutEmoji?: string;
+  isAdjusted?: boolean;
   onTargetClick?: () => void;
+  onWorkoutClick?: () => void;
 }
 
 export const CalorieRing: React.FC<CalorieRingProps> = ({
   consumed,
   target,
+  baseCalories,
+  workoutBadge,
+  workoutEmoji,
+  isAdjusted = false,
   onTargetClick,
+  onWorkoutClick,
 }) => {
   const percentage = Math.min(100, Math.round((consumed / target) * 100));
   const remaining = target - consumed;
@@ -25,18 +35,36 @@ export const CalorieRing: React.FC<CalorieRingProps> = ({
 
   return (
     <section className="bg-surface-container-lowest rounded-2xl p-6 ambient-shadow soft-ui-border flex flex-col items-center justify-center relative overflow-hidden">
-      {/* Target Badge */}
+      {/* Target Badge & Workout Indicator */}
       <div className="w-full flex justify-between items-center mb-3">
         <div className="flex items-center gap-1.5 text-xs font-semibold text-outline">
           <Target className="w-3.5 h-3.5 text-primary" />
-          <span>יעד יומי: {target.toLocaleString()} קק"ל</span>
+          <span>יעד: {target.toLocaleString()} קק"ל</span>
+          {isAdjusted && baseCalories && (
+            <span className="text-[10px] text-tertiary font-bold">
+              (+{target - baseCalories})
+            </span>
+          )}
         </div>
-        <button
-          onClick={onTargetClick}
-          className="text-xs font-bold text-primary hover:underline"
-        >
-          ערוך יעד
-        </button>
+        <div className="flex items-center gap-1.5">
+          {onWorkoutClick && (
+            <button
+              onClick={onWorkoutClick}
+              className="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary flex items-center gap-1 transition-all"
+            >
+              <span>{workoutEmoji || '⚡'}</span>
+              <span>{workoutBadge || 'מצב אימון'}</span>
+            </button>
+          )}
+          {onTargetClick && (
+            <button
+              onClick={onTargetClick}
+              className="text-[10px] font-bold text-outline hover:text-primary transition-all"
+            >
+              ערוך
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Main Circular Progress Bar */}

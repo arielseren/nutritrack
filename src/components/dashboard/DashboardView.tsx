@@ -1,11 +1,21 @@
-import React from 'react';
-import { QrCode, Search, UtensilsCrossed } from 'lucide-react';
-import type { DayLog, UserProfile, MealType } from '../../types';
-import { calculateDayTotals } from '../../services/nutritionCalculator';
+import React, { useState } from 'react';
+import {
+  QrCode,
+  Search,
+  UtensilsCrossed,
+  SlidersHorizontal,
+} from 'lucide-react';
+import type { DayLog, UserProfile, MealType, WorkoutDayType } from '../../types';
+import {
+  calculateDayTotals,
+  getDailyAdjustedTargets,
+  WORKOUT_CONFIGS,
+} from '../../services/nutritionCalculator';
 import { CalorieRing } from './CalorieRing';
 import { MacroBreakdown } from './MacroBreakdown';
 import { WaterTracker } from './WaterTracker';
 import { RecentActivity } from './RecentActivity';
+import { WorkoutModeModal } from './WorkoutModeModal';
 
 interface DashboardViewProps {
   userProfile: UserProfile;
@@ -17,6 +27,13 @@ interface DashboardViewProps {
   onNavigateToDiary: () => void;
   onUpdateWater: (glasses: number) => void;
   onDeleteItem: (mealType: MealType, logId: string) => void;
+  onUpdateDayWorkout?: (
+    date: string,
+    workoutType: WorkoutDayType,
+    burnedCalories?: number,
+    title?: string,
+    durationMinutes?: number
+  ) => void;
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
@@ -29,12 +46,22 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onNavigateToDiary,
   onUpdateWater,
   onDeleteItem,
+  onUpdateDayWorkout,
 }) => {
+  const [isWorkoutModalOpen, setIsWorkoutModalOpen] = useState(false);
   const totals = calculateDayTotals(dayLog);
+  const adjusted = getDailyAdjustedTargets(userProfile, dayLog, dayLog.date);
+
+  const handleQuickSelectWorkout = (type: WorkoutDayType) => {
+    if (onUpdateDayWorkout) {
+      const cfg = WORKOUT_CONFIGS[type];
+      onUpdateDayWorkout(dayLog.date, type, cfg.defaultBurnedKcal, cfg.title);
+    }
+  };
 
   return (
     <div className="space-y-4 pb-4">
-      {/* Greeting Header matching Stitch */}
+      {/* Greeting Header */}
       <section className="flex justify-between items-end pt-1">
         <div>
           <h2 className="font-headline text-2xl font-bold text-on-surface">
@@ -54,6 +81,66 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         >
           {userProfile.name.charAt(0) || 'D'}
         </button>
+      </section>
+
+      {/* Dynamic Workout Mode Banner & Quick Selector */}
+      <section className="p-3.5 rounded-3xl bg-surface-container-lowest ambient-shadow soft-ui-border space-y-2.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold">
+              <span className="text-base">{adjusted.workoutEmoji}</span>
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-bold text-on-surface">
+                  {adjusted.workoutTitle}
+                </span>
+                <span className="px-1.5 py-0.2 rounded-md bg-primary/10 text-primary font-bold text-[10px]">
+                  {adjusted.workoutBadge}
+                </span>
+              </div>
+              <p className="text-[10px] text-outline">
+                {adjusted.isAdjusted
+                  ? `תוספת אימון: +${adjusted.burnedCalories} קק"ל ליעד היומי`
+                  : 'מאזן בסיסי ליום ללא אימון'}
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setIsWorkoutModalOpen(true)}
+            className="p-1.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-outline hover:text-on-surface transition-all flex items-center gap-1 text-[11px] font-bold"
+            title="כיוונון אימון מדויק"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+            <span>התאם</span>
+          </button>
+        </div>
+
+        {/* 1-Click Workout Type Pills */}
+        <div className="flex gap-1.5 overflow-x-auto hide-scrollbar pt-1">
+          {(
+            [
+              { type: 'rest', label: '🛋️ מנוחה' },
+              { type: 'light_strength', label: '🏋️ כוח (+250)' },
+              { type: 'heavy_strength', label: '🔥 כבד (+450)' },
+              { type: 'cardio', label: '🏃 אירובי (+350)' },
+              { type: 'hiit', label: '⚡ HIIT (+400)' },
+            ] as { type: WorkoutDayType; label: string }[]
+          ).map((item) => (
+            <button
+              key={item.type}
+              onClick={() => handleQuickSelectWorkout(item.type)}
+              className={`px-3 py-1.5 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all ${
+                adjusted.workoutType === item.type
+                  ? 'bg-primary text-on-primary shadow-xs'
+                  : 'bg-surface-container-low hover:bg-surface-container text-outline hover:text-on-surface border border-surface-container-high/60'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
       </section>
 
       {/* Quick Action Buttons Row */}
@@ -89,21 +176,26 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </button>
       </section>
 
-      {/* Calorie Ring */}
+      {/* Calorie Ring with Adjusted Daily Target */}
       <CalorieRing
         consumed={totals.totalCalories}
-        target={userProfile.dailyCalorieTarget}
+        target={adjusted.targetCalories}
+        baseCalories={adjusted.baseCalories}
+        workoutBadge={adjusted.workoutBadge}
+        workoutEmoji={adjusted.workoutEmoji}
+        isAdjusted={adjusted.isAdjusted}
         onTargetClick={onOpenProfile}
+        onWorkoutClick={() => setIsWorkoutModalOpen(true)}
       />
 
-      {/* Macro Breakdown */}
+      {/* Macro Breakdown with Adjusted Targets */}
       <MacroBreakdown
         protein={totals.totalProtein}
-        proteinTarget={userProfile.dailyProteinTarget}
+        proteinTarget={adjusted.targetProtein}
         carbs={totals.totalCarbs}
-        carbsTarget={userProfile.dailyCarbsTarget}
+        carbsTarget={adjusted.targetCarbs}
         fat={totals.totalFat}
-        fatTarget={userProfile.dailyFatTarget}
+        fatTarget={adjusted.targetFat}
       />
 
       {/* Water Tracker */}
@@ -119,6 +211,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         onNavigateToDiary={onNavigateToDiary}
         onDeleteItem={onDeleteItem}
       />
+
+      {/* Workout Mode Detailed Customization Modal */}
+      {onUpdateDayWorkout && (
+        <WorkoutModeModal
+          isOpen={isWorkoutModalOpen}
+          onClose={() => setIsWorkoutModalOpen(false)}
+          currentDate={dayLog.date}
+          dayLog={dayLog}
+          userProfile={userProfile}
+          onSaveWorkout={onUpdateDayWorkout}
+        />
+      )}
     </div>
   );
 };

@@ -18,9 +18,15 @@ import {
   Send,
   Sparkles,
   Info,
+  Dumbbell,
+  Flame,
 } from 'lucide-react';
-import type { UserProfile, FitnessGoal, ActivityLevel } from '../../types';
-import { calculateScientificTargets } from '../../services/nutritionCalculator';
+import type { UserProfile, FitnessGoal, ActivityLevel, WorkoutDayType } from '../../types';
+import {
+  calculateScientificTargets,
+  DEFAULT_WEEKLY_WORKOUT_SCHEDULE,
+  WORKOUT_CONFIGS,
+} from '../../services/nutritionCalculator';
 import { NotificationService } from '../../services/notificationService';
 import { BiometricAuthService } from '../../services/biometricAuthService';
 import { StorageService } from '../../services/storageService';
@@ -38,7 +44,7 @@ interface ProfileSettingsModalProps {
   isInline?: boolean;
 }
 
-type AccordionSection = 'personal' | 'targets' | 'notifications' | 'security' | 'backup';
+type AccordionSection = 'personal' | 'targets' | 'schedule' | 'notifications' | 'security' | 'backup';
 
 export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
   isOpen,
@@ -56,6 +62,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
   const [openSections, setOpenSections] = useState<Record<AccordionSection, boolean>>({
     personal: true,
     targets: false,
+    schedule: false,
     notifications: false,
     security: false,
     backup: false,
@@ -622,7 +629,175 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
           </div>
 
           {/* ========================================================================= */}
-          {/* ACCORDION 3: התראות ותזכורות Push (Push Notifications) */}
+          {/* ACCORDION 3: לוח אימונים שבועי וסייקלינג קלוריות (Workout Schedule & Cycling) */}
+          {/* ========================================================================= */}
+          <div className="pt-2">
+            <div
+              onClick={() => toggleSection('schedule')}
+              className="p-3.5 rounded-2xl bg-surface-container-low hover:bg-surface-container flex items-center justify-between cursor-pointer transition-all border border-surface-container-high"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-primary/15 flex items-center justify-center text-primary">
+                  <Dumbbell className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-headline font-bold text-xs text-on-surface">
+                    לוח אימונים שבועי וסייקלינג קלוריות
+                  </h3>
+                  <p className="text-[10px] text-outline">
+                    הגדרת ימי אימון מול מנוחה והתאמת קלוריות אוטומטית
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {openSections.schedule ? (
+                  <ChevronUp className="w-4 h-4 text-outline" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-outline" />
+                )}
+              </div>
+            </div>
+
+            {openSections.schedule && (
+              <div className="mt-2.5 p-3.5 rounded-2xl bg-surface-container-lowest border border-surface-container-high space-y-3.5 animate-in fade-in duration-150 text-xs">
+                
+                {/* Info Tip */}
+                <div className="p-3 rounded-2xl bg-surface-container-low border border-surface-container-high/60 flex items-start gap-2">
+                  <Flame className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                  <p className="text-[11px] text-on-surface leading-relaxed">
+                    <strong>סייקלינג קלוריות חכם:</strong> בימי אימון כוח או אירובי, יעד הקלוריות והפחמימות היומי יגדל אוטומטית כדי לתדלק את האימון, ובימי מנוחה יחזור למאזן שיקום בסיסי.
+                  </p>
+                </div>
+
+                {/* Quick Schedule Presets */}
+                <div className="space-y-1.5">
+                  <span className="text-[11px] font-bold text-outline block">תבניות אימון מוכנות בלחיצה:</span>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newSched: Record<number, WorkoutDayType> = {
+                          0: 'light_strength', // א - כוח
+                          1: 'rest',           // ב - מנוחה
+                          2: 'heavy_strength', // ג - כבד
+                          3: 'rest',           // ד - מנוחה
+                          4: 'light_strength', // ה - כוח
+                          5: 'cardio',         // ו - אירובי
+                          6: 'rest',           // ש - מנוחה
+                        };
+                        const updated = { ...formData, weeklyWorkoutSchedule: newSched };
+                        setFormData(updated);
+                        onSaveProfile(updated);
+                      }}
+                      className="p-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-bold text-[10px] text-center border border-surface-container-high transition-all"
+                    >
+                      תבנית AB (4 ימים)
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newSched: Record<number, WorkoutDayType> = {
+                          0: 'heavy_strength', // א - Push
+                          1: 'light_strength', // ב - Pull
+                          2: 'heavy_strength', // ג - Legs
+                          3: 'rest',           // ד - מנוחה
+                          4: 'light_strength', // ה - Upper
+                          5: 'heavy_strength', // ו - Lower
+                          6: 'rest',           // ש - מנוחה
+                        };
+                        const updated = { ...formData, weeklyWorkoutSchedule: newSched };
+                        setFormData(updated);
+                        onSaveProfile(updated);
+                      }}
+                      className="p-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-bold text-[10px] text-center border border-surface-container-high transition-all"
+                    >
+                      תבנית PPL (5 ימים)
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newSched: Record<number, WorkoutDayType> = {
+                          0: 'heavy_strength', // א - Full Body
+                          1: 'rest',           // ב - מנוחה
+                          2: 'heavy_strength', // ג - Full Body
+                          3: 'rest',           // ד - מנוחה
+                          4: 'heavy_strength', // ה - Full Body
+                          5: 'cardio',         // ו - אירובי קל
+                          6: 'rest',           // ש - מנוחה
+                        };
+                        const updated = { ...formData, weeklyWorkoutSchedule: newSched };
+                        setFormData(updated);
+                        onSaveProfile(updated);
+                      }}
+                      className="p-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-bold text-[10px] text-center border border-surface-container-high transition-all"
+                    >
+                      Full Body (3 ימים)
+                    </button>
+                  </div>
+                </div>
+
+                {/* 7 Days Grid Editor */}
+                <div className="space-y-2 pt-1">
+                  <span className="text-[11px] font-bold text-outline block">
+                    סוג הפעילות המוגדר לכל יום בשבוע:
+                  </span>
+
+                  {[
+                    { dayIdx: 0, dayName: 'יום ראשון' },
+                    { dayIdx: 1, dayName: 'יום שני' },
+                    { dayIdx: 2, dayName: 'יום שלישי' },
+                    { dayIdx: 3, dayName: 'יום רביעי' },
+                    { dayIdx: 4, dayName: 'יום חמישי' },
+                    { dayIdx: 5, dayName: 'יום שישי' },
+                    { dayIdx: 6, dayName: 'יום שבת' },
+                  ].map(({ dayIdx, dayName }) => {
+                    const currentSchedule =
+                      formData.weeklyWorkoutSchedule || DEFAULT_WEEKLY_WORKOUT_SCHEDULE;
+                    const currentVal: WorkoutDayType = currentSchedule[dayIdx] || 'rest';
+                    const cfg = WORKOUT_CONFIGS[currentVal] || WORKOUT_CONFIGS.rest;
+
+                    return (
+                      <div
+                        key={dayIdx}
+                        className="p-2.5 rounded-xl bg-surface-container-low border border-surface-container-high/60 flex items-center justify-between gap-2"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm">{cfg.emoji}</span>
+                          <span className="font-bold text-xs text-on-surface">{dayName}</span>
+                        </div>
+
+                        <select
+                          value={currentVal}
+                          onChange={(e) => {
+                            const newSched = {
+                              ...(formData.weeklyWorkoutSchedule || DEFAULT_WEEKLY_WORKOUT_SCHEDULE),
+                              [dayIdx]: e.target.value as WorkoutDayType,
+                            };
+                            const updated = { ...formData, weeklyWorkoutSchedule: newSched };
+                            setFormData(updated);
+                            onSaveProfile(updated);
+                          }}
+                          className="px-2 py-1 rounded-lg bg-surface-container border border-surface-container-high text-xs text-on-surface font-semibold"
+                        >
+                          <option value="rest">🛋️ יום מנוחה (בסיסי)</option>
+                          <option value="light_strength">🏋️ אימון כוח (+250 קק"ל)</option>
+                          <option value="heavy_strength">🔥 אימון כבד / רגליים (+450 קק"ל)</option>
+                          <option value="cardio">🏃 אירובי / ריצה (+350 קק"ל)</option>
+                          <option value="hiit">⚡ HIIT / אינטרוולים (+400 קק"ל)</option>
+                        </select>
+                      </div>
+                    );
+                  })}
+                </div>
+
+              </div>
+            )}
+          </div>
+
+          {/* ========================================================================= */}
+          {/* ACCORDION 4: התראות ותזכורות Push (Push Notifications) */}
           {/* ========================================================================= */}
           <div className="pt-2">
             <div

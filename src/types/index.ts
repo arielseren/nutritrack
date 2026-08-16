@@ -64,9 +64,21 @@ export interface LoggedFoodItem {
   imageUrl?: string;
 }
 
+export type WorkoutDayType =
+  | 'rest'
+  | 'light_strength'
+  | 'heavy_strength'
+  | 'cardio'
+  | 'hiit'
+  | 'custom';
+
 export interface DayLog {
   date: string; // YYYY-MM-DD
   waterGlasses: number; // e.g. 6 of 8
+  workoutType?: WorkoutDayType;
+  workoutTitle?: string;
+  workoutBurnedCalories?: number;
+  workoutDurationMinutes?: number;
   meals: {
     breakfast: LoggedFoodItem[];
     lunch: LoggedFoodItem[];
@@ -98,6 +110,8 @@ export interface UserProfile {
   dailyFatTarget: number; // grams
   dailyWaterTargetGlasses: number; // glasses (250ml each)
   theme: 'light' | 'dark';
+  weeklyWorkoutSchedule?: Record<number, WorkoutDayType>; // 0=Sunday, 1=Monday, etc.
+  calorieCyclingEnabled?: boolean;
   waterReminderEnabled?: boolean;
   pushNotificationsEnabled?: boolean;
   notificationsEnabled?: boolean;
