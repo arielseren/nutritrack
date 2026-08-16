@@ -26,7 +26,6 @@ import type { UserProfile, FitnessGoal, ActivityLevel, WorkoutDayType } from '..
 import {
   calculateScientificTargets,
   DEFAULT_WEEKLY_WORKOUT_SCHEDULE,
-  WORKOUT_CONFIGS,
 } from '../../services/nutritionCalculator';
 import { NotificationService } from '../../services/notificationService';
 import { BiometricAuthService } from '../../services/biometricAuthService';
@@ -701,7 +700,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                 {/* Quick Schedule Presets */}
                 <div className="space-y-1.5">
                   <span className="text-[11px] font-bold text-outline block">תבניות אימון מוכנות בלחיצה:</span>
-                  <div className="grid grid-cols-3 gap-1.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
                     <button
                       type="button"
                       onClick={() => {
@@ -718,7 +717,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                         setFormData(updated);
                         onSaveProfile(updated);
                       }}
-                      className="p-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-bold text-[10px] text-center border border-surface-container-high transition-all"
+                      className="p-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-bold text-xs text-center border border-surface-container-high transition-all"
                     >
                       תבנית AB (4 ימים)
                     </button>
@@ -739,7 +738,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                         setFormData(updated);
                         onSaveProfile(updated);
                       }}
-                      className="p-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-bold text-[10px] text-center border border-surface-container-high transition-all"
+                      className="p-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-bold text-xs text-center border border-surface-container-high transition-all"
                     >
                       תבנית PPL (5 ימים)
                     </button>
@@ -760,7 +759,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                         setFormData(updated);
                         onSaveProfile(updated);
                       }}
-                      className="p-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-bold text-[10px] text-center border border-surface-container-high transition-all"
+                      className="p-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-bold text-xs text-center border border-surface-container-high transition-all"
                     >
                       Full Body (3 ימים)
                     </button>
@@ -785,16 +784,14 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                     const currentSchedule =
                       formData.weeklyWorkoutSchedule || DEFAULT_WEEKLY_WORKOUT_SCHEDULE;
                     const currentVal: WorkoutDayType = currentSchedule[dayIdx] || 'rest';
-                    const cfg = WORKOUT_CONFIGS[currentVal] || WORKOUT_CONFIGS.rest;
 
                     return (
                       <div
                         key={dayIdx}
-                        className="p-2.5 rounded-xl bg-surface-container-low border border-surface-container-high/60 flex items-center justify-between gap-2"
+                        className="p-2.5 rounded-xl bg-surface-container-low border border-surface-container-high/60 flex items-center justify-between gap-2 overflow-hidden"
                       >
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm">{cfg.emoji}</span>
-                          <span className="font-bold text-xs text-on-surface">{dayName}</span>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="font-bold text-xs text-on-surface truncate">{dayName}</span>
                         </div>
 
                         <select
@@ -808,13 +805,13 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                             setFormData(updated);
                             onSaveProfile(updated);
                           }}
-                          className="px-2 py-1 rounded-lg bg-surface-container border border-surface-container-high text-xs text-on-surface font-semibold"
+                          className="px-2 py-1.5 rounded-xl bg-surface-container border border-surface-container-high text-xs text-on-surface font-semibold max-w-[175px] truncate"
                         >
-                          <option value="rest">🛋️ יום מנוחה (בסיסי)</option>
-                          <option value="light_strength">🏋️ אימון כוח (+250 קק"ל)</option>
-                          <option value="heavy_strength">🔥 אימון כבד / רגליים (+450 קק"ל)</option>
-                          <option value="cardio">🏃 אירובי / ריצה (+350 קק"ל)</option>
-                          <option value="hiit">⚡ HIIT / אינטרוולים (+400 קק"ל)</option>
+                          <option value="rest">יום מנוחה (בסיסי)</option>
+                          <option value="light_strength">אימון כוח (+250 קק"ל)</option>
+                          <option value="heavy_strength">אימון כבד (+450 קק"ל)</option>
+                          <option value="cardio">אירובי (+350 קק"ל)</option>
+                          <option value="hiit">HIIT (+400 קק"ל)</option>
                         </select>
                       </div>
                     );

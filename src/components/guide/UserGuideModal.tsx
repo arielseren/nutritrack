@@ -66,8 +66,8 @@ export const UserGuideModal: React.FC<UserGuideModalProps> = ({
       title: '2. הזנה ישירה ותיעוד מזון מהיר (ללא 100 גרם)',
       badge: 'תיעוד מהיר',
       icon: <Zap className="w-4 h-4 text-tertiary" />,
-      summary: 'הזנת קלוריות ומאקרו ישירות ליומן, שיטת כף היד וסריקת ברקוד',
-      keywords: ['הזנה ישירה', '100 גרם', 'כף יד', 'ברקוד', 'חיפוש', 'מאכלים', 'גרמים', 'מנה'],
+      summary: 'הזנת קלוריות ומאקרו ישירות ליומן, שיטת כף היד וחיפוש במאגר הישראלי',
+      keywords: ['הזנה ישירה', '100 גרם', 'כף יד', 'חיפוש', 'מאכלים', 'גרמים', 'מנה'],
       content: (
         <div className="space-y-2.5 text-xs text-on-surface leading-relaxed">
           <p>
@@ -75,26 +75,26 @@ export const UserGuideModal: React.FC<UserGuideModalProps> = ({
           </p>
           <div className="space-y-2">
             <div className="p-2.5 rounded-xl bg-surface-container-low border border-surface-container-high">
-              <strong className="text-primary block mb-1">⚡ לשונית "הזנה ישירה" במסך החיפוש:</strong>
+              <strong className="text-primary block mb-1">לשונית "הזנה ישירה" במסך החיפוש:</strong>
               <p className="text-outline text-[11px]">
                 הזן את סך הקלוריות, החלבון, הפחמימות והשומן של המנה או הארוחה והוסף ישירות ליומן היום ללא צורך במדידות!
               </p>
             </div>
 
             <div className="p-2.5 rounded-xl bg-surface-container-low border border-surface-container-high">
-              <strong className="text-primary block mb-1">🖐️ מדריך כמויות ויזואלי (שיטת כף היד):</strong>
+              <strong className="text-primary block mb-1">מדריך כמויות ויזואלי (שיטת כף היד):</strong>
               <ul className="text-outline text-[11px] space-y-1">
-                <li>🖐️ <strong>כף יד פתוחה:</strong> מנת חלבון (בשר/עוף/קציצות ~ 120-150g).</li>
-                <li>✊ <strong>אגרוף סגור:</strong> מנת פחמימה (אורז/פתיתים/פסטה ~ 1 כוס).</li>
-                <li>🤲 <strong>שתי כפות ידיים:</strong> סלט וירקות מבושלים (~ 200g).</li>
-                <li>👍 <strong>אגודל מלא:</strong> שומן וממרח (כף טחינה/שמן זית ~ 15g).</li>
+                <li>• <strong>כף יד פתוחה:</strong> מנת חלבון (בשר/עוף/קציצות ~ 120-150g).</li>
+                <li>• <strong>אגרוף סגור:</strong> מנת פחמימה (אורז/פתיתים/פסטה ~ 1 כוס).</li>
+                <li>• <strong>שתי כפות ידיים:</strong> סלט וירקות מבושלים (~ 200g).</li>
+                <li>• <strong>אגודל מלא:</strong> שומן וממרח (כף טחינה/שמן זית ~ 15g).</li>
               </ul>
             </div>
 
             <div className="p-2.5 rounded-xl bg-surface-container-low border border-surface-container-high">
-              <strong className="text-primary block mb-1">📷 סורק ברקוד וזיהוי צלחות ב-AI:</strong>
+              <strong className="text-primary block mb-1">חיפוש במאגר ישראלי עשיר:</strong>
               <p className="text-outline text-[11px]">
-                סרוק ברקוד מהיר מול מאגר Open Food Facts או צלם את הצלחת לזיהוי מהיר.
+                חפש מאכלים, בחר לפי יחידות מנה מובנות (קציצה, ביצה, פרוסה, גביע) או הזן גרמים בקלות.
               </p>
             </div>
           </div>
@@ -115,24 +115,24 @@ export const UserGuideModal: React.FC<UserGuideModalProps> = ({
           </p>
           <div className="grid grid-cols-2 gap-1.5 text-[11px]">
             <div className="p-2 rounded-xl bg-surface-container-low border border-surface-container-high">
-              <span className="font-bold text-on-surface block">🛋️ יום מנוחה:</span>
+              <span className="font-bold text-on-surface block">יום מנוחה:</span>
               <span className="text-outline">מאזן בסיסי לשיקום השרירים</span>
             </div>
             <div className="p-2 rounded-xl bg-surface-container-low border border-surface-container-high">
-              <span className="font-bold text-primary block">🏋️ אימון כוח:</span>
+              <span className="font-bold text-primary block">אימון כוח:</span>
               <span className="text-outline">+250 קק"ל ופחמימות למילוי מאגרים</span>
             </div>
             <div className="p-2 rounded-xl bg-surface-container-low border border-surface-container-high">
-              <span className="font-bold text-tertiary block">🔥 אימון כבד/רגליים:</span>
+              <span className="font-bold text-tertiary block">אימון כבד/רגליים:</span>
               <span className="text-outline">+450 קק"ל ואנרגיה מקסימלית</span>
             </div>
             <div className="p-2 rounded-xl bg-surface-container-low border border-surface-container-high">
-              <span className="font-bold text-secondary block">🏃 אירובי / ריצה:</span>
+              <span className="font-bold text-secondary block">אירובי / ריצה:</span>
               <span className="text-outline">+350 קק"ל לפעילות סיבולת</span>
             </div>
           </div>
           <p className="text-outline text-[11px]">
-            ניתן לבחור מצב אימון בלחיצה אחת בראש ה-Dashboard, או להגדיר לוח שבועי קבוע בהגדרות הפרופיל (תבניות AB, PPL, Full Body).
+            ניתן לבחור מצב אימון בלחיצה על "שינוי" בדף הבית, או להגדיר לוח שבועי קבוע בהגדרות הפרופיל (תבניות AB, PPL, Full Body).
           </p>
         </div>
       ),

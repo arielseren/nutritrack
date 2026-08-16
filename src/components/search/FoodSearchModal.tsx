@@ -3,11 +3,18 @@ import {
   Search,
   X,
   Heart,
-  QrCode,
   PlusCircle,
   Check,
   Zap,
   Sparkles,
+  SunMedium,
+  Sun,
+  Moon,
+  Apple,
+  Hand,
+  Flame,
+  Utensils,
+  Layers,
 } from 'lucide-react';
 import type { FoodCategory, FoodItem, MealType } from '../../types';
 import { calculateItemNutrition } from '../../services/nutritionCalculator';
@@ -18,7 +25,6 @@ interface FoodSearchModalProps {
   foodDatabase: FoodItem[];
   defaultMealType?: MealType;
   onLogFood: (mealType: MealType, food: FoodItem, grams: number, amount: number, unit: string) => void;
-  onOpenBarcodeScanner: () => void;
   onOpenCustomFoodModal: () => void;
   onToggleFavorite: (foodId: string) => void;
   onLogDirectMeal?: (
@@ -38,7 +44,6 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
   foodDatabase,
   defaultMealType = 'lunch',
   onLogFood,
-  onOpenBarcodeScanner,
   onOpenCustomFoodModal,
   onToggleFavorite,
   onLogDirectMeal,
@@ -77,16 +82,16 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
     }
   }, [isOpen, defaultMealType]);
 
-  const categories: { key: FoodCategory; label: string }[] = [
-    { key: 'all', label: 'הכל' },
-    { key: 'popular', label: 'פופולרי' },
-    { key: 'proteins', label: 'חלבונים' },
-    { key: 'carbs', label: 'פחמימות' },
-    { key: 'fats', label: 'שומנים' },
+  const categories: { key: FoodCategory; label: string; icon?: React.ReactNode }[] = [
+    { key: 'all', label: 'הכל', icon: <Layers className="w-3.5 h-3.5" /> },
+    { key: 'popular', label: 'פופולרי', icon: <Flame className="w-3.5 h-3.5" /> },
+    { key: 'proteins', label: 'חלבונים', icon: <Utensils className="w-3.5 h-3.5" /> },
+    { key: 'carbs', label: 'פחמימות', icon: <Sparkles className="w-3.5 h-3.5" /> },
+    { key: 'fats', label: 'שומנים', icon: <Zap className="w-3.5 h-3.5" /> },
     { key: 'dairy', label: 'מוצרי חלב' },
-    { key: 'fruits_veggies', label: 'פירות וירקות' },
+    { key: 'fruits_veggies', label: 'פירות וירקות', icon: <Apple className="w-3.5 h-3.5" /> },
     { key: 'snacks', label: 'נשנושים' },
-    { key: 'favorites', label: 'מועדפים ❤️' },
+    { key: 'favorites', label: 'מועדפים', icon: <Heart className="w-3.5 h-3.5 text-error fill-current" /> },
   ];
 
   const filteredFoods = useMemo(() => {
@@ -128,65 +133,58 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
 
   const handleConfirmLog = () => {
     if (!selectedFood) return;
-    const unitLabel =
+    const unitDesc =
       portionMode === 'standard'
-        ? selectedFood.servingUnit
-        : 'גרם';
+        ? `${amountValue} ${selectedFood.servingUnit}`
+        : `${customGrams} גרם`;
 
-    onLogFood(
-      selectedMealType,
-      selectedFood,
-      calculatedTotalGrams,
-      portionMode === 'standard' ? amountValue : customGrams,
-      unitLabel
-    );
+    onLogFood(selectedMealType, selectedFood, calculatedTotalGrams, amountValue, unitDesc);
     setSelectedFood(null);
     onClose();
   };
 
   const handleDirectSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const cals = Number(directCalories);
-    if (!directCalories || isNaN(cals) || cals < 0) return;
-
-    const prot = Number(directProtein) || 0;
-    const carbs = Number(directCarbs) || 0;
-    const fat = Number(directFat) || 0;
-    const foodName = directName.trim() || 'מנה מהירה';
+    const numCal = Number(directCalories) || 0;
+    if (numCal <= 0) {
+      alert('נא להזין כמות קלוריות (קק"ל) חיובית');
+      return;
+    }
 
     if (onLogDirectMeal) {
       onLogDirectMeal(
         selectedMealType,
-        foodName,
-        cals,
-        prot,
-        carbs,
-        fat,
+        directName.trim() || 'מנה אישית',
+        numCal,
+        Number(directProtein) || 0,
+        Number(directCarbs) || 0,
+        Number(directFat) || 0,
         directSaveToDb
       );
     }
     onClose();
   };
 
+  const mealButtons = [
+    { type: 'breakfast' as MealType, label: 'בוקר', icon: <SunMedium className="w-3.5 h-3.5" /> },
+    { type: 'lunch' as MealType, label: 'צהריים', icon: <Sun className="w-3.5 h-3.5" /> },
+    { type: 'dinner' as MealType, label: 'ערב', icon: <Moon className="w-3.5 h-3.5" /> },
+    { type: 'snack' as MealType, label: 'נשנוש', icon: <Apple className="w-3.5 h-3.5" /> },
+  ];
+
   return (
     <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
-      <div className="w-full max-w-[480px] max-h-[92dvh] bg-surface-container-lowest rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden border border-surface-container-high animate-modal-sheet modal-safe-bottom">
+      <div className="w-full max-w-[480px] max-h-[90dvh] bg-surface-container-lowest rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden border border-surface-container-high animate-modal-sheet">
         
-        {/* Header */}
-        <div className="p-4 border-b border-surface-container-high bg-surface-container-low flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold">
-              {activeTab === 'search' ? <Search className="w-4 h-4" /> : <Zap className="w-4 h-4" />}
+        {/* Modal Header */}
+        <div className="p-4 border-b border-surface-container-high bg-surface-container-low flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold">
+              <Search className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-headline font-bold text-base text-on-surface">
-                {activeTab === 'search' ? 'הוספת מזון ליומן' : 'הזנת קלוריות ומאקרו ישירה'}
-              </h3>
-              <p className="text-xs text-outline">
-                {activeTab === 'search'
-                  ? 'חפש מאגר עשיר, סרוק ברקוד או הזן ישירות'
-                  : 'הזן קלוריות, חלבון, פחמימה ושומן ישירות ללא חישוב 100 גרם'}
-              </p>
+              <h3 className="font-headline font-bold text-base text-on-surface">הוספת מאכל ליומן</h3>
+              <p className="text-[11px] text-outline">חיפוש במאגר, מדריך כמויות או הזנת קלוריות ישירה</p>
             </div>
           </div>
           <button
@@ -199,7 +197,7 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
         </div>
 
         {/* Top Tab Mode Switcher: Search vs Direct Entry */}
-        <div className="p-2.5 bg-surface-container-low border-b border-surface-container-high flex gap-2">
+        <div className="p-2.5 bg-surface-container-low border-b border-surface-container-high flex gap-2 flex-shrink-0">
           <button
             type="button"
             onClick={() => setActiveTab('search')}
@@ -223,32 +221,26 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
             }`}
           >
             <Zap className="w-3.5 h-3.5" />
-            <span>⚡ הזנה ישירה (ללא 100 גרם)</span>
+            <span>הזנה ישירה (ללא 100 גרם)</span>
           </button>
         </div>
 
-        {/* Meal Selector Tabs */}
-        <div className="px-4 pt-3 pb-1">
+        {/* Meal Selector Tabs with Clean Icons */}
+        <div className="px-4 pt-3 pb-1 flex-shrink-0">
           <div className="grid grid-cols-4 gap-1.5 p-1 bg-surface-container-low rounded-2xl border border-surface-container-high">
-            {(
-              [
-                { type: 'breakfast', label: 'בוקר 🌅' },
-                { type: 'lunch', label: 'צהריים ☀️' },
-                { type: 'dinner', label: 'ערב 🌙' },
-                { type: 'snack', label: 'נשנוש 🍪' },
-              ] as { type: MealType; label: string }[]
-            ).map(({ type, label }) => (
+            {mealButtons.map(({ type, label, icon }) => (
               <button
                 key={type}
                 type="button"
                 onClick={() => setSelectedMealType(type)}
-                className={`py-2 px-1 rounded-xl text-xs font-bold text-center transition-all ${
+                className={`py-2 px-1 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all ${
                   selectedMealType === type
                     ? 'bg-primary text-white shadow-sm'
                     : 'text-on-surface-variant hover:bg-surface-container'
                 }`}
               >
-                {label}
+                {icon}
+                <span>{label}</span>
               </button>
             ))}
           </div>
@@ -259,205 +251,171 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
         {/* ========================================================================= */}
         {activeTab === 'direct' && (
           <form onSubmit={handleDirectSubmit} className="p-4 space-y-3.5 overflow-y-auto flex-1 text-xs animate-in fade-in duration-150">
+            <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20 flex items-start gap-2.5">
+              <Zap className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold text-xs text-primary block">
+                  תיעוד מהיר ללא צורך במאזניים וחישובים
+                </span>
+                <p className="text-[11px] text-outline mt-0.5">
+                  הזן ישירות את סך הקלוריות והערכים של המנה/הארוחה והיא תתווסף מיד ליומן היום.
+                </p>
+              </div>
+            </div>
+
             <div>
-              <label className="font-bold text-on-surface block mb-1">
-                שם המאכל / הארוחה <span className="text-outline font-normal">(אופציונלי)</span>
-              </label>
+              <label className="text-[11px] font-bold text-outline block mb-1">שם המנה או הארוחה (אופציונלי)</label>
               <input
                 type="text"
                 value={directName}
                 onChange={(e) => setDirectName(e.target.value)}
-                placeholder="לדוגמה: ארוחה בחוץ / שייק חלבון / מנה ביתית"
-                className="w-full bg-surface-container-low text-on-surface p-2.5 rounded-xl border border-surface-container-high focus:border-primary outline-hidden text-xs"
-                autoFocus
+                placeholder="לדוגמה: ארוחת צהריים במסעדה, שייק חלבון, סנדוויץ'..."
+                className="w-full bg-surface-container-lowest text-on-surface p-2.5 rounded-xl border border-surface-container-high text-xs outline-hidden focus:border-primary"
               />
             </div>
 
-            {/* Macro Card */}
-            <div className="p-3.5 rounded-2xl bg-surface-container-low border border-surface-container-high space-y-3">
-              <div className="flex items-center gap-1.5 text-primary font-bold text-xs">
-                <Sparkles className="w-4 h-4" />
-                <span>ערכים תזונתיים של המנה:</span>
-              </div>
+            <div>
+              <label className="text-[11px] font-bold text-outline block mb-1">
+                סך קלוריות (קק"ל) <span className="text-error">*</span>
+              </label>
+              <input
+                type="number"
+                min="1"
+                required
+                value={directCalories}
+                onChange={(e) => setDirectCalories(e.target.value)}
+                placeholder="למשל: 550"
+                className="w-full bg-surface-container-lowest text-on-surface text-base font-extrabold text-primary p-2.5 rounded-xl border border-surface-container-high outline-hidden focus:border-primary"
+              />
+            </div>
 
-              {/* Direct Calories */}
+            <div className="grid grid-cols-3 gap-2">
               <div>
-                <label className="font-bold text-on-surface block mb-1">
-                  קלוריות (קק"ל) <span className="text-primary">*</span>
-                </label>
+                <label className="text-[10px] font-bold text-outline block mb-1">חלבון (גרם)</label>
                 <input
                   type="number"
-                  required
                   min="0"
-                  step="any"
-                  value={directCalories}
-                  onChange={(e) => setDirectCalories(e.target.value)}
-                  placeholder="למשל: 450"
-                  className="w-full bg-surface-container-lowest text-tertiary font-extrabold text-base p-2.5 rounded-xl border border-surface-container-high focus:border-primary outline-hidden"
+                  step="0.1"
+                  value={directProtein}
+                  onChange={(e) => setDirectProtein(e.target.value)}
+                  placeholder="0"
+                  className="w-full bg-surface-container-lowest text-on-surface font-bold p-2 rounded-xl border border-surface-container-high text-xs"
                 />
               </div>
-
-              {/* 3 Macros */}
-              <div className="grid grid-cols-3 gap-2">
-                <div>
-                  <label className="text-[11px] font-bold text-outline block mb-1">חלבון (גרם)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="any"
-                    value={directProtein}
-                    onChange={(e) => setDirectProtein(e.target.value)}
-                    placeholder="0"
-                    className="w-full bg-surface-container-lowest text-on-surface font-bold p-2 rounded-xl border border-surface-container-high focus:border-primary outline-hidden text-xs"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[11px] font-bold text-outline block mb-1">פחמימות (גרם)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="any"
-                    value={directCarbs}
-                    onChange={(e) => setDirectCarbs(e.target.value)}
-                    placeholder="0"
-                    className="w-full bg-surface-container-lowest text-on-surface font-bold p-2 rounded-xl border border-surface-container-high focus:border-primary outline-hidden text-xs"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[11px] font-bold text-outline block mb-1">שומן (גרם)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="any"
-                    value={directFat}
-                    onChange={(e) => setDirectFat(e.target.value)}
-                    placeholder="0"
-                    className="w-full bg-surface-container-lowest text-on-surface font-bold p-2 rounded-xl border border-surface-container-high focus:border-primary outline-hidden text-xs"
-                  />
-                </div>
+              <div>
+                <label className="text-[10px] font-bold text-outline block mb-1">פחמימות (גרם)</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={directCarbs}
+                  onChange={(e) => setDirectCarbs(e.target.value)}
+                  placeholder="0"
+                  className="w-full bg-surface-container-lowest text-on-surface font-bold p-2 rounded-xl border border-surface-container-high text-xs"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-outline block mb-1">שומן (גרם)</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={directFat}
+                  onChange={(e) => setDirectFat(e.target.value)}
+                  placeholder="0"
+                  className="w-full bg-surface-container-lowest text-on-surface font-bold p-2 rounded-xl border border-surface-container-high text-xs"
+                />
               </div>
             </div>
 
-            <label className="flex items-center gap-2 p-2.5 rounded-xl bg-surface-container-low border border-surface-container-high/60 cursor-pointer hover:bg-surface-container transition-all">
+            <label className="flex items-center gap-2 p-2.5 rounded-xl bg-surface-container-low border border-surface-container-high/60 cursor-pointer">
               <input
                 type="checkbox"
                 checked={directSaveToDb}
                 onChange={(e) => setDirectSaveToDb(e.target.checked)}
-                className="w-4 h-4 rounded text-primary focus:ring-primary"
+                className="w-4 h-4 rounded text-primary border-surface-container-high focus:ring-primary"
               />
-              <span className="text-xs text-on-surface font-semibold">
-                שמור גם במאגר המאכלים שלי לשימוש חוזר
+              <span className="text-[11px] text-on-surface font-medium">
+                שמור מאכל זה גם במאגר המאכלים האישי שלי
               </span>
             </label>
 
-            <div className="pt-2">
-              <button
-                type="submit"
-                className="w-full py-3.5 rounded-2xl bg-primary hover:bg-primary/90 text-on-primary font-headline font-bold text-sm shadow-md active:scale-98 transition-all flex items-center justify-center gap-2"
-              >
-                <Check className="w-4 h-4 stroke-[3]" />
-                <span>הוסף ישירות ליומן היום 🎉</span>
-              </button>
-            </div>
+            <button
+              type="submit"
+              className="w-full py-3.5 rounded-2xl bg-primary hover:bg-primary/90 text-on-primary font-headline font-bold text-sm shadow-md active:scale-98 transition-all flex items-center justify-center gap-2"
+            >
+              <Check className="w-4 h-4 stroke-[3]" />
+              <span>הוסף ישירות ליומן היום</span>
+            </button>
           </form>
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 2: DATABASE SEARCH & QUICK ACTIONS */}
+        {/* TAB 2: SEARCH IN DATABASE */}
         {/* ========================================================================= */}
         {activeTab === 'search' && (
-          <>
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
             {/* Search Input Bar */}
-            <div className="p-4 pb-2 space-y-2.5">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="חפש מאכל (חזה עוף, קוטג', אבוקדו)..."
-                  className="w-full bg-surface-container-low text-on-surface py-2.5 pr-10 pl-10 rounded-2xl border border-surface-container-high focus:ring-2 focus:ring-primary outline-none text-sm placeholder:text-outline/60 transition-all"
-                  autoFocus
-                />
-                <Search className="w-4 h-4 text-outline absolute right-3.5 top-1/2 -translate-y-1/2" />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="p-1 text-outline hover:text-on-surface absolute left-3 top-1/2 -translate-y-1/2"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-
-              {/* Action pills: Barcode scanner + Direct entry switch + Custom Food */}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    onClose();
-                    onOpenBarcodeScanner();
-                  }}
-                  className="flex-1 py-2 px-2.5 rounded-xl bg-tertiary-container/30 hover:bg-tertiary-container/50 text-tertiary font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
-                >
-                  <QrCode className="w-4 h-4" />
-                  <span>סרוק ברקוד</span>
-                </button>
+            <div className="p-4 pb-2 space-y-2 flex-shrink-0">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="חפש מאכל במאגר הישראלי..."
+                    className="w-full bg-surface-container text-on-surface py-2.5 pr-10 pl-4 rounded-2xl border border-surface-container-high focus:border-primary text-xs outline-hidden transition-all"
+                  />
+                  <Search className="w-4 h-4 text-outline absolute right-3.5 top-1/2 -translate-y-1/2" />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="p-1 text-outline hover:text-on-surface absolute left-3 top-1/2 -translate-y-1/2"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
 
                 <button
-                  onClick={() => setActiveTab('direct')}
-                  className="flex-1 py-2 px-2.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
+                  type="button"
+                  onClick={onOpenCustomFoodModal}
+                  className="p-2.5 rounded-2xl bg-surface-container hover:bg-surface-container-high text-primary border border-surface-container-high flex items-center gap-1 text-xs font-bold transition-all flex-shrink-0"
+                  title="צור מאכל חדש"
                 >
-                  <Zap className="w-4 h-4" />
-                  <span>הזנה ישירה</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    onClose();
-                    onOpenCustomFoodModal();
-                  }}
-                  className="flex-1 py-2 px-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-bold text-xs flex items-center justify-center gap-1.5 border border-surface-container-high transition-all"
-                >
-                  <PlusCircle className="w-4 h-4 text-primary" />
-                  <span>מאכל מותאם</span>
+                  <PlusCircle className="w-4 h-4" />
+                  <span className="hidden sm:inline">מאכל חדש</span>
                 </button>
               </div>
 
-              {/* Smart Visual Portion Guide Banner */}
-              <div className="rounded-2xl bg-surface-container-low border border-surface-container-high overflow-hidden">
+              {/* Visual Portion Guide (Collapsible) */}
+              <div>
                 <button
                   type="button"
                   onClick={() => setShowPortionGuide(!showPortionGuide)}
-                  className="w-full p-2.5 flex items-center justify-between text-xs font-bold text-on-surface hover:bg-surface-container transition-all"
+                  className="text-[11px] text-primary hover:underline font-bold flex items-center gap-1 py-0.5"
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm">🖐️</span>
-                    <span className="text-[11px] text-primary">לא שוקל במאזניים? לחץ למדריך כמויות מהיר</span>
-                  </div>
-                  <span className="text-[10px] text-outline">{showPortionGuide ? 'סגור' : 'הצג מדריך'}</span>
+                  <Hand className="w-3.5 h-3.5" />
+                  <span>{showPortionGuide ? 'הסתר מדריך כמויות' : 'מדריך כמויות מהיר (שיטת כף היד)'}</span>
                 </button>
 
                 {showPortionGuide && (
-                  <div className="p-3 pt-1 border-t border-surface-container-high/60 bg-surface-container-lowest text-[11px] space-y-2 animate-in fade-in duration-150">
-                    <p className="text-outline text-[10px] leading-relaxed">
-                      אינך צריך משקל מטבח! השתמש בהערכות ויזואליות או בחר באפשרות <strong>"לפי יחידות"</strong>:
-                    </p>
-                    <div className="grid grid-cols-2 gap-2 text-[10px]">
-                      <div className="p-2 rounded-xl bg-surface-container-low border border-surface-container-high/60">
-                        <span className="font-bold text-primary block">🖐️ כף יד פתוחה</span>
+                  <div className="mt-1.5 p-3 rounded-2xl bg-surface-container-low border border-surface-container-high text-[11px] space-y-1.5 animate-in fade-in duration-150">
+                    <div className="grid grid-cols-2 gap-1.5">
+                      <div className="p-2 rounded-xl bg-surface-container-lowest border border-surface-container-high/60">
+                        <span className="font-bold text-primary block">כף יד פתוחה</span>
                         <span className="text-outline">מנת חלבון (בשר, עוף, קציצות ~ 120-150g)</span>
                       </div>
-                      <div className="p-2 rounded-xl bg-surface-container-low border border-surface-container-high/60">
-                        <span className="font-bold text-primary block">✊ אגרוף סגור</span>
+                      <div className="p-2 rounded-xl bg-surface-container-lowest border border-surface-container-high/60">
+                        <span className="font-bold text-primary block">אגרוף סגור</span>
                         <span className="text-outline">מנת פחמימה (אורז, פתיתים, פסטה ~ כוס)</span>
                       </div>
-                      <div className="p-2 rounded-xl bg-surface-container-low border border-surface-container-high/60">
-                        <span className="font-bold text-primary block">🤲 שתי כפות ידיים</span>
+                      <div className="p-2 rounded-xl bg-surface-container-lowest border border-surface-container-high/60">
+                        <span className="font-bold text-primary block">שתי כפות ידיים</span>
                         <span className="text-outline">סלט וירקות מבושלים (~ 200g)</span>
                       </div>
-                      <div className="p-2 rounded-xl bg-surface-container-low border border-surface-container-high/60">
-                        <span className="font-bold text-primary block">👍 אגודל מלא</span>
+                      <div className="p-2 rounded-xl bg-surface-container-lowest border border-surface-container-high/60">
+                        <span className="font-bold text-primary block">אגודל מלא</span>
                         <span className="text-outline">שומן וממרח (כף טחינה, שמן זית ~ 15g)</span>
                       </div>
                     </div>
@@ -465,26 +423,27 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
                 )}
               </div>
 
-              {/* Category Chips */}
+              {/* Category Chips with Icons */}
               <div className="flex gap-1.5 overflow-x-auto hide-scrollbar py-1">
-                {categories.map(({ key, label }) => (
+                {categories.map(({ key, label, icon }) => (
                   <button
                     key={key}
                     onClick={() => setSelectedCategory(key)}
-                    className={`whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                    className={`whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1 transition-all ${
                       selectedCategory === key
                         ? 'bg-primary text-white font-bold shadow-xs'
                         : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
                     }`}
                   >
-                    {label}
+                    {icon}
+                    <span>{label}</span>
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Food List */}
-            <div className="flex-1 overflow-y-auto p-4 pt-1 space-y-2 min-h-[220px]">
+            <div className="flex-1 overflow-y-auto p-4 pt-1 space-y-2 min-h-[160px]">
               {filteredFoods.length === 0 ? (
                 <div className="py-12 text-center text-outline">
                   <p className="text-sm font-semibold">לא נמצאו מאכלים התואמים לחיפוש</p>
@@ -561,9 +520,9 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
               )}
             </div>
 
-            {/* Selected Food Portion Drawer */}
+            {/* Selected Food Portion Drawer (Sticky Bottom with guaranteed visibility) */}
             {selectedFood && (
-              <div className="p-4 bg-surface-container-low border-t border-surface-container-high space-y-3 animate-in slide-in-from-bottom duration-200">
+              <div className="p-4 pb-6 sm:pb-4 bg-surface-container-lowest border-t-2 border-primary/40 space-y-3 flex-shrink-0 shadow-[0_-8px_24px_rgba(0,0,0,0.12)] z-30 animate-in slide-in-from-bottom duration-200">
                 <div className="flex justify-between items-start">
                   <div>
                     <h4 className="font-headline font-bold text-sm text-on-surface">
@@ -639,24 +598,25 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
                         step="5"
                         value={customGrams}
                         onChange={(e) => setCustomGrams(Math.max(1, Number(e.target.value) || 0))}
-                        className="w-20 bg-surface-container-lowest text-on-surface text-center font-bold p-1.5 rounded-xl border border-surface-container-high text-xs"
+                        className="w-20 bg-surface-container-low text-on-surface text-center font-bold p-1.5 rounded-xl border border-surface-container-high text-xs"
                       />
                       <span className="text-xs text-outline font-bold">גרם</span>
                     </div>
                   )}
                 </div>
 
-                {/* Confirm Button */}
+                {/* Confirm Button - Guaranteed to be visible! */}
                 <button
+                  type="button"
                   onClick={handleConfirmLog}
-                  className="w-full py-3 rounded-2xl bg-primary hover:bg-primary/90 text-white font-headline font-bold text-sm shadow-md active:scale-95 transition-all flex items-center justify-center gap-2"
+                  className="w-full py-3.5 rounded-2xl bg-primary hover:bg-primary/90 text-white font-headline font-bold text-sm shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Check className="w-4 h-4 stroke-[3]" />
                   <span>הוסף לארוחה זו ({activeNutrition.calculatedCalories} קק"ל)</span>
                 </button>
               </div>
             )}
-          </>
+          </div>
         )}
 
       </div>

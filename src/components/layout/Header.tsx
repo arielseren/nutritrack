@@ -4,7 +4,6 @@ import {
   Sun,
   Moon,
   Flame,
-  User,
   BookOpen,
 } from 'lucide-react';
 import { formatHebrewDate } from '../../services/nutritionCalculator';
@@ -13,13 +12,9 @@ interface HeaderProps {
   currentDate: string;
   onOpenDatePicker: () => void;
   onOpenNotifications: () => void;
-  onOpenProfile: () => void;
-  onOpenAuth: () => void;
   onOpenUserGuide?: () => void;
   unreadNotificationsCount?: number;
   streakCount?: number;
-  userName?: string;
-  isLoggedIn?: boolean;
   currentTheme: 'light' | 'dark';
   onToggleTheme: () => void;
 }
@@ -28,13 +23,9 @@ export const Header: React.FC<HeaderProps> = ({
   currentDate,
   onOpenDatePicker,
   onOpenNotifications,
-  onOpenProfile,
-  onOpenAuth,
   onOpenUserGuide,
   unreadNotificationsCount = 0,
   streakCount = 0,
-  userName = 'דני',
-  isLoggedIn = true,
   currentTheme,
   onToggleTheme,
 }) => {
@@ -124,32 +115,6 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error ring-2 ring-surface" />
             )}
           </button>
-
-          {/* User Account / Profile Avatar */}
-          {isLoggedIn ? (
-            <button
-              onClick={onOpenProfile}
-              aria-label="פרופיל משתמש"
-              className="flex items-center gap-1.5 p-1 pl-2.5 rounded-xl bg-surface-container-low hover:bg-surface-container border border-surface-container-high transition-all active:scale-95"
-              title={`מחובר בתור ${userName} - לחץ להגדרות או יציאה`}
-            >
-              <div className="w-6 h-6 rounded-lg bg-primary text-on-primary text-xs font-bold flex items-center justify-center shadow-2xs">
-                {userName ? userName.charAt(0) : 'U'}
-              </div>
-              <span className="text-[11px] font-bold text-on-surface max-w-[60px] truncate hidden sm:inline-block">
-                {userName}
-              </span>
-            </button>
-          ) : (
-            <button
-              onClick={onOpenAuth}
-              aria-label="התחברות"
-              className="px-2.5 py-1.5 rounded-xl bg-primary text-on-primary text-xs font-bold flex items-center gap-1 shadow-xs hover:opacity-90 active:scale-95 transition-all"
-            >
-              <User className="w-3.5 h-3.5" />
-              <span>התחבר</span>
-            </button>
-          )}
         </div>
 
       </div>

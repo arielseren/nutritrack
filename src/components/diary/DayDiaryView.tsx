@@ -10,6 +10,11 @@ import {
   Sunset,
   Cookie,
   SlidersHorizontal,
+  Dumbbell,
+  Flame,
+  Activity,
+  Zap,
+  BedDouble,
 } from 'lucide-react';
 import type { DayLog, MealType, UserProfile, WorkoutDayType } from '../../types';
 import {
@@ -62,6 +67,24 @@ export const DayDiaryView: React.FC<DayDiaryViewProps> = ({
     const d = new Date(currentDate);
     d.setDate(d.getDate() + 1);
     onDateChange(d.toISOString().split('T')[0]);
+  };
+
+  const getWorkoutIcon = (type: WorkoutDayType) => {
+    switch (type) {
+      case 'light_strength':
+        return <Dumbbell className="w-3.5 h-3.5" />;
+      case 'heavy_strength':
+        return <Flame className="w-3.5 h-3.5" />;
+      case 'cardio':
+        return <Activity className="w-3.5 h-3.5" />;
+      case 'hiit':
+        return <Zap className="w-3.5 h-3.5" />;
+      case 'custom':
+        return <SlidersHorizontal className="w-3.5 h-3.5" />;
+      case 'rest':
+      default:
+        return <BedDouble className="w-3.5 h-3.5" />;
+    }
   };
 
   const isToday = currentDate === getTodayDateString();
@@ -146,10 +169,10 @@ export const DayDiaryView: React.FC<DayDiaryViewProps> = ({
             {/* Workout badge button */}
             <button
               onClick={() => setIsWorkoutModalOpen(true)}
-              className="px-2 py-0.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary font-bold text-[10px] flex items-center gap-1 transition-all"
+              className="px-2.5 py-1 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-bold text-[11px] flex items-center gap-1.5 transition-all"
               title="שנה מצב אימון"
             >
-              <span>{adjusted.workoutEmoji}</span>
+              {getWorkoutIcon(adjusted.workoutType)}
               <span>{adjusted.workoutBadge}</span>
               {adjusted.isAdjusted && <span>(+{adjusted.burnedCalories})</span>}
               <SlidersHorizontal className="w-2.5 h-2.5 mr-0.5" />

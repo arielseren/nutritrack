@@ -20,8 +20,7 @@
 - **Styling:** Tailwind CSS v4 + Dynamic CSS Variables (Light & Dark Theme)
 - **Design Tokens & Brand:** גווני Emerald Teal (`#006b5f`, `#2dd4bf`) וענבר (`#ffab6d`), Glassmorphism, Rounded Squircles
 - **Typography & Fonts:** Hanken Grotesk, Plus Jakarta Sans, Heebo (Google Fonts)
-- **Icons & Visual Effects:** Lucide React, Google Material Symbols, Canvas Confetti
-- **Camera & Barcode Scanner:** `html5-qrcode` + Open Food Facts API + AI Food Image Recognition
+- **Icons & Visual Effects:** Lucide React (Clean Vector Icons), Google Material Symbols, Canvas Confetti
 - **Biometric Security:** WebAuthn API (`navigator.credentials`) להתחברות בטביעת אצבע / FaceID
 - **Push & Service Worker:** Service Worker API (`public/sw.js`) + Notification API לתזכורות מים וארוחות
 - **Data Persistence:** LocalStorage API + Local JSON Backup Export / Import
@@ -47,25 +46,25 @@ c:\projects\nutrition
 │   │   ├── foodDatabase.ts       # מאגר מאכלים ישראלי ובינלאומי עשיר (קציצות, בשרים, חלבונים, פחמימות, שומנים)
 │   │   └── presetMenus.ts        # תפריטי תזונה מוכנים (חיטוב 1,800, מסה 2,400, ים-תיכוני 2,000)
 │   ├── services/
-│   │   ├── nutritionCalculator.ts# מחשבוני BMR & TDEE (Mifflin-St Jeor), מאקרואים ותאריכים
+│   │   ├── nutritionCalculator.ts# מחשבוני BMR & TDEE (Mifflin-St Jeor), מאקרואים, סייקלינג ורצף דינמי
 │   │   ├── storageService.ts     # שירות שמירת LocalStorage, גיבויים, משתמשים ותפריטים מותאמים
 │   │   ├── biometricAuthService.ts# שירות אימות ביומטרי WebAuthn (טביעת אצבע / FaceID)
-│   │   ├── notificationService.ts# שירות תזמון התראות Web Push ובדיקת זמני ארוחות
-│   │   └── openFoodFacts.ts      # חיבור API אונליין למאגר Open Food Facts (מיליוני ברקודים)
+│   │   └── notificationService.ts# שירות תזמון התראות Web Push ובדיקת זמני ארוחות
 │   ├── components/
 │   │   ├── layout/
-│   │   │   ├── Header.tsx        # סרגל עליון: לוגו AI, בורר תאריכים, מעבר יום/לילה, פרופיל והתראות
-│   │   │   └── BottomNav.tsx     # סרגל ניווט תחתון + כפתור Quick-Add מרכזי
+│   │   │   ├── Header.tsx        # סרגל עליון: לוגו AI, בורר תאריכים, מעבר יום/לילה, מונה רצף דינמי והתראות
+│   │   │   └── BottomNav.tsx     # סרגל ניווט תחתון: דף הבית, יומן, כפתור הוספה, תפריטים, פרופיל
 │   │   ├── dashboard/
-│   │   │   ├── DashboardView.tsx # תצוגת לוח הבקרה הראשית
+│   │   │   ├── DashboardView.tsx # דף הבית הראשי, באנר אימונים קומפקטי עם כפתור שינוי
 │   │   │   ├── CalorieRing.tsx   # טבעת קלוריות מונפשת (SVG Circular Progress)
 │   │   │   ├── MacroBreakdown.tsx# פירוט 3 מאקרואים (חלבון, פחמימה, שומן) עם סרגלי התקדמות
 │   │   │   ├── WaterTracker.tsx  # מעקב 8 כוסות מים אינטראקטיביות + אפקט קונפטי
-│   │   │   └── RecentActivity.tsx# רשימת פעילות אחרונה עם מחיקה מהירה
+│   │   │   ├── RecentActivity.tsx# רשימת פעילות אחרונה עם מחיקה מהירה
+│   │   │   └── WorkoutModeModal.tsx# מודאל כיוונון עצימות ושריפת קלוריות באימון
 │   │   ├── diary/
 │   │   │   └── DayDiaryView.tsx  # יומן ארוחות יומי (בוקר, צהריים, ערב, נשנושים) ומעבר ימים
 │   │   ├── search/
-│   │   │   └── FoodSearchModal.tsx # חיפוש מאכלים, מדריך כמויות ללא משקל, קטגוריות ומועדפים
+│   │   │   └── FoodSearchModal.tsx # חיפוש מאכלים, הזנה ישירה, כפתור הוספה נעוץ, קטגוריות ומועדפים
 │   │   ├── scanner/
 │   │   │   └── BarcodeScannerModal.tsx # סורק ברקוד (מצלמה + Open Food Facts) + זיהוי צלחות ב-AI
 │   │   ├── custom/

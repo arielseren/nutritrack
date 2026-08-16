@@ -9,7 +9,6 @@ import type { NavTab } from './components/layout/BottomNav';
 import { DashboardView } from './components/dashboard/DashboardView';
 import { DayDiaryView } from './components/diary/DayDiaryView';
 import { FoodSearchModal } from './components/search/FoodSearchModal';
-import { BarcodeScannerModal } from './components/scanner/BarcodeScannerModal';
 import { CustomFoodModal } from './components/custom/CustomFoodModal';
 import { MealPlansModal } from './components/plans/MealPlansModal';
 import { ProfileSettingsModal } from './components/profile/ProfileSettingsModal';
@@ -31,7 +30,6 @@ export function App() {
   // Modal open states
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [searchDefaultMealType, setSearchDefaultMealType] = useState<MealType>('lunch');
-  const [isBarcodeScannerOpen, setIsBarcodeScannerOpen] = useState(false);
   const [isCustomFoodModalOpen, setIsCustomFoodModalOpen] = useState(false);
   const [isMealPlansOpen, setIsMealPlansOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -349,13 +347,9 @@ export function App() {
         currentDate={currentDate}
         onOpenDatePicker={() => setIsDatePickerModalOpen(true)}
         onOpenNotifications={() => setIsNotificationsModalOpen(true)}
-        onOpenProfile={() => setIsProfileModalOpen(true)}
-        onOpenAuth={() => setIsAuthModalOpen(true)}
         onOpenUserGuide={() => setIsUserGuideOpen(true)}
         unreadNotificationsCount={unreadNotifsCount}
         streakCount={streakCount}
-        userName={userProfile.name}
-        isLoggedIn={userProfile.isLoggedIn !== false}
         currentTheme={userProfile.theme}
         onToggleTheme={handleToggleTheme}
       />
@@ -368,7 +362,6 @@ export function App() {
               userProfile={userProfile}
               dayLog={currentDayLog}
               onOpenQuickAdd={() => handleOpenQuickAdd('lunch')}
-              onOpenBarcodeScanner={() => setIsBarcodeScannerOpen(true)}
               onOpenMealPlans={() => setIsMealPlansOpen(true)}
               onOpenProfile={() => setIsProfileModalOpen(true)}
               onNavigateToDiary={() => setActiveTab('diary')}
@@ -446,18 +439,9 @@ export function App() {
         foodDatabase={foodDatabase}
         defaultMealType={searchDefaultMealType}
         onLogFood={handleLogFood}
-        onOpenBarcodeScanner={() => setIsBarcodeScannerOpen(true)}
         onOpenCustomFoodModal={() => setIsCustomFoodModalOpen(true)}
         onToggleFavorite={handleToggleFavorite}
         onLogDirectMeal={handleLogDirectMeal}
-      />
-
-      <BarcodeScannerModal
-        isOpen={isBarcodeScannerOpen}
-        onClose={() => setIsBarcodeScannerOpen(false)}
-        foodDatabase={foodDatabase}
-        defaultMealType={searchDefaultMealType}
-        onLogFood={handleLogFood}
       />
 
       <CustomFoodModal

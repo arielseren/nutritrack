@@ -5,6 +5,10 @@ import {
   Flame,
   Check,
   Sparkles,
+  Activity,
+  Zap,
+  BedDouble,
+  SlidersHorizontal,
 } from 'lucide-react';
 import type { WorkoutDayType, DayLog, UserProfile } from '../../types';
 import { WORKOUT_CONFIGS, getDailyAdjustedTargets } from '../../services/nutritionCalculator';
@@ -54,6 +58,24 @@ export const WorkoutModeModal: React.FC<WorkoutModeModalProps> = ({
     const config = WORKOUT_CONFIGS[type];
     setCustomBurned(config.defaultBurnedKcal);
     setCustomTitle(config.title);
+  };
+
+  const getWorkoutIcon = (type: WorkoutDayType) => {
+    switch (type) {
+      case 'light_strength':
+        return <Dumbbell className="w-5 h-5 text-primary" />;
+      case 'heavy_strength':
+        return <Flame className="w-5 h-5 text-tertiary" />;
+      case 'cardio':
+        return <Activity className="w-5 h-5 text-emerald-500" />;
+      case 'hiit':
+        return <Zap className="w-5 h-5 text-amber-500" />;
+      case 'custom':
+        return <SlidersHorizontal className="w-5 h-5 text-secondary" />;
+      case 'rest':
+      default:
+        return <BedDouble className="w-5 h-5 text-slate-500" />;
+    }
   };
 
   const handleApply = () => {
@@ -125,7 +147,9 @@ export const WorkoutModeModal: React.FC<WorkoutModeModalProps> = ({
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="text-xl flex-shrink-0">{cfg.emoji}</span>
+                    <div className="w-8 h-8 rounded-xl bg-surface-container flex items-center justify-center flex-shrink-0">
+                      {getWorkoutIcon(type)}
+                    </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span className="font-bold text-xs text-on-surface truncate">
