@@ -1,4 +1,4 @@
-import type { DayLog, FoodItem, LoggedFoodItem, MealType, UserProfile, NotificationItem } from '../types';
+import type { DayLog, FoodItem, LoggedFoodItem, MealType, UserProfile, NotificationItem, MealPlanPreset } from '../types';
 import { INITIAL_FOOD_DATABASE } from '../data/foodDatabase';
 import { calculateItemNutrition, getTodayDateString } from './nutritionCalculator';
 
@@ -361,11 +361,39 @@ export const StorageService = {
     localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(list));
   },
 
+  // Custom Meal Plans Management
+  getCustomMealPlans(): MealPlanPreset[] {
+    try {
+      const data = localStorage.getItem('nutritrack_custom_meal_plans_v1');
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  },
+
+  saveCustomMealPlan(plan: MealPlanPreset): MealPlanPreset {
+    const plans = this.getCustomMealPlans();
+    const idx = plans.findIndex((p) => p.id === plan.id);
+    if (idx >= 0) {
+      plans[idx] = plan;
+    } else {
+      plans.unshift(plan);
+    }
+    localStorage.setItem('nutritrack_custom_meal_plans_v1', JSON.stringify(plans));
+    return plan;
+  },
+
+  deleteCustomMealPlan(planId: string): void {
+    const plans = this.getCustomMealPlans().filter((p) => p.id !== planId);
+    localStorage.setItem('nutritrack_custom_meal_plans_v1', JSON.stringify(plans));
+  },
+
   exportAllData(): string {
     const data = {
       profile: this.getProfile(),
       dayLogs: this.getAllDayLogs(),
       customFoods: localStorage.getItem(FOOD_DB_KEY) ? JSON.parse(localStorage.getItem(FOOD_DB_KEY)!) : [],
+      customPlans: this.getCustomMealPlans(),
       notifications: this.getNotifications(),
       exportDate: new Date().toISOString(),
       version: '1.0.0',
@@ -379,6 +407,7 @@ export const StorageService = {
       if (parsed.profile) localStorage.setItem(PROFILE_KEY, JSON.stringify(parsed.profile));
       if (parsed.dayLogs) localStorage.setItem(DAY_LOGS_KEY, JSON.stringify(parsed.dayLogs));
       if (parsed.customFoods) localStorage.setItem(FOOD_DB_KEY, JSON.stringify(parsed.customFoods));
+      if (parsed.customPlans) localStorage.setItem('nutritrack_custom_meal_plans_v1', JSON.stringify(parsed.customPlans));
       if (parsed.notifications) localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(parsed.notifications));
       return true;
     } catch (e) {
@@ -392,5 +421,6 @@ export const StorageService = {
     localStorage.removeItem(DAY_LOGS_KEY);
     localStorage.removeItem(FOOD_DB_KEY);
     localStorage.removeItem(NOTIFICATIONS_KEY);
+    localStorage.removeItem('nutritrack_custom_meal_plans_v1');
   },
 };

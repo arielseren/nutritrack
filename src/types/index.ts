@@ -111,12 +111,15 @@ export interface MealPlanPreset {
   title: string;
   subtitle?: string;
   description: string;
-  badge: string; // e.g. "חיטוב מואץ", "מסה נקייה"
+  badge: string; // e.g. "חיטוב מואץ", "מסה נקייה", "מותאם אישית"
   targetGoal: FitnessGoal;
   totalCalories: number;
   protein: number;
   carbs: number;
   fat: number;
+  isCustom?: boolean;
+  author?: string;
+  createdAt?: string;
   meals: {
     mealType: MealType;
     items: {

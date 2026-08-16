@@ -242,67 +242,70 @@ export function App() {
         onToggleTheme={handleToggleTheme}
       />
 
-      {/* Main Container */}
+      {/* Main Container with Page Fade Transition */}
       <main className="flex-1 w-full max-w-[480px] mx-auto px-4 pt-3 pb-24">
-        {activeTab === 'dashboard' && (
-          <DashboardView
-            userProfile={userProfile}
-            dayLog={currentDayLog}
-            onOpenQuickAdd={() => handleOpenQuickAdd('lunch')}
-            onOpenBarcodeScanner={() => setIsBarcodeScannerOpen(true)}
-            onOpenMealPlans={() => setIsMealPlansOpen(true)}
-            onOpenProfile={() => setIsProfileModalOpen(true)}
-            onNavigateToDiary={() => setActiveTab('diary')}
-            onUpdateWater={handleUpdateWater}
-            onDeleteItem={handleDeleteItem}
-          />
-        )}
-
-        {activeTab === 'diary' && (
-          <DayDiaryView
-            currentDate={currentDate}
-            dayLog={currentDayLog}
-            userProfile={userProfile}
-            onDateChange={(newDate) => setCurrentDate(newDate)}
-            onOpenDatePicker={() => setIsDatePickerModalOpen(true)}
-            onAddFoodToMeal={(mealType) => handleOpenQuickAdd(mealType)}
-            onDeleteItem={handleDeleteItem}
-          />
-        )}
-
-        {activeTab === 'plans' && (
-          <div className="space-y-4">
-            <div className="pt-2">
-              <h2 className="font-headline text-2xl font-bold text-on-surface">תפריטי תזונה מוכנים</h2>
-              <p className="text-xs text-outline">בחר תפריט מומלץ והחל אותו על היומן שלך בלחיצה אחת</p>
-            </div>
-            <MealPlansModal
-              isOpen={true}
-              onClose={() => setActiveTab('dashboard')}
-              onApplyPlan={handleApplyMealPlan}
-            />
-          </div>
-        )}
-
-        {activeTab === 'profile' && (
-          <div className="space-y-4">
-            <div className="pt-2">
-              <h2 className="font-headline text-2xl font-bold text-on-surface">פרופיל והגדרות</h2>
-              <p className="text-xs text-outline">נהל את יעדי הקלוריות, המאקרו, ההתראות והאבטחה שלך</p>
-            </div>
-            <ProfileSettingsModal
-              isOpen={true}
-              onClose={() => setActiveTab('dashboard')}
+        <div key={activeTab} className="animate-page-enter">
+          {activeTab === 'dashboard' && (
+            <DashboardView
               userProfile={userProfile}
-              onSaveProfile={handleSaveProfile}
-              onExportData={handleExportData}
-              onImportData={handleImportData}
-              onResetData={handleResetData}
-              onLogout={handleLogout}
-              onOpenAuth={() => setIsAuthModalOpen(true)}
+              dayLog={currentDayLog}
+              onOpenQuickAdd={() => handleOpenQuickAdd('lunch')}
+              onOpenBarcodeScanner={() => setIsBarcodeScannerOpen(true)}
+              onOpenMealPlans={() => setIsMealPlansOpen(true)}
+              onOpenProfile={() => setIsProfileModalOpen(true)}
+              onNavigateToDiary={() => setActiveTab('diary')}
+              onUpdateWater={handleUpdateWater}
+              onDeleteItem={handleDeleteItem}
             />
-          </div>
-        )}
+          )}
+
+          {activeTab === 'diary' && (
+            <DayDiaryView
+              currentDate={currentDate}
+              dayLog={currentDayLog}
+              userProfile={userProfile}
+              onDateChange={(newDate) => setCurrentDate(newDate)}
+              onOpenDatePicker={() => setIsDatePickerModalOpen(true)}
+              onAddFoodToMeal={(mealType) => handleOpenQuickAdd(mealType)}
+              onDeleteItem={handleDeleteItem}
+            />
+          )}
+
+          {activeTab === 'plans' && (
+            <div className="space-y-4">
+              <div className="pt-2">
+                <h2 className="font-headline text-2xl font-bold text-on-surface">תפריטי תזונה</h2>
+                <p className="text-xs text-outline">בחר תפריט מומלץ או בנה תפריט אישי והחל אותו בלחיצה אחת</p>
+              </div>
+              <MealPlansModal
+                isOpen={true}
+                onClose={() => setActiveTab('dashboard')}
+                onApplyPlan={handleApplyMealPlan}
+                foodDatabase={foodDatabase}
+              />
+            </div>
+          )}
+
+          {activeTab === 'profile' && (
+            <div className="space-y-4">
+              <div className="pt-2">
+                <h2 className="font-headline text-2xl font-bold text-on-surface">פרופיל והגדרות</h2>
+                <p className="text-xs text-outline">נהל את יעדי הקלוריות, המאקרו, ההתראות והאבטחה שלך</p>
+              </div>
+              <ProfileSettingsModal
+                isOpen={true}
+                onClose={() => setActiveTab('dashboard')}
+                userProfile={userProfile}
+                onSaveProfile={handleSaveProfile}
+                onExportData={handleExportData}
+                onImportData={handleImportData}
+                onResetData={handleResetData}
+                onLogout={handleLogout}
+                onOpenAuth={() => setIsAuthModalOpen(true)}
+              />
+            </div>
+          )}
+        </div>
       </main>
 
       {/* Floating Toast Notification */}
@@ -355,6 +358,7 @@ export function App() {
           isOpen={isMealPlansOpen}
           onClose={() => setIsMealPlansOpen(false)}
           onApplyPlan={handleApplyMealPlan}
+          foodDatabase={foodDatabase}
         />
       )}
 
@@ -377,6 +381,8 @@ export function App() {
         onClose={() => setIsNotificationsModalOpen(false)}
         notifications={notifications}
         onMarkAllAsRead={handleMarkNotificationsAsRead}
+        userProfile={userProfile}
+        onSaveProfile={handleSaveProfile}
       />
 
       <DatePickerModal
