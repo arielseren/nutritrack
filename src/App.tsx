@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { FoodItem, MealType, MealPlanPreset, UserProfile, DayLog, NotificationItem, WorkoutDayType } from './types';
+import type { FoodItem, MealType, MealPlanPreset, UserProfile, DayLog, NotificationItem, WorkoutDayType, WeeklyMealPlanSchedule } from './types';
 import { StorageService } from './services/storageService';
 import { getTodayDateString, WORKOUT_CONFIGS } from './services/nutritionCalculator';
 import { NotificationService } from './services/notificationService';
@@ -208,6 +208,32 @@ export function App() {
     showToast(`תפריט "${plan.title}" הוחל בהצלחה על יומן היום! 🎉`);
   };
 
+  const handleApplyFullWeek = (schedule: WeeklyMealPlanSchedule) => {
+    const today = new Date();
+    const dayLogsToUpdate: Record<string, DayLog> = { ...dayLogs };
+
+    for (let i = 0; i < 7; i++) {
+      const targetDateObj = new Date(today);
+      targetDateObj.setDate(today.getDate() + i);
+      const dateStr = targetDateObj.toISOString().split('T')[0];
+      const dayOfWeek = targetDateObj.getDay();
+
+      const planDay = schedule[dayOfWeek];
+      if (planDay && planDay.planId && planDay.meals) {
+        const updatedDayLog = StorageService.applyWeeklyDayToCalendarDate(
+          dateStr,
+          planDay,
+          foodDatabase,
+          userProfile.id
+        );
+        dayLogsToUpdate[dateStr] = updatedDayLog;
+      }
+    }
+
+    setDayLogs(dayLogsToUpdate);
+    showToast('התפריט השבועי שובץ והוחל בהצלחה על 7 הימים הקרובים! 🎉');
+  };
+
   const handleUpdateDayWorkout = (
     date: string,
     workoutType: WorkoutDayType,
@@ -366,6 +392,7 @@ export function App() {
               isInline={true}
               onClose={() => setActiveTab('dashboard')}
               onApplyPlan={handleApplyMealPlan}
+              onApplyFullWeek={handleApplyFullWeek}
               foodDatabase={foodDatabase}
             />
           )}
@@ -440,6 +467,7 @@ export function App() {
           isOpen={isMealPlansOpen}
           onClose={() => setIsMealPlansOpen(false)}
           onApplyPlan={handleApplyMealPlan}
+          onApplyFullWeek={handleApplyFullWeek}
           foodDatabase={foodDatabase}
         />
       )}

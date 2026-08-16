@@ -150,6 +150,34 @@ export interface MealPlanPreset {
   }[];
 }
 
+export interface WeeklyMealPlanDay {
+  dayOfWeek: number; // 0=Sunday, 1=Monday, ..., 6=Saturday
+  dayName?: string;
+  date?: string; // YYYY-MM-DD
+  planId?: string; // Assigned preset or custom plan ID
+  planTitle?: string;
+  planBadge?: string;
+  totalCalories?: number;
+  protein?: number;
+  carbs?: number;
+  fat?: number;
+  meals?: {
+    mealType: MealType;
+    items: {
+      foodId: string;
+      name: string;
+      amountDesc: string;
+      grams: number;
+      calories: number;
+      protein: number;
+      carbs: number;
+      fat: number;
+    }[];
+  }[];
+}
+
+export type WeeklyMealPlanSchedule = Record<number, WeeklyMealPlanDay>; // 0 to 6
+
 export interface NotificationItem {
   id: string;
   title: string;

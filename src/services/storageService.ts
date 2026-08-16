@@ -1,4 +1,4 @@
-import type { DayLog, FoodItem, LoggedFoodItem, MealType, UserProfile, NotificationItem, MealPlanPreset, WorkoutDayType } from '../types';
+import type { DayLog, FoodItem, LoggedFoodItem, MealType, UserProfile, NotificationItem, MealPlanPreset, WorkoutDayType, WeeklyMealPlanSchedule, WeeklyMealPlanDay } from '../types';
 import { INITIAL_FOOD_DATABASE } from '../data/foodDatabase';
 import { calculateItemNutrition, getTodayDateString } from './nutritionCalculator';
 
@@ -9,7 +9,18 @@ const USERS_REGISTRY_KEY = 'nutritrack_users_registry_v1';
 const DAY_LOGS_PREFIX = 'nutritrack_day_logs_v1_';
 const FOOD_DB_PREFIX = 'nutritrack_custom_food_db_v1_';
 const CUSTOM_MEAL_PLANS_PREFIX = 'nutritrack_custom_meal_plans_v1_';
+const WEEKLY_MEAL_PLAN_PREFIX = 'nutritrack_weekly_meal_plan_v1_';
 const NOTIFICATIONS_PREFIX = 'nutritrack_notifications_v1_';
+
+export const DEFAULT_WEEKLY_MEAL_PLAN: WeeklyMealPlanSchedule = {
+  0: { dayOfWeek: 0, dayName: 'יום ראשון' },
+  1: { dayOfWeek: 1, dayName: 'יום שני' },
+  2: { dayOfWeek: 2, dayName: 'יום שלישי' },
+  3: { dayOfWeek: 3, dayName: 'יום רביעי' },
+  4: { dayOfWeek: 4, dayName: 'יום חמישי' },
+  5: { dayOfWeek: 5, dayName: 'יום שישי' },
+  6: { dayOfWeek: 6, dayName: 'יום שבת' },
+};
 
 export const DEFAULT_USER_PROFILE: UserProfile = {
   id: 'usr_default_1',
@@ -595,6 +606,103 @@ export const StorageService = {
     } catch (e) {
       console.warn(e);
     }
+  },
+
+  // Weekly Meal Plan (Per-User Isolated)
+  getWeeklyMealPlan(userId?: string): WeeklyMealPlanSchedule {
+    const uid = userId || this.getActiveUserId();
+    const key = WEEKLY_MEAL_PLAN_PREFIX + uid;
+    try {
+      const data = localStorage.getItem(key);
+      if (data) {
+        return JSON.parse(data);
+      }
+      return DEFAULT_WEEKLY_MEAL_PLAN;
+    } catch {
+      return DEFAULT_WEEKLY_MEAL_PLAN;
+    }
+  },
+
+  saveWeeklyMealPlan(schedule: WeeklyMealPlanSchedule, userId?: string): void {
+    const uid = userId || this.getActiveUserId();
+    const key = WEEKLY_MEAL_PLAN_PREFIX + uid;
+    try {
+      localStorage.setItem(key, JSON.stringify(schedule));
+    } catch (e) {
+      console.warn(e);
+    }
+  },
+
+  assignPlanToWeeklyDay(
+    dayOfWeek: number,
+    plan: MealPlanPreset | null,
+    userId?: string
+  ): WeeklyMealPlanSchedule {
+    const uid = userId || this.getActiveUserId();
+    const schedule = this.getWeeklyMealPlan(uid);
+    const dayNames = ['יום ראשון', 'יום שני', 'יום שלישי', 'יום רביעי', 'יום חמישי', 'יום שישי', 'יום שבת'];
+
+    if (!plan) {
+      schedule[dayOfWeek] = {
+        dayOfWeek,
+        dayName: dayNames[dayOfWeek],
+      };
+    } else {
+      schedule[dayOfWeek] = {
+        dayOfWeek,
+        dayName: dayNames[dayOfWeek],
+        planId: plan.id,
+        planTitle: plan.title,
+        planBadge: plan.badge,
+        totalCalories: plan.totalCalories,
+        protein: plan.protein,
+        carbs: plan.carbs,
+        fat: plan.fat,
+        meals: plan.meals,
+      };
+    }
+
+    this.saveWeeklyMealPlan(schedule, uid);
+    return schedule;
+  },
+
+  applyWeeklyDayToCalendarDate(
+    date: string,
+    dayPlan: WeeklyMealPlanDay,
+    foodDatabase: FoodItem[],
+    userId?: string
+  ): DayLog {
+    const uid = userId || this.getActiveUserId();
+
+    if (dayPlan.meals) {
+      dayPlan.meals.forEach((planMeal) => {
+        planMeal.items.forEach((item) => {
+          const food = foodDatabase.find((f) => f.id === item.foodId) || {
+            id: item.foodId,
+            name: item.name,
+            calories: Math.round((item.calories / (item.grams || 100)) * 100),
+            protein: Math.round((item.protein / (item.grams || 100)) * 100),
+            carbs: Math.round((item.carbs / (item.grams || 100)) * 100),
+            fat: Math.round((item.fat / (item.grams || 100)) * 100),
+            servingUnit: item.amountDesc || 'מנה',
+            servingGrams: item.grams || 100,
+            category: 'proteins' as const,
+          };
+
+          this.addFoodToMeal(
+            date,
+            planMeal.mealType,
+            food,
+            item.grams,
+            1,
+            item.amountDesc || 'מנה',
+            uid
+          );
+        });
+      });
+    }
+
+    return this.getDayLog(date, uid);
   },
 
   // Backup Export / Import (Per User)
