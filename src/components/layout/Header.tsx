@@ -17,6 +17,7 @@ interface HeaderProps {
   onOpenAuth: () => void;
   onOpenUserGuide?: () => void;
   unreadNotificationsCount?: number;
+  streakCount?: number;
   userName?: string;
   isLoggedIn?: boolean;
   currentTheme: 'light' | 'dark';
@@ -31,6 +32,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAuth,
   onOpenUserGuide,
   unreadNotificationsCount = 0,
+  streakCount = 0,
   userName = 'דני',
   isLoggedIn = true,
   currentTheme,
@@ -73,11 +75,15 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center gap-1.5">
           {/* Streak Counter Badge */}
           <div
-            className="flex items-center gap-1 px-2 py-1 rounded-xl bg-surface-container-low border border-surface-container-high text-[11px] font-bold text-tertiary shadow-2xs"
-            title="רצף יומי של 5 ימים!"
+            className={`flex items-center gap-1 px-2 py-1 rounded-xl border text-[11px] font-bold shadow-2xs transition-all ${
+              streakCount > 0
+                ? 'bg-amber-500/10 border-amber-500/30 text-amber-500'
+                : 'bg-surface-container-low border-surface-container-high text-outline'
+            }`}
+            title={streakCount > 0 ? `רצף יומי של ${streakCount} ימים ברציפות! כל הכבוד! 🔥` : 'התחל רצף יומי על ידי תיעוד ארוחה או מים היום! 🔥'}
           >
-            <Flame className="w-3.5 h-3.5 fill-tertiary text-tertiary animate-pulse" />
-            <span>5</span>
+            <Flame className={`w-3.5 h-3.5 ${streakCount > 0 ? 'fill-amber-500 text-amber-500 animate-pulse' : 'text-outline'}`} />
+            <span>{streakCount}</span>
           </div>
 
           {/* User Guide Button */}

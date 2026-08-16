@@ -332,3 +332,65 @@ export function getDailyAdjustedTargets(
     baseCalories,
   };
 }
+
+/**
+ * מחשב את רצף הימים הרציפים שבהם המשתמש תיעד אוכל או מים
+ */
+export function calculateLoggingStreak(
+  dayLogs: Record<string, DayLog>,
+  todayDateStr: string
+): number {
+  const isLogged = (dStr: string) => {
+    const log = dayLogs[dStr];
+    if (!log) return false;
+    const hasFood =
+      (log.meals?.breakfast?.length || 0) > 0 ||
+      (log.meals?.lunch?.length || 0) > 0 ||
+      (log.meals?.dinner?.length || 0) > 0 ||
+      (log.meals?.snack?.length || 0) > 0;
+    const hasWater = (log.waterGlasses || 0) > 0;
+    return hasFood || hasWater;
+  };
+
+  let streak = 0;
+  const today = new Date(todayDateStr + 'T12:00:00');
+
+  // Check if today has logs
+  if (isLogged(todayDateStr)) {
+    streak = 1;
+    const cursor = new Date(today);
+    cursor.setDate(cursor.getDate() - 1);
+    while (true) {
+      const dStr = cursor.toISOString().split('T')[0];
+      if (isLogged(dStr)) {
+        streak++;
+        cursor.setDate(cursor.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+  } else {
+    // If today is not logged yet, check from yesterday
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yStr = yesterday.toISOString().split('T')[0];
+    if (isLogged(yStr)) {
+      streak = 1;
+      const cursor = new Date(yesterday);
+      cursor.setDate(cursor.getDate() - 1);
+      while (true) {
+        const dStr = cursor.toISOString().split('T')[0];
+        if (isLogged(dStr)) {
+          streak++;
+          cursor.setDate(cursor.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+    } else {
+      streak = 0;
+    }
+  }
+
+  return streak;
+}

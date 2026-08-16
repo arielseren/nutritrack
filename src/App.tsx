@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { FoodItem, MealType, MealPlanPreset, UserProfile, DayLog, NotificationItem, WorkoutDayType, WeeklyMealPlanSchedule } from './types';
 import { StorageService } from './services/storageService';
-import { getTodayDateString, WORKOUT_CONFIGS } from './services/nutritionCalculator';
+import { getTodayDateString, WORKOUT_CONFIGS, calculateLoggingStreak } from './services/nutritionCalculator';
 import { NotificationService } from './services/notificationService';
 import { Header } from './components/layout/Header';
 import { BottomNav } from './components/layout/BottomNav';
@@ -340,6 +340,7 @@ export function App() {
   };
 
   const unreadNotifsCount = notifications.filter((n) => !n.read).length;
+  const streakCount = calculateLoggingStreak(dayLogs, currentDate);
 
   return (
     <div className="min-h-screen bg-background text-on-background flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-container">
@@ -352,6 +353,7 @@ export function App() {
         onOpenAuth={() => setIsAuthModalOpen(true)}
         onOpenUserGuide={() => setIsUserGuideOpen(true)}
         unreadNotificationsCount={unreadNotifsCount}
+        streakCount={streakCount}
         userName={userProfile.name}
         isLoggedIn={userProfile.isLoggedIn !== false}
         currentTheme={userProfile.theme}
