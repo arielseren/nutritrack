@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Calendar,
   Bell,
@@ -6,6 +5,7 @@ import {
   Moon,
   Flame,
   User,
+  BookOpen,
 } from 'lucide-react';
 import { formatHebrewDate } from '../../services/nutritionCalculator';
 
@@ -15,6 +15,7 @@ interface HeaderProps {
   onOpenNotifications: () => void;
   onOpenProfile: () => void;
   onOpenAuth: () => void;
+  onOpenUserGuide?: () => void;
   unreadNotificationsCount?: number;
   userName?: string;
   isLoggedIn?: boolean;
@@ -28,6 +29,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenNotifications,
   onOpenProfile,
   onOpenAuth,
+  onOpenUserGuide,
   unreadNotificationsCount = 0,
   userName = 'דני',
   isLoggedIn = true,
@@ -77,6 +79,18 @@ export const Header: React.FC<HeaderProps> = ({
             <Flame className="w-3.5 h-3.5 fill-tertiary text-tertiary animate-pulse" />
             <span>5</span>
           </div>
+
+          {/* User Guide Button */}
+          {onOpenUserGuide && (
+            <button
+              onClick={onOpenUserGuide}
+              aria-label="מדריך למשתמש"
+              className="p-2 rounded-xl bg-surface-container-low hover:bg-surface-container border border-surface-container-high text-primary transition-all active:scale-95"
+              title="מדריך למשתמש"
+            >
+              <BookOpen className="w-4 h-4" />
+            </button>
+          )}
 
           {/* Quick Theme Toggle (Light / Dark) */}
           <button

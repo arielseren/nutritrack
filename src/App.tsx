@@ -16,6 +16,7 @@ import { ProfileSettingsModal } from './components/profile/ProfileSettingsModal'
 import { NotificationsModal } from './components/notifications/NotificationsModal';
 import { DatePickerModal } from './components/common/DatePickerModal';
 import { AuthModal } from './components/auth/AuthModal';
+import { UserGuideModal } from './components/guide/UserGuideModal';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 export function App() {
@@ -37,6 +38,7 @@ export function App() {
   const [isNotificationsModalOpen, setIsNotificationsModalOpen] = useState(false);
   const [isDatePickerModalOpen, setIsDatePickerModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isUserGuideOpen, setIsUserGuideOpen] = useState(false);
 
   // Toast feedback state
   const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
@@ -348,6 +350,7 @@ export function App() {
         onOpenNotifications={() => setIsNotificationsModalOpen(true)}
         onOpenProfile={() => setIsProfileModalOpen(true)}
         onOpenAuth={() => setIsAuthModalOpen(true)}
+        onOpenUserGuide={() => setIsUserGuideOpen(true)}
         unreadNotificationsCount={unreadNotifsCount}
         userName={userProfile.name}
         isLoggedIn={userProfile.isLoggedIn !== false}
@@ -409,6 +412,7 @@ export function App() {
               onResetData={handleResetData}
               onLogout={handleLogout}
               onOpenAuth={() => setIsAuthModalOpen(true)}
+              onOpenUserGuide={() => setIsUserGuideOpen(true)}
             />
           )}
         </div>
@@ -483,6 +487,7 @@ export function App() {
           onResetData={handleResetData}
           onLogout={handleLogout}
           onOpenAuth={() => setIsAuthModalOpen(true)}
+          onOpenUserGuide={() => setIsUserGuideOpen(true)}
         />
       )}
 
@@ -507,6 +512,11 @@ export function App() {
         onClose={() => setIsAuthModalOpen(false)}
         currentUser={userProfile}
         onLoginSuccess={handleLoginSuccess}
+      />
+
+      <UserGuideModal
+        isOpen={isUserGuideOpen}
+        onClose={() => setIsUserGuideOpen(false)}
       />
     </div>
   );

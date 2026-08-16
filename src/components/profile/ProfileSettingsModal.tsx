@@ -20,6 +20,7 @@ import {
   Info,
   Dumbbell,
   Flame,
+  BookOpen,
 } from 'lucide-react';
 import type { UserProfile, FitnessGoal, ActivityLevel, WorkoutDayType } from '../../types';
 import {
@@ -41,6 +42,7 @@ interface ProfileSettingsModalProps {
   onResetData: () => void;
   onLogout?: () => void;
   onOpenAuth?: () => void;
+  onOpenUserGuide?: () => void;
   isInline?: boolean;
 }
 
@@ -56,6 +58,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
   onResetData,
   onLogout,
   onOpenAuth,
+  onOpenUserGuide,
   isInline = false,
 }) => {
   // Active open accordion section
@@ -279,6 +282,32 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
         {/* Modal Scrollable Body */}
         <div className="p-4 overflow-y-auto space-y-3 flex-1 divide-y divide-surface-container-high/40">
           
+          {/* User Guide Quick Banner */}
+          {onOpenUserGuide && (
+            <div className="pb-1">
+              <button
+                type="button"
+                onClick={onOpenUserGuide}
+                className="w-full p-3 rounded-2xl bg-primary/10 hover:bg-primary/15 border border-primary/20 flex items-center justify-between transition-all group"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-primary text-on-primary flex items-center justify-center font-bold shadow-xs">
+                    <BookOpen className="w-4 h-4" />
+                  </div>
+                  <div className="text-right">
+                    <span className="font-bold text-xs text-primary block group-hover:underline">
+                      מדריך למשתמש ומרכז עזרה 📖
+                    </span>
+                    <span className="text-[10px] text-outline block">
+                      הסברים מקיפים על אימונים, תפריט שבועי, הזנה ישירה ועוד
+                    </span>
+                  </div>
+                </div>
+                <span className="text-xs font-bold text-primary">פתח ←</span>
+              </button>
+            </div>
+          )}
+
           {/* ========================================================================= */}
           {/* ACCORDION 1: פרטים אישיים (Personal Details) */}
           {/* ========================================================================= */}
