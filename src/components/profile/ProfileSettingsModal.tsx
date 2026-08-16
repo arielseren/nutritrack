@@ -371,8 +371,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                         <label className="text-[11px] font-bold text-outline block mb-1">גיל</label>
                         <input
                           type="number"
-                          value={formData.age}
-                          onChange={(e) => setFormData({ ...formData, age: Number(e.target.value) })}
+                          value={formData.age === 0 ? '' : formData.age}
+                          onChange={(e) => setFormData({ ...formData, age: e.target.value === '' ? 0 : Number(e.target.value) })}
+                          placeholder="0"
                           className="w-full px-3 py-2 rounded-xl bg-surface-container border border-surface-container-high text-on-surface text-xs"
                         />
                       </div>
@@ -383,8 +384,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                         <label className="text-[10px] font-bold text-outline block mb-1">גובה (ס"מ)</label>
                         <input
                           type="number"
-                          value={formData.height}
-                          onChange={(e) => setFormData({ ...formData, height: Number(e.target.value) })}
+                          value={formData.height === 0 ? '' : formData.height}
+                          onChange={(e) => setFormData({ ...formData, height: e.target.value === '' ? 0 : Number(e.target.value) })}
+                          placeholder="0"
                           className="w-full px-2.5 py-2 rounded-xl bg-surface-container border border-surface-container-high text-on-surface text-xs"
                         />
                       </div>
@@ -392,8 +394,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                         <label className="text-[10px] font-bold text-outline block mb-1">משקל (ק"ג)</label>
                         <input
                           type="number"
-                          value={formData.currentWeight}
-                          onChange={(e) => setFormData({ ...formData, currentWeight: Number(e.target.value) })}
+                          value={formData.currentWeight === 0 ? '' : formData.currentWeight}
+                          onChange={(e) => setFormData({ ...formData, currentWeight: e.target.value === '' ? 0 : Number(e.target.value) })}
+                          placeholder="0"
                           className="w-full px-2.5 py-2 rounded-xl bg-surface-container border border-surface-container-high text-on-surface text-xs"
                         />
                       </div>
@@ -401,8 +404,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                         <label className="text-[10px] font-bold text-outline block mb-1">משקל יעד</label>
                         <input
                           type="number"
-                          value={formData.targetWeight}
-                          onChange={(e) => setFormData({ ...formData, targetWeight: Number(e.target.value) })}
+                          value={formData.targetWeight === 0 ? '' : formData.targetWeight}
+                          onChange={(e) => setFormData({ ...formData, targetWeight: e.target.value === '' ? 0 : Number(e.target.value) })}
+                          placeholder="0"
                           className="w-full px-2.5 py-2 rounded-xl bg-surface-container border border-surface-container-high text-on-surface text-xs"
                         />
                       </div>
@@ -539,8 +543,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                       <label className="text-[11px] font-bold text-outline block mb-1">יעד קלוריות (קק"ל)</label>
                       <input
                         type="number"
-                        value={formData.dailyCalorieTarget}
-                        onChange={(e) => setFormData({ ...formData, dailyCalorieTarget: Number(e.target.value) })}
+                        value={formData.dailyCalorieTarget === 0 ? '' : formData.dailyCalorieTarget}
+                        onChange={(e) => setFormData({ ...formData, dailyCalorieTarget: e.target.value === '' ? 0 : Number(e.target.value) })}
+                        placeholder="0"
                         className="w-full px-3 py-2 rounded-xl bg-surface-container border border-surface-container-high text-on-surface text-xs font-bold text-tertiary"
                       />
                     </div>
@@ -550,8 +555,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                         <label className="text-[10px] font-bold text-outline block mb-1">חלבון (גרם)</label>
                         <input
                           type="number"
-                          value={formData.dailyProteinTarget}
-                          onChange={(e) => setFormData({ ...formData, dailyProteinTarget: Number(e.target.value) })}
+                          value={formData.dailyProteinTarget === 0 ? '' : formData.dailyProteinTarget}
+                          onChange={(e) => setFormData({ ...formData, dailyProteinTarget: e.target.value === '' ? 0 : Number(e.target.value) })}
+                          placeholder="0"
                           className="w-full px-2.5 py-2 rounded-xl bg-surface-container border border-surface-container-high text-on-surface text-xs"
                         />
                       </div>
@@ -559,8 +565,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                         <label className="text-[10px] font-bold text-outline block mb-1">פחמימות (גרם)</label>
                         <input
                           type="number"
-                          value={formData.dailyCarbsTarget}
-                          onChange={(e) => setFormData({ ...formData, dailyCarbsTarget: Number(e.target.value) })}
+                          value={formData.dailyCarbsTarget === 0 ? '' : formData.dailyCarbsTarget}
+                          onChange={(e) => setFormData({ ...formData, dailyCarbsTarget: e.target.value === '' ? 0 : Number(e.target.value) })}
+                          placeholder="0"
                           className="w-full px-2.5 py-2 rounded-xl bg-surface-container border border-surface-container-high text-on-surface text-xs"
                         />
                       </div>
@@ -568,8 +575,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                         <label className="text-[10px] font-bold text-outline block mb-1">שומן (גרם)</label>
                         <input
                           type="number"
-                          value={formData.dailyFatTarget}
-                          onChange={(e) => setFormData({ ...formData, dailyFatTarget: Number(e.target.value) })}
+                          value={formData.dailyFatTarget === 0 ? '' : formData.dailyFatTarget}
+                          onChange={(e) => setFormData({ ...formData, dailyFatTarget: e.target.value === '' ? 0 : Number(e.target.value) })}
+                          placeholder="0"
                           className="w-full px-2.5 py-2 rounded-xl bg-surface-container border border-surface-container-high text-on-surface text-xs"
                         />
                       </div>
@@ -579,8 +587,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                       <label className="text-[11px] font-bold text-outline block mb-1">יעד כוסות מים (250 מ"ל לכוס)</label>
                       <input
                         type="number"
-                        value={formData.dailyWaterTargetGlasses}
-                        onChange={(e) => setFormData({ ...formData, dailyWaterTargetGlasses: Number(e.target.value) })}
+                        value={formData.dailyWaterTargetGlasses === 0 ? '' : formData.dailyWaterTargetGlasses}
+                        onChange={(e) => setFormData({ ...formData, dailyWaterTargetGlasses: e.target.value === '' ? 0 : Number(e.target.value) })}
+                        placeholder="0"
                         className="w-full px-3 py-2 rounded-xl bg-surface-container border border-surface-container-high text-on-surface text-xs"
                       />
                     </div>

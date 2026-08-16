@@ -398,19 +398,20 @@ export const CreateMealPlanModal: React.FC<CreateMealPlanModalProps> = ({
                     </span>
                   </div>
 
-                  <div>
-                    <label className="text-[11px] font-bold text-outline block mb-1">כמות גרמים</label>
-                    <input
-                      type="number"
-                      value={selectedGrams}
-                      onChange={(e) => {
-                        const g = Number(e.target.value);
-                        setSelectedGrams(g);
-                        setSelectedAmount(Math.round((g / (selectedFood.servingGrams || 100)) * 10) / 10);
-                      }}
-                      className="w-full px-3 py-2 rounded-xl bg-surface-container-low border border-surface-container-high text-on-surface font-bold text-xs"
-                    />
-                  </div>
+                    <div>
+                      <label className="text-[11px] font-bold text-outline block mb-1">כמות גרמים</label>
+                      <input
+                        type="number"
+                        value={selectedGrams === 0 ? '' : selectedGrams}
+                        onChange={(e) => {
+                          const g = e.target.value === '' ? 0 : Number(e.target.value);
+                          setSelectedGrams(g);
+                          setSelectedAmount(Math.round((g / (selectedFood.servingGrams || 100)) * 10) / 10);
+                        }}
+                        placeholder="0"
+                        className="w-full px-3 py-2 rounded-xl bg-surface-container-low border border-surface-container-high text-on-surface font-bold text-xs"
+                      />
+                    </div>
 
                   <div className="p-2.5 rounded-xl bg-primary/10 text-center text-xs font-bold text-primary">
                     ערך מחושב: {Math.round((selectedFood.calories * selectedGrams) / 100)} קק"ל •{' '}

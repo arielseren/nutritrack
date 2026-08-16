@@ -382,8 +382,9 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
                   type="number"
                   min="1"
                   max="2000"
-                  value={customGrams}
-                  onChange={(e) => setCustomGrams(Math.max(1, Number(e.target.value)))}
+                  value={customGrams === 0 ? '' : customGrams}
+                  onChange={(e) => setCustomGrams(e.target.value === '' ? 0 : Number(e.target.value))}
+                  placeholder="0"
                   className="w-24 p-2 text-center font-bold text-sm bg-surface-container-lowest rounded-xl border border-surface-container-high"
                 />
                 <span className="text-xs text-outline font-semibold">גרם סה"כ</span>
