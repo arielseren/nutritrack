@@ -1,0 +1,20 @@
+{
+  "name": "NutriTrack - מעקב תזונה יומי",
+  "short_name": "NutriTrack",
+  "description": "מעקב תזונה יומי חכם, קלוריות, מקרואים ושתיית מים",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f9ff",
+  "theme_color": "#006b5f",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "he",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

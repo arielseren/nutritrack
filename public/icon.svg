@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#006b5f"/>
+      <stop offset="100%" stop-color="#2dd4bf"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="url(#bg)"/>
+  <!-- Leaf / Sparkles Nutrition Icon -->
+  <path d="M256 100 C170 100 120 180 120 280 C120 380 200 412 256 412 C312 412 392 380 392 280 C392 180 342 100 256 100 Z" fill="#ffffff" opacity="0.95"/>
+  <path d="M256 140 C256 260 210 330 160 360" stroke="#006b5f" stroke-width="16" stroke-linecap="round" fill="none"/>
+  <circle cx="340" cy="180" r="28" fill="#fb923c"/>
+</svg>
