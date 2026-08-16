@@ -123,6 +123,49 @@ export function App() {
     showToast(`נוסף בהצלחה: ${food.name} (${Math.round((food.calories * grams) / 100)} קק"ל)`);
   };
 
+  const handleLogDirectMeal = (
+    mealType: MealType,
+    name: string,
+    calories: number,
+    protein: number,
+    carbs: number,
+    fat: number,
+    saveToDb?: boolean
+  ) => {
+    const updated = StorageService.addDirectItemToMeal(
+      currentDate,
+      mealType,
+      name,
+      calories,
+      protein,
+      carbs,
+      fat,
+      'מנה',
+      userProfile.id
+    );
+    setDayLogs({ ...dayLogs, [currentDate]: updated });
+
+    if (saveToDb) {
+      StorageService.saveCustomFood(
+        {
+          name: name.trim() || 'מנה אישית',
+          calories: Math.round(calories),
+          protein: Math.round(protein * 10) / 10,
+          carbs: Math.round(carbs * 10) / 10,
+          fat: Math.round(fat * 10) / 10,
+          servingUnit: 'מנה',
+          servingGrams: 100,
+          category: 'proteins',
+          isCustom: true,
+        },
+        userProfile.id
+      );
+      setFoodDatabase(StorageService.getFoodDatabase(userProfile.id));
+    }
+
+    showToast(`נוסף ליומן: ${name || 'מנה ישירה'} (${Math.round(calories)} קק"ל) 🎉`);
+  };
+
   const handleDeleteItem = (mealType: MealType, logId: string) => {
     const updated = StorageService.removeFoodFromMeal(currentDate, mealType, logId, userProfile.id);
     setDayLogs({ ...dayLogs, [currentDate]: updated });
@@ -373,6 +416,7 @@ export function App() {
         onOpenBarcodeScanner={() => setIsBarcodeScannerOpen(true)}
         onOpenCustomFoodModal={() => setIsCustomFoodModalOpen(true)}
         onToggleFavorite={handleToggleFavorite}
+        onLogDirectMeal={handleLogDirectMeal}
       />
 
       <BarcodeScannerModal
@@ -386,7 +430,9 @@ export function App() {
       <CustomFoodModal
         isOpen={isCustomFoodModalOpen}
         onClose={() => setIsCustomFoodModalOpen(false)}
+        defaultMealType={searchDefaultMealType}
         onSaveCustomFood={handleSaveCustomFood}
+        onLogDirect={handleLogDirectMeal}
       />
 
       {activeTab !== 'plans' && (

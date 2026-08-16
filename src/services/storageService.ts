@@ -380,6 +380,49 @@ export const StorageService = {
     return dayLog;
   },
 
+  addDirectItemToMeal(
+    date: string,
+    mealType: MealType,
+    name: string,
+    calories: number,
+    protein: number,
+    carbs: number,
+    fat: number,
+    unit?: string,
+    userId?: string
+  ): DayLog {
+    const uid = userId || this.getActiveUserId();
+    const dayLog = this.getDayLog(date, uid);
+
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    const loggedItem: LoggedFoodItem = {
+      name: name.trim() || 'מנה ישירה',
+      amount: 1,
+      unit: unit || 'מנה',
+      totalGrams: 100,
+      calories: Math.round(calories),
+      calculatedCalories: Math.round(calories),
+      protein: Math.round(protein * 10) / 10,
+      calculatedProtein: Math.round(protein * 10) / 10,
+      carbs: Math.round(carbs * 10) / 10,
+      calculatedCarbs: Math.round(carbs * 10) / 10,
+      fat: Math.round(fat * 10) / 10,
+      calculatedFat: Math.round(fat * 10) / 10,
+      logId: 'log_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+      timestamp: timeStr,
+    };
+
+    if (!dayLog.meals[mealType]) {
+      dayLog.meals[mealType] = [];
+    }
+
+    dayLog.meals[mealType].push(loggedItem);
+    this.saveDayLog(dayLog, uid);
+    return dayLog;
+  },
+
   removeFoodFromMeal(date: string, mealType: MealType, logId: string, userId?: string): DayLog {
     const uid = userId || this.getActiveUserId();
     const dayLog = this.getDayLog(date, uid);
