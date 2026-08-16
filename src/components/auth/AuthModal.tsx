@@ -157,8 +157,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         {/* Header Branding */}
         <div className="text-center mb-6 pt-2">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-primary to-teal-400 p-0.5 mx-auto mb-3 shadow-md flex items-center justify-center">
-            <img src="/icon.svg" alt="NutriTrack Logo" className="w-full h-full object-contain rounded-2xl" />
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-primary to-teal-400 p-0.5 mx-auto mb-3 shadow-md flex items-center justify-center overflow-hidden">
+            <img src="/logo.png" onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/icon.svg'; }} alt="NutriTrack Logo" className="w-full h-full object-cover rounded-2xl" />
           </div>
           <h2 className="font-headline text-xl font-bold text-on-surface">
             {mode === 'login' ? 'ברוך הבא ל-NutriTrack' : 'יצירת חשבון חדש'}

@@ -42,7 +42,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center gap-2">
           {/* Professional Brand Logo Icon */}
           <div className="w-8 h-8 rounded-xl overflow-hidden shadow-xs flex-shrink-0 bg-primary/10 border border-primary/20">
-            <img src="/icon.svg" alt="NutriTrack Logo" className="w-full h-full object-cover" />
+            <img src="/logo.png" onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/icon.svg'; }} alt="NutriTrack Logo" className="w-full h-full object-cover" />
           </div>
 
           <div className="flex flex-col">
