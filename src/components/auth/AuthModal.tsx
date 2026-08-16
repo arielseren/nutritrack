@@ -1,6 +1,17 @@
 import React, { useState } from 'react';
-import { User, Lock, Mail, X, Check, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
+import {
+  X,
+  LogIn,
+  UserPlus,
+  Mail,
+  Lock,
+  User,
+  Fingerprint,
+  AlertCircle,
+} from 'lucide-react';
 import type { UserProfile } from '../../types';
+import { StorageService, DEFAULT_USER_PROFILE } from '../../services/storageService';
+import { BiometricAuthService } from '../../services/biometricAuthService';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -15,226 +26,290 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   currentUser,
   onLoginSuccess,
 }) => {
-  const [isRegisterMode, setIsRegisterMode] = useState(false);
+  const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [isSuccess, setIsSuccess] = useState(false);
-
-  React.useEffect(() => {
-    if (isOpen) {
-      setErrorMsg(null);
-      setIsSuccess(false);
-      setEmail(currentUser.email || '');
-      setPassword('');
-      setName(currentUser.name || '');
-    }
-  }, [isOpen, currentUser]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleLoginWithPassword = (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMsg(null);
+    setError(null);
 
-    if (!email.trim() || !password.trim()) {
-      setErrorMsg('נא למלא את כל השדות');
+    if (!email || !password) {
+      setError('נא למלא אימייל וסיסמה');
       return;
     }
 
-    if (password.length < 4) {
-      setErrorMsg('הסיסמה חייבת להכיל לפחות 4 תווים');
-      return;
-    }
+    setLoading(true);
+    const users = StorageService.getUsersRegistry();
+    const existingUser = users.find((u) => u.email?.toLowerCase() === email.toLowerCase());
 
-    // Save/Update user profile in LocalStorage
-    const updatedUser: UserProfile = {
-      ...currentUser,
-      email: email.trim(),
-      name: isRegisterMode ? (name.trim() || currentUser.name) : (currentUser.name || name.trim() || 'דני'),
-    };
-
-    // Save to users registry
-    try {
-      const existingUsersRaw = localStorage.getItem('nutritrack_users');
-      const existingUsers: UserProfile[] = existingUsersRaw ? JSON.parse(existingUsersRaw) : [];
-      const userIndex = existingUsers.findIndex((u) => u.email === updatedUser.email);
-      if (userIndex >= 0) {
-        existingUsers[userIndex] = updatedUser;
-      } else {
-        existingUsers.push(updatedUser);
-      }
-      localStorage.setItem('nutritrack_users', JSON.stringify(existingUsers));
-    } catch (e) {
-      console.warn(e);
-    }
-
-    setIsSuccess(true);
-    setTimeout(() => {
-      onLoginSuccess(updatedUser);
+    if (existingUser) {
+      const loggedIn: UserProfile = {
+        ...existingUser,
+        isLoggedIn: true,
+      };
+      onLoginSuccess(loggedIn);
       onClose();
-    }, 600);
+    } else {
+      // Create user if logging in for first time with default profile
+      const newUser: UserProfile = {
+        ...DEFAULT_USER_PROFILE,
+        id: 'usr_' + Date.now(),
+        name: email.split('@')[0],
+        email: email.toLowerCase(),
+        password,
+        isLoggedIn: true,
+      };
+      onLoginSuccess(newUser);
+      onClose();
+    }
+    setLoading(false);
   };
 
-  const handleGuestContinue = () => {
+  const handleRegister = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!name || !email || !password) {
+      setError('נא למלא את כל השדות');
+      return;
+    }
+
+    setLoading(true);
+    const users = StorageService.getUsersRegistry();
+    const existing = users.find((u) => u.email?.toLowerCase() === email.toLowerCase());
+
+    if (existing) {
+      setError('משתמש עם כתובת אימייל זו כבר קיים. עבור להתחברות.');
+      setLoading(false);
+      return;
+    }
+
+    const newUser: UserProfile = {
+      ...DEFAULT_USER_PROFILE,
+      id: 'usr_' + Date.now(),
+      name,
+      email: email.toLowerCase(),
+      password,
+      isLoggedIn: true,
+      hasBiometrics: false,
+    };
+
+    onLoginSuccess(newUser);
+    onClose();
+    setLoading(false);
+  };
+
+  const handleBiometricLogin = async () => {
+    setError(null);
+    setLoading(true);
+
+    const isAvailable = await BiometricAuthService.isBiometricAvailable();
+    if (!isAvailable) {
+      setError('זיהוי ביומטרי אינו זמין במכשיר זה');
+      setLoading(false);
+      return;
+    }
+
+    const res = await BiometricAuthService.authenticateBiometrics(currentUser.biometricCredentialId);
+    if (res.success) {
+      const loggedIn: UserProfile = {
+        ...currentUser,
+        isLoggedIn: true,
+      };
+      onLoginSuccess(loggedIn);
+      onClose();
+    } else {
+      setError(res.error || 'אימות ביומטרי נכשל. נסה באמצעות סיסמה.');
+    }
+    setLoading(false);
+  };
+
+  const handleContinueAsGuest = () => {
+    const guestUser: UserProfile = {
+      ...DEFAULT_USER_PROFILE,
+      id: 'guest_' + Date.now(),
+      name: 'אורח',
+      email: '',
+      isLoggedIn: false,
+    };
+    onLoginSuccess(guestUser);
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
-      <div className="w-full max-w-[440px] max-h-[92vh] bg-surface-container-lowest rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden border border-surface-container-high">
-        {/* Header */}
-        <div className="p-4 border-b border-surface-container-high flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-              <Sparkles className="w-4 h-4" />
-            </div>
-            <div>
-              <h3 className="font-headline font-bold text-base text-on-surface">
-                {isRegisterMode ? 'יצירת חשבון חדש' : 'התחברות לחשבון'}
-              </h3>
-              <p className="text-xs text-outline">
-                {isRegisterMode
-                  ? 'הצטרף ל-NutriTrack וסנכרן את היעדים שלך'
-                  : 'שמור וגבה את נתוני התזונה שלך'}
-              </p>
-            </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="bg-surface rounded-3xl w-full max-w-[420px] p-6 shadow-2xl border border-outline-variant/30 relative">
+        
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          aria-label="סגור"
+          className="absolute top-4 left-4 p-2 rounded-xl text-outline hover:bg-surface-container hover:text-on-surface transition-all"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        {/* Header Branding */}
+        <div className="text-center mb-6 pt-2">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-primary to-teal-400 p-0.5 mx-auto mb-3 shadow-md flex items-center justify-center">
+            <img src="/icon.svg" alt="NutriTrack Logo" className="w-full h-full object-contain rounded-2xl" />
           </div>
+          <h2 className="font-headline text-xl font-bold text-on-surface">
+            {mode === 'login' ? 'ברוך הבא ל-NutriTrack' : 'יצירת חשבון חדש'}
+          </h2>
+          <p className="text-xs text-outline mt-0.5">
+            {mode === 'login'
+              ? 'התחבר כדי לסנכרן את יומן התזונה והיעדים שלך'
+              : 'הירשם והתחל לנהל את התזונה היומית שלך בדיוק מרבי'}
+          </p>
+        </div>
+
+        {/* Tab Switcher */}
+        <div className="flex bg-surface-container-low p-1 rounded-2xl border border-surface-container-high mb-5">
           <button
-            onClick={onClose}
-            aria-label="סגור"
-            className="p-1.5 rounded-full hover:bg-surface-container text-outline hover:text-on-surface transition-all"
+            onClick={() => {
+              setMode('login');
+              setError(null);
+            }}
+            className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+              mode === 'login'
+                ? 'bg-surface-container-lowest text-primary shadow-xs'
+                : 'text-outline hover:text-on-surface'
+            }`}
           >
-            <X className="w-5 h-5" />
+            <LogIn className="w-3.5 h-3.5" />
+            <span>התחברות</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setMode('register');
+              setError(null);
+            }}
+            className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+              mode === 'register'
+                ? 'bg-surface-container-lowest text-primary shadow-xs'
+                : 'text-outline hover:text-on-surface'
+            }`}
+          >
+            <UserPlus className="w-3.5 h-3.5" />
+            <span>הרשמה חדשה</span>
           </button>
         </div>
 
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto flex-1 text-xs">
-          {/* Mode Switch Tabs */}
-          <div className="grid grid-cols-2 gap-1 p-1 bg-surface-container-low rounded-2xl border border-surface-container-high text-xs font-bold">
-            <button
-              type="button"
-              onClick={() => {
-                setIsRegisterMode(false);
-                setErrorMsg(null);
-              }}
-              className={`py-2 rounded-xl transition-all ${
-                !isRegisterMode
-                  ? 'bg-primary text-white shadow-sm'
-                  : 'text-on-surface-variant hover:bg-surface-container'
-              }`}
-            >
-              התחברות
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setIsRegisterMode(true);
-                setErrorMsg(null);
-              }}
-              className={`py-2 rounded-xl transition-all ${
-                isRegisterMode
-                  ? 'bg-primary text-white shadow-sm'
-                  : 'text-on-surface-variant hover:bg-surface-container'
-              }`}
-            >
-              הרשמה
-            </button>
+        {/* Error Alert */}
+        {error && (
+          <div className="mb-4 p-3 rounded-xl bg-error-container/30 border border-error/20 flex items-center gap-2 text-xs text-error font-semibold">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span>{error}</span>
           </div>
+        )}
 
-          {/* Name field (for registration) */}
-          {isRegisterMode && (
+        {/* Biometric Quick Login Button (when in Login mode) */}
+        {mode === 'login' && (
+          <div className="mb-4">
+            <button
+              type="button"
+              disabled={loading}
+              onClick={handleBiometricLogin}
+              className="w-full py-3 rounded-2xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-98 shadow-xs"
+            >
+              <Fingerprint className="w-5 h-5 text-primary" />
+              <span>התחבר עם טביעת אצבע / Face ID</span>
+            </button>
+            <div className="flex items-center my-3 gap-2">
+              <div className="flex-1 h-px bg-surface-container-high" />
+              <span className="text-[10px] text-outline">או באמצעות סיסמה</span>
+              <div className="flex-1 h-px bg-surface-container-high" />
+            </div>
+          </div>
+        )}
+
+        {/* Form Inputs */}
+        <form onSubmit={mode === 'login' ? handleLoginWithPassword : handleRegister} className="space-y-3">
+          {mode === 'register' && (
             <div>
-              <label className="font-bold text-on-surface block mb-1">שם מלא</label>
+              <label className="text-[11px] font-bold text-outline block mb-1">שם מלא</label>
               <div className="relative">
                 <input
                   type="text"
-                  required
+                  placeholder="לדוגמה: דניאל לוי"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="למשל: דני כהן"
-                  className="w-full bg-surface-container-low text-on-surface py-2.5 pr-9 pl-3 rounded-xl border border-surface-container-high focus:ring-2 focus:ring-primary outline-none"
+                  className="w-full pl-3 pr-9 py-2.5 rounded-xl bg-surface-container-low border border-surface-container-high text-xs text-on-surface focus:outline-hidden focus:border-primary"
+                  required
                 />
-                <User className="w-4 h-4 text-outline absolute right-3 top-1/2 -translate-y-1/2" />
+                <User className="w-4 h-4 text-outline absolute right-3 top-3" />
               </div>
             </div>
           )}
 
-          {/* Email field */}
           <div>
-            <label className="font-bold text-on-surface block mb-1">כתובת אימייל</label>
+            <label className="text-[11px] font-bold text-outline block mb-1">כתובת אימייל</label>
             <div className="relative">
               <input
                 type="email"
-                required
+                placeholder="name@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@example.com"
-                className="w-full bg-surface-container-low text-on-surface py-2.5 pr-9 pl-3 rounded-xl border border-surface-container-high focus:ring-2 focus:ring-primary outline-none text-left"
-                dir="ltr"
+                className="w-full pl-3 pr-9 py-2.5 rounded-xl bg-surface-container-low border border-surface-container-high text-xs text-on-surface focus:outline-hidden focus:border-primary"
+                required
               />
-              <Mail className="w-4 h-4 text-outline absolute right-3 top-1/2 -translate-y-1/2" />
+              <Mail className="w-4 h-4 text-outline absolute right-3 top-3" />
             </div>
           </div>
 
-          {/* Password field */}
           <div>
-            <label className="font-bold text-on-surface block mb-1">סיסמה</label>
+            <label className="text-[11px] font-bold text-outline block mb-1">סיסמה</label>
             <div className="relative">
               <input
                 type="password"
-                required
+                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full bg-surface-container-low text-on-surface py-2.5 pr-9 pl-3 rounded-xl border border-surface-container-high focus:ring-2 focus:ring-primary outline-none text-left"
-                dir="ltr"
+                className="w-full pl-3 pr-9 py-2.5 rounded-xl bg-surface-container-low border border-surface-container-high text-xs text-on-surface focus:outline-hidden focus:border-primary"
+                required
               />
-              <Lock className="w-4 h-4 text-outline absolute right-3 top-1/2 -translate-y-1/2" />
+              <Lock className="w-4 h-4 text-outline absolute right-3 top-3" />
             </div>
           </div>
 
-          {errorMsg && (
-            <div className="p-2.5 rounded-xl bg-error-container/40 text-error text-xs font-semibold">
-              {errorMsg}
-            </div>
-          )}
-
-          {/* Submit Button */}
           <button
             type="submit"
-            className="w-full py-3 rounded-xl bg-primary text-white font-bold text-sm shadow-md shadow-primary/20 hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-1.5 mt-2"
+            disabled={loading}
+            className="w-full py-3 mt-2 rounded-2xl bg-primary hover:bg-primary/90 text-on-primary font-headline font-bold text-xs shadow-md active:scale-98 transition-all flex items-center justify-center gap-2"
           >
-            <Check className="w-4 h-4" />
-            <span>
-              {isSuccess
-                ? 'בוצע בהצלחה!'
-                : isRegisterMode
-                ? 'צור חשבון והתחל'
-                : 'התחבר עכשיו'}
-            </span>
+            {mode === 'login' ? (
+              <>
+                <LogIn className="w-4 h-4" />
+                <span>התחבר לחשבון</span>
+              </>
+            ) : (
+              <>
+                <UserPlus className="w-4 h-4" />
+                <span>צור חשבון חדש</span>
+              </>
+            )}
           </button>
-
-          {/* Guest / Privacy note */}
-          <div className="pt-2 text-center space-y-2">
-            <div className="flex items-center justify-center gap-1 text-[11px] text-outline">
-              <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-              <span>הנתונים נשמרים ומאובטחים ישירות במכשירך</span>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleGuestContinue}
-              className="text-xs text-primary font-bold hover:underline flex items-center justify-center gap-1 mx-auto"
-            >
-              <span>המשך כאורח ללא הרשמה</span>
-              <ArrowRight className="w-3.5 h-3.5 rotate-180" />
-            </button>
-          </div>
         </form>
+
+        {/* Footer Quick Links */}
+        <div className="mt-5 pt-3 border-t border-surface-container-high text-center">
+          <button
+            type="button"
+            onClick={handleContinueAsGuest}
+            className="text-xs text-outline hover:text-on-surface font-semibold underline decoration-dotted"
+          >
+            המשך כאורח ללא הרשמה
+          </button>
+        </div>
+
       </div>
     </div>
   );

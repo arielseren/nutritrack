@@ -3,12 +3,17 @@ import { INITIAL_FOOD_DATABASE } from '../data/foodDatabase';
 import { calculateItemNutrition, getTodayDateString } from './nutritionCalculator';
 
 const PROFILE_KEY = 'nutritrack_user_profile_v1';
+const USERS_KEY = 'nutritrack_users_registry_v1';
 const DAY_LOGS_KEY = 'nutritrack_day_logs_v1';
 const FOOD_DB_KEY = 'nutritrack_custom_food_db_v1';
 const NOTIFICATIONS_KEY = 'nutritrack_notifications_v1';
 
 export const DEFAULT_USER_PROFILE: UserProfile = {
-  name: 'דני',
+  id: 'usr_default_1',
+  name: 'דני כהן',
+  email: 'dani@example.com',
+  isLoggedIn: true,
+  hasBiometrics: false,
   gender: 'male',
   age: 28,
   height: 178,
@@ -22,7 +27,8 @@ export const DEFAULT_USER_PROFILE: UserProfile = {
   dailyFatTarget: 65,
   dailyWaterTargetGlasses: 8,
   theme: 'light',
-  notificationsEnabled: true,
+  pushNotificationsEnabled: false,
+  waterReminderEnabled: true,
   waterReminderIntervalMinutes: 120,
   mealReminderBreakfast: '08:30',
   mealReminderLunch: '13:30',
@@ -61,73 +67,65 @@ export const INITIAL_TODAY_LOG: DayLog = {
         ...calculateItemNutrition(INITIAL_FOOD_DATABASE[23], 200),
         timestamp: '08:25',
       },
-      {
-        ...INITIAL_FOOD_DATABASE[18], // שמן זית
-        logId: 'log_init_4',
-        amount: 1,
-        unit: 'כף (10 גרם)',
-        totalGrams: 10,
-        ...calculateItemNutrition(INITIAL_FOOD_DATABASE[18], 10),
-        timestamp: '08:25',
-      },
     ],
     lunch: [
       {
-        ...INITIAL_FOOD_DATABASE[0], // חזה עוף
-        logId: 'log_init_5',
-        amount: 1.2,
-        unit: 'יחידה (150 גרם)',
-        totalGrams: 180,
-        ...calculateItemNutrition(INITIAL_FOOD_DATABASE[0], 180),
-        timestamp: '13:30',
+        ...INITIAL_FOOD_DATABASE[0], // חזה עוף צלוי
+        logId: 'log_init_4',
+        amount: 1,
+        unit: 'נתח (150 גרם)',
+        totalGrams: 150,
+        ...calculateItemNutrition(INITIAL_FOOD_DATABASE[0], 150),
+        timestamp: '13:15',
       },
       {
-        ...INITIAL_FOOD_DATABASE[9], // אורז בסמטי
-        logId: 'log_init_6',
+        ...INITIAL_FOOD_DATABASE[10], // אורז בסמטי מבושל
+        logId: 'log_init_5',
         amount: 1,
         unit: 'כוס (150 גרם)',
         totalGrams: 150,
-        ...calculateItemNutrition(INITIAL_FOOD_DATABASE[9], 150),
-        timestamp: '13:35',
+        ...calculateItemNutrition(INITIAL_FOOD_DATABASE[10], 150),
+        timestamp: '13:15',
       },
       {
-        ...INITIAL_FOOD_DATABASE[25], // ברוקולי
-        logId: 'log_init_7',
+        ...INITIAL_FOOD_DATABASE[20], // שמן זית
+        logId: 'log_init_6',
         amount: 1,
-        unit: 'כוס (100 גרם)',
-        totalGrams: 100,
-        ...calculateItemNutrition(INITIAL_FOOD_DATABASE[25], 100),
-        timestamp: '13:40',
-      },
-      {
-        ...INITIAL_FOOD_DATABASE[17], // טחינה גולמית
-        logId: 'log_init_8',
-        amount: 1,
-        unit: 'כף (15 גרם)',
-        totalGrams: 15,
-        ...calculateItemNutrition(INITIAL_FOOD_DATABASE[17], 15),
-        timestamp: '13:40',
+        unit: 'כף (10 גרם)',
+        totalGrams: 10,
+        ...calculateItemNutrition(INITIAL_FOOD_DATABASE[20], 10),
+        timestamp: '13:15',
       },
     ],
-    dinner: [],
-    snack: [
+    dinner: [
       {
-        ...INITIAL_FOOD_DATABASE[21], // בננה
-        logId: 'log_init_9',
+        ...INITIAL_FOOD_DATABASE[4], // יוגורט PRO 20g חלבון
+        logId: 'log_init_7',
         amount: 1,
-        unit: 'יחידה בינונית (120 גרם)',
-        totalGrams: 120,
-        ...calculateItemNutrition(INITIAL_FOOD_DATABASE[21], 120),
-        timestamp: '11:00',
+        unit: 'גביע (200 גרם)',
+        totalGrams: 200,
+        ...calculateItemNutrition(INITIAL_FOOD_DATABASE[4], 200),
+        timestamp: '19:40',
       },
       {
-        ...INITIAL_FOOD_DATABASE[19], // שקדים
-        logId: 'log_init_10',
-        amount: 0.5,
+        ...INITIAL_FOOD_DATABASE[21], // שקדים טבעיים
+        logId: 'log_init_8',
+        amount: 1,
         unit: 'חופן (30 גרם)',
-        totalGrams: 15,
-        ...calculateItemNutrition(INITIAL_FOOD_DATABASE[19], 15),
-        timestamp: '11:05',
+        totalGrams: 30,
+        ...calculateItemNutrition(INITIAL_FOOD_DATABASE[21], 30),
+        timestamp: '19:45',
+      },
+    ],
+    snack: [
+      {
+        ...INITIAL_FOOD_DATABASE[24], // תפוח עץ בינוני
+        logId: 'log_init_9',
+        amount: 1,
+        unit: 'יחידה (150 גרם)',
+        totalGrams: 150,
+        ...calculateItemNutrition(INITIAL_FOOD_DATABASE[24], 150),
+        timestamp: '16:30',
       },
     ],
   },
@@ -136,7 +134,7 @@ export const INITIAL_TODAY_LOG: DayLog = {
 export const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'notif_1',
-    title: 'שתיית מים 💧',
+    title: 'זמן לשתות מים! 💧',
     body: 'הגיע הזמן לשתות עוד כוס מים כדי לשמור על רעננות וריכוז!',
     time: 'לפני 15 דקות',
     type: 'water',
@@ -172,6 +170,44 @@ export const StorageService = {
 
   saveProfile(profile: UserProfile): void {
     localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+    // Also sync to registered users registry if email exists
+    if (profile.email) {
+      this.syncUserToRegistry(profile);
+    }
+  },
+
+  // Multi-user & Auth management
+  getUsersRegistry(): UserProfile[] {
+    try {
+      const data = localStorage.getItem(USERS_KEY);
+      return data ? JSON.parse(data) : [DEFAULT_USER_PROFILE];
+    } catch {
+      return [DEFAULT_USER_PROFILE];
+    }
+  },
+
+  syncUserToRegistry(user: UserProfile): void {
+    const users = this.getUsersRegistry();
+    const idx = users.findIndex((u) => u.email === user.email || u.id === user.id);
+    if (idx >= 0) {
+      users[idx] = { ...users[idx], ...user };
+    } else {
+      users.push(user);
+    }
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  },
+
+  logout(): UserProfile {
+    const guestProfile: UserProfile = {
+      ...DEFAULT_USER_PROFILE,
+      id: `guest_${Date.now()}`,
+      name: 'אורח',
+      email: '',
+      isLoggedIn: false,
+      hasBiometrics: false,
+    };
+    this.saveProfile(guestProfile);
+    return guestProfile;
   },
 
   getAllDayLogs(): Record<string, DayLog> {
@@ -180,7 +216,6 @@ export const StorageService = {
       if (data) {
         return JSON.parse(data);
       }
-      // Initial default log
       const initialLogs: Record<string, DayLog> = {
         [INITIAL_TODAY_LOG.date]: INITIAL_TODAY_LOG,
       };
@@ -254,7 +289,7 @@ export const StorageService = {
   removeFoodFromMeal(date: string, mealType: MealType, logId: string): DayLog {
     const dayLog = this.getDayLog(date);
     if (dayLog.meals[mealType]) {
-      dayLog.meals[mealType] = dayLog.meals[mealType].filter((item) => item.logId !== logId);
+      dayLog.meals[mealType] = dayLog.meals[mealType].filter((item) => item.logId !== logId && item.id !== logId);
       this.saveDayLog(dayLog);
     }
     return dayLog;
@@ -271,8 +306,8 @@ export const StorageService = {
     try {
       const customData = localStorage.getItem(FOOD_DB_KEY);
       if (customData) {
-        const customItems: FoodItem[] = JSON.parse(customData);
-        return [...INITIAL_FOOD_DATABASE, ...customItems];
+        const customFoods: FoodItem[] = JSON.parse(customData);
+        return [...customFoods, ...INITIAL_FOOD_DATABASE];
       }
       return INITIAL_FOOD_DATABASE;
     } catch {
@@ -281,48 +316,34 @@ export const StorageService = {
   },
 
   saveCustomFood(food: Omit<FoodItem, 'id'>): FoodItem {
-    const customItems: FoodItem[] = (() => {
-      try {
-        const d = localStorage.getItem(FOOD_DB_KEY);
-        return d ? JSON.parse(d) : [];
-      } catch {
-        return [];
-      }
-    })();
-
     const newFood: FoodItem = {
       ...food,
-      id: 'custom_food_' + Date.now(),
+      id: 'custom_' + Date.now(),
       isCustom: true,
     };
-
-    customItems.push(newFood);
-    localStorage.setItem(FOOD_DB_KEY, JSON.stringify(customItems));
+    try {
+      const customData = localStorage.getItem(FOOD_DB_KEY);
+      const customFoods: FoodItem[] = customData ? JSON.parse(customData) : [];
+      customFoods.unshift(newFood);
+      localStorage.setItem(FOOD_DB_KEY, JSON.stringify(customFoods));
+    } catch (e) {
+      console.warn(e);
+    }
     return newFood;
   },
 
   toggleFavorite(foodId: string): void {
-    const db = this.getFoodDatabase();
-    const item = db.find((f) => f.id === foodId);
+    const database = this.getFoodDatabase();
+    const item = database.find((f) => f.id === foodId);
     if (item) {
       item.isFavorite = !item.isFavorite;
-      // If it's custom or base, persist custom overrides
-      const customItems: FoodItem[] = (() => {
-        try {
-          const d = localStorage.getItem(FOOD_DB_KEY);
-          return d ? JSON.parse(d) : [];
-        } catch {
-          return [];
-        }
-      })();
-
-      const existingIndex = customItems.findIndex((c) => c.id === foodId);
-      if (existingIndex >= 0) {
-        customItems[existingIndex].isFavorite = item.isFavorite;
-      } else {
-        customItems.push({ ...item });
+      const customData = localStorage.getItem(FOOD_DB_KEY);
+      const customFoods: FoodItem[] = customData ? JSON.parse(customData) : [];
+      const cIndex = customFoods.findIndex((f) => f.id === foodId);
+      if (cIndex >= 0) {
+        customFoods[cIndex].isFavorite = item.isFavorite;
+        localStorage.setItem(FOOD_DB_KEY, JSON.stringify(customFoods));
       }
-      localStorage.setItem(FOOD_DB_KEY, JSON.stringify(customItems));
     }
   },
 
@@ -336,29 +357,32 @@ export const StorageService = {
   },
 
   markNotificationsAsRead(): void {
-    const notifs = this.getNotifications().map((n) => ({ ...n, read: true }));
-    localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(notifs));
+    const list = this.getNotifications().map((n) => ({ ...n, read: true }));
+    localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(list));
   },
 
   exportAllData(): string {
-    const payload = {
+    const data = {
       profile: this.getProfile(),
-      logs: this.getAllDayLogs(),
-      customFoods: localStorage.getItem(FOOD_DB_KEY),
+      dayLogs: this.getAllDayLogs(),
+      customFoods: localStorage.getItem(FOOD_DB_KEY) ? JSON.parse(localStorage.getItem(FOOD_DB_KEY)!) : [],
+      notifications: this.getNotifications(),
       exportDate: new Date().toISOString(),
-      version: '1.0',
+      version: '1.0.0',
     };
-    return JSON.stringify(payload, null, 2);
+    return JSON.stringify(data, null, 2);
   },
 
-  importAllData(jsonStr: string): boolean {
+  importAllData(jsonString: string): boolean {
     try {
-      const payload = JSON.parse(jsonStr);
-      if (payload.profile) localStorage.setItem(PROFILE_KEY, JSON.stringify(payload.profile));
-      if (payload.logs) localStorage.setItem(DAY_LOGS_KEY, JSON.stringify(payload.logs));
-      if (payload.customFoods) localStorage.setItem(FOOD_DB_KEY, payload.customFoods);
+      const parsed = JSON.parse(jsonString);
+      if (parsed.profile) localStorage.setItem(PROFILE_KEY, JSON.stringify(parsed.profile));
+      if (parsed.dayLogs) localStorage.setItem(DAY_LOGS_KEY, JSON.stringify(parsed.dayLogs));
+      if (parsed.customFoods) localStorage.setItem(FOOD_DB_KEY, JSON.stringify(parsed.customFoods));
+      if (parsed.notifications) localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(parsed.notifications));
       return true;
-    } catch {
+    } catch (e) {
+      console.warn('Import failed', e);
       return false;
     }
   },

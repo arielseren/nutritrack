@@ -77,8 +77,13 @@ export interface DayLog {
 }
 
 export interface UserProfile {
+  id?: string;
   name: string;
   email?: string;
+  password?: string;
+  isLoggedIn?: boolean;
+  hasBiometrics?: boolean;
+  biometricCredentialId?: string;
   gender: 'male' | 'female';
   age: number;
   height: number; // cm
@@ -93,6 +98,7 @@ export interface UserProfile {
   dailyWaterTargetGlasses: number; // glasses (250ml each)
   theme: 'light' | 'dark';
   waterReminderEnabled?: boolean;
+  pushNotificationsEnabled?: boolean;
   notificationsEnabled?: boolean;
   waterReminderIntervalMinutes?: number;
   mealReminderBreakfast?: string; // HH:mm

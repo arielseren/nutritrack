@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { FoodItem, MealType, MealPlanPreset, UserProfile, DayLog, NotificationItem } from './types';
 import { StorageService } from './services/storageService';
 import { getTodayDateString } from './services/nutritionCalculator';
+import { NotificationService } from './services/notificationService';
 import { Header } from './components/layout/Header';
 import { BottomNav } from './components/layout/BottomNav';
 import type { NavTab } from './components/layout/BottomNav';
@@ -39,6 +40,28 @@ export function App() {
 
   // Toast feedback state
   const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+
+  // Register ServiceWorker and setup reminder checks
+  useEffect(() => {
+    NotificationService.registerServiceWorker();
+
+    // Check reminders every 60 seconds
+    const interval = setInterval(() => {
+      const currentLog = StorageService.getDayLog(getTodayDateString());
+      NotificationService.checkAndTriggerReminders(
+        !!userProfile.waterReminderEnabled && !!userProfile.pushNotificationsEnabled,
+        currentLog.waterGlasses,
+        userProfile.dailyWaterTargetGlasses,
+        {
+          breakfast: userProfile.mealReminderBreakfast,
+          lunch: userProfile.mealReminderLunch,
+          dinner: userProfile.mealReminderDinner,
+        }
+      );
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [userProfile]);
 
   // Sync theme with html class
   useEffect(() => {
@@ -115,7 +138,7 @@ export function App() {
           fat: Math.round((item.fat / item.grams) * 100),
           servingUnit: item.amountDesc,
           servingGrams: item.grams,
-          category: 'proteins',
+          category: 'proteins' as const,
         };
 
         StorageService.addFoodToMeal(
@@ -143,6 +166,13 @@ export function App() {
     StorageService.saveProfile(loggedInUser);
     setUserProfile(loggedInUser);
     showToast(`ברוך הבא, ${loggedInUser.name}! 👋`);
+  };
+
+  const handleLogout = () => {
+    const guest = StorageService.logout();
+    setUserProfile(guest);
+    setIsProfileModalOpen(false);
+    showToast('התנתקת מהחשבון בהצלחה');
   };
 
   const handleSaveCustomFood = (newFood: Omit<FoodItem, 'id'>) => {
@@ -203,9 +233,11 @@ export function App() {
         currentDate={currentDate}
         onOpenDatePicker={() => setIsDatePickerModalOpen(true)}
         onOpenNotifications={() => setIsNotificationsModalOpen(true)}
+        onOpenProfile={() => setIsProfileModalOpen(true)}
         onOpenAuth={() => setIsAuthModalOpen(true)}
         unreadNotificationsCount={unreadNotifsCount}
         userName={userProfile.name}
+        isLoggedIn={userProfile.isLoggedIn !== false}
         currentTheme={userProfile.theme}
         onToggleTheme={handleToggleTheme}
       />
@@ -256,7 +288,7 @@ export function App() {
           <div className="space-y-4">
             <div className="pt-2">
               <h2 className="font-headline text-2xl font-bold text-on-surface">פרופיל והגדרות</h2>
-              <p className="text-xs text-outline">נהל את יעדי הקלוריות, המאקרו והנתונים האישיים שלך</p>
+              <p className="text-xs text-outline">נהל את יעדי הקלוריות, המאקרו, ההתראות והאבטחה שלך</p>
             </div>
             <ProfileSettingsModal
               isOpen={true}
@@ -266,6 +298,7 @@ export function App() {
               onExportData={handleExportData}
               onImportData={handleImportData}
               onResetData={handleResetData}
+              onLogout={handleLogout}
               onOpenAuth={() => setIsAuthModalOpen(true)}
             />
           </div>
@@ -334,6 +367,7 @@ export function App() {
           onExportData={handleExportData}
           onImportData={handleImportData}
           onResetData={handleResetData}
+          onLogout={handleLogout}
           onOpenAuth={() => setIsAuthModalOpen(true)}
         />
       )}

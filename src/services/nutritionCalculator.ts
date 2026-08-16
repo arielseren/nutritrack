@@ -70,6 +70,25 @@ export function calculateTDEE(
   };
 }
 
+export function calculateScientificTargets(
+  gender: 'male' | 'female',
+  age: number,
+  heightCm: number,
+  weightKg: number,
+  activityLevel: ActivityLevel,
+  goal: FitnessGoal
+) {
+  const bmr = calculateBMR(gender, weightKg, heightCm, age);
+  const tdee = calculateTDEE(bmr, activityLevel, goal);
+  return {
+    bmr,
+    calories: tdee.targetCalories,
+    protein: tdee.proteinGrams,
+    carbs: tdee.carbsGrams,
+    fat: tdee.fatGrams,
+  };
+}
+
 export function calculateItemNutrition(
   item: { calories: number; protein: number; carbs: number; fat: number },
   grams: number
