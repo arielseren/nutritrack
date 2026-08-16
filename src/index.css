@@ -71,24 +71,27 @@
     --color-on-surface: #dde4e1;
     --color-surface-variant: #3f4946;
     --color-on-surface-variant: #bec9c5;
-    
-    --color-outline: #899390;
+
+    --color-outline: #89938f;
     --color-outline-variant: #3f4946;
 
-    --color-surface-container-lowest: #09100f;
-    --color-surface-container-low: #161d1c;
-    --color-surface-container: #1b2120;
-    --color-surface-container-high: #252c2a;
-    --color-surface-container-highest: #303735;
+    --color-surface-container-lowest: #090f0e;
+    --color-surface-container-low: #161d1b;
+    --color-surface-container: #1a2120;
+    --color-surface-container-high: #242c2a;
+    --color-surface-container-highest: #2f3634;
   }
 }
 
 @theme {
+  --font-headline: var(--font-headline);
+  --font-body: var(--font-body);
+
   --color-primary: var(--color-primary);
   --color-primary-container: var(--color-primary-container);
   --color-on-primary: var(--color-on-primary);
   --color-on-primary-container: var(--color-on-primary-container);
-  
+
   --color-secondary: var(--color-secondary);
   --color-secondary-container: var(--color-secondary-container);
   --color-on-secondary: var(--color-on-secondary);
@@ -119,27 +122,36 @@
   --color-surface-container: var(--color-surface-container);
   --color-surface-container-high: var(--color-surface-container-high);
   --color-surface-container-highest: var(--color-surface-container-highest);
-
-  --font-headline: var(--font-headline);
-  --font-body: var(--font-body);
 }
 
 body {
   font-family: var(--font-body);
   background-color: var(--color-background);
   color: var(--color-on-background);
-  min-height: 100vh;
-  margin: 0;
-  padding: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  direction: rtl;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+  min-height: 100dvh;
+}
+
+/* iOS Specific Input Fix: Prevents unwanted zooming on focus */
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  input[type="time"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -153,6 +165,23 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-outline);
+}
+
+/* iOS Safe Area Helper Classes */
+.header-safe-top {
+  padding-top: calc(0.625rem + env(safe-area-inset-top, 0px));
+}
+
+.bottom-nav-safe {
+  padding-bottom: calc(0.625rem + env(safe-area-inset-bottom, 0px));
+}
+
+.main-scroll-padding {
+  padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+.modal-safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* Smooth Interactive Animations */

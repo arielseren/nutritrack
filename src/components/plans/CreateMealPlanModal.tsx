@@ -176,7 +176,7 @@ export const CreateMealPlanModal: React.FC<CreateMealPlanModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-surface rounded-3xl w-full max-w-[480px] max-h-[92vh] flex flex-col shadow-2xl border border-outline-variant/30 overflow-hidden animate-modal-sheet">
+      <div className="bg-surface rounded-3xl w-full max-w-[480px] max-h-[90dvh] flex flex-col shadow-2xl border border-outline-variant/30 overflow-hidden animate-modal-sheet">
         
         {/* Header */}
         <div className="px-5 py-3.5 flex items-center justify-between border-b border-surface-container-high bg-surface-container-lowest flex-shrink-0">
@@ -440,7 +440,7 @@ export const CreateMealPlanModal: React.FC<CreateMealPlanModalProps> = ({
         )}
 
         {/* Footer Actions */}
-        <div className="p-3.5 bg-surface-container-lowest border-t border-surface-container-high flex items-center gap-2 flex-shrink-0">
+        <div className="p-3.5 bg-surface-container-lowest border-t border-surface-container-high flex items-center gap-2 flex-shrink-0 modal-safe-bottom">
           <button
             onClick={() => handleSave(false)}
             className="flex-1 py-2.5 rounded-2xl bg-surface-container hover:bg-surface-container-high text-on-surface font-headline font-bold text-xs transition-all border border-surface-container-high"

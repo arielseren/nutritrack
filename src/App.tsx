@@ -242,8 +242,8 @@ export function App() {
         onToggleTheme={handleToggleTheme}
       />
 
-      {/* Main Container with Page Fade Transition */}
-      <main className="flex-1 w-full max-w-[480px] mx-auto px-4 pt-3 pb-24">
+      {/* Main Container with Page Fade Transition & iPhone Safe Bottom Scroll */}
+      <main className="flex-1 w-full max-w-[480px] mx-auto px-4 pt-3 main-scroll-padding">
         <div key={activeTab} className="animate-page-enter">
           {activeTab === 'dashboard' && (
             <DashboardView

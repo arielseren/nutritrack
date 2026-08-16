@@ -42,7 +42,7 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
-      <div className="w-full max-w-[380px] bg-surface-container-lowest rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl border border-surface-container-high space-y-4">
+      <div className="w-full max-w-[380px] bg-surface-container-lowest rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl border border-surface-container-high space-y-4 animate-modal-sheet modal-safe-bottom">
         {/* Header */}
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">

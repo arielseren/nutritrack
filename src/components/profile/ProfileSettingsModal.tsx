@@ -224,7 +224,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-surface rounded-3xl w-full max-w-[480px] max-h-[92vh] flex flex-col shadow-2xl border border-outline-variant/30 overflow-hidden">
+      <div className="bg-surface rounded-3xl w-full max-w-[480px] max-h-[90dvh] flex flex-col shadow-2xl border border-outline-variant/30 overflow-hidden animate-modal-sheet">
         
         {/* Modal Header */}
         <div className="px-5 py-4 flex items-center justify-between border-b border-surface-container-high bg-surface-container-lowest flex-shrink-0">
