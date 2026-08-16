@@ -1,32 +1,55 @@
-# React + TypeScript + Vite
+# 🥗 NutriTrack - Daily Nutrition & Calorie Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+[![Live App](https://img.shields.io/badge/Render-Live%20App-teal?style=for-the-badge&logo=render)](https://nutritrack-app-ck2v.onrender.com)
+[![React 19](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)](https://react.dev)
+[![Vite](https://img.shields.io/badge/Vite-8-purple?style=for-the-badge&logo=vite)](https://vitejs.dev)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4-38bdf8?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com)
+[![PWA Ready](https://img.shields.io/badge/PWA-Installable-green?style=for-the-badge&logo=pwa)](https://nutritrack-app-ck2v.onrender.com)
 
-Currently, two official plugins are available:
+אפליקציית ווב ו-PWA מתקדמת למעקב תזונה יומי, ניהול קלוריות, מקרואים, שתיית מים, התראות Push חכמות, אימות ביומטרי (טביעת אצבע) ובונה תפריטים מותאמים אישית בעברית מלאה (RTL). נבנתה במלואה בהשראת מסכי ה-UI מפרויקט ה-**Stitch** ("מעקב תזונה יומי").
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## 🌐 קישורים חיים
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **🔗 אפליקציה חיה ב-Render:** [https://nutritrack-app-ck2v.onrender.com](https://nutritrack-app-ck2v.onrender.com)
+- **📂 מאגר GitHub:** [https://github.com/arielseren/nutritrack](https://github.com/arielseren/nutritrack)
 
-## Expanding the Oxlint configuration
+---
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+## ✨ תכונות מרכזיות (Key Features)
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+- 📊 **לוח בקרה חכם (Smart Dashboard):** טבעת קלוריות מונפשת, מדדי חלבון/פחמימה/שומן, מעקב 8 כוסות מים עם אפקט קונפטי.
+- 📖 **יומן תזונה יומי (Day Diary):** חלוקה ל-4 ארוחות (בוקר, צהריים, ערב, נשנושים) עם סיכום מאקרו וניווט תאריכים.
+- 🥗 **בונה תפריטים אישי (Custom Meal Plan Builder):** יצירת תפריטים מותאמים עם חישוב מאקרו חי והחלה בלחיצה אחת על היומן.
+- 👆 **אימות ביומטרי (WebAuthn Biometric Auth):** התחברות מהירה בטביעת אצבע / FaceID / TouchID ומערכת ניהול משתמשים.
+- 🔔 **התראות Web Push ותזכורות עצמאיות:** הגדרת שעות מדויקות לארוחות בוקר, צהריים, ערב ושתיית מים ישירות מפעמון ההתראות.
+- 🔽 **כרטיסיות Dropdown עם מצב עריכה:** מסך פרופיל והגדרות ב-5 אקורדיונים נפתחים עם מצב עריכה מוגן והזנת מספרים חלקה.
+- 🧆 **מאגר מזון ישראלי עשיר:** מגוון קציצות (בקר, עוף, דגים, ירק, עדשים), שווארמה, שניצל, פתיתים, מג'דרה, ממרחים, גבינות ועוד.
+- 📷 **סורק ברקוד ו-AI:** סריקת מוצרים ישירות מהמצלמה מול Open Food Facts וזיהוי צלחות ב-AI.
+- 🌙 **מצב לילה ו-PWA:** תמיכה מלאה בהתקנה למסך הבית בטלפון ומעבר בלחיצה בין Light ל-Dark Mode.
+- 🎨 **אנימציות חלקות:** מעברי עמודים וסדינים מונפשים (`animate-page-enter`, `animate-modal-sheet`).
+
+---
+
+## 💻 הרצה מקומית (Local Development)
+
+```bash
+# התקנת תלויות
+npm install
+
+# הרצת שרת פיתוח
+npm run dev
+
+# פתיחה למכשירים ברשת המקומית
+npm run dev -- --host
+
+# בניית גרסת ייצור
+npm run build
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+---
+
+## 🚀 פריסה אוטומטית (Deployment)
+
+הפרויקט מחובר ב-Continuous Deployment ל-Render: כל Push לענף `master` ב-GitHub פורס אוטומטית את האפליקציה ל-HTTPS בכתובת החיה.
