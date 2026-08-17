@@ -267,6 +267,91 @@ export const UserGuideModal: React.FC<UserGuideModalProps> = ({
         </div>
       ),
     },
+    {
+      id: 'ai_suite',
+      title: '10. חבילת ה-AI החכמה: סורק צלחות, OCR תוויות והזנה קולית',
+      badge: 'כלי AI מתקדמים',
+      icon: <Sparkles className="w-4 h-4 text-primary" />,
+      summary: 'סריקת צלחות בתמונה, חילוץ ערכי 100 גרם מתוויות והזנה קולית חופשית בעברית',
+      keywords: ['AI', 'בינה מלאכותית', 'סורק צלחת', 'מצלמה', 'תמונה', 'OCR', 'תווית', 'הזנה קולית', 'מיקרופון', 'מתכונים'],
+      content: (
+        <div className="space-y-2.5 text-xs text-on-surface leading-relaxed">
+          <p>
+            מרכז ה-AI של <strong>NutriTrack</strong> (כפתור ✨ AI בסרגל העליון ובדף הבית) כולל 4 מנועי בינה מלאכותית עוצמתיים:
+          </p>
+          <div className="space-y-2">
+            <div className="p-2.5 rounded-xl bg-surface-container-low border border-surface-container-high">
+              <strong className="text-primary block mb-1">📸 סורק צלחות וארוחות (AI Plate Scanner):</strong>
+              <p className="text-outline text-[11px]">
+                צלם את הצלחת או בחר תמונה מהגלריה — ה-AI מזהה את כל המרכיבים בצלחת, מעריך משקלים בגרמים, מחשב קלוריות ומאקרו ומאפשר הוספה מהירה ליומן.
+              </p>
+            </div>
+
+            <div className="p-2.5 rounded-xl bg-surface-container-low border border-surface-container-high">
+              <strong className="text-primary block mb-1">🏷️ סורק תוויות ערכים תזונתיים (Nutrition Label OCR):</strong>
+              <p className="text-outline text-[11px]">
+                צלם את טבלת ה-100 גרם מגב המוצר בסופר — המערכת מחלצת אוטומטית קלוריות, חלבון, פחמימות, שומן וסודיום ושומרת כמאכל אישי במאגר.
+              </p>
+            </div>
+
+            <div className="p-2.5 rounded-xl bg-surface-container-low border border-surface-container-high">
+              <strong className="text-primary block mb-1">🎙️ הזנה קולית וחופשית בעברית טבעית:</strong>
+              <p className="text-outline text-[11px]">
+                לחץ על המיקרופון ודבר חופשי (למשל: <em>"אכלתי 160 גרם חזה עוף עם כוס אורז בסמטי וסלט קצוץ עם שמן זית"</em>) — ה-AI מפרק למרכיבים ומתעד ביומן.
+              </p>
+            </div>
+
+            <div className="p-2.5 rounded-xl bg-surface-container-low border border-surface-container-high">
+              <strong className="text-primary block mb-1">🍳 מחולל מתכונים והשלמת חוסרי מאקרו:</strong>
+              <p className="text-outline text-[11px]">
+                מחשב את יתרת הקלוריות והחלבון שחסרים לך להיום ומייצר 3 הצעות לארוחות/מתכונים שסוגרים בדיוק את היעד!
+              </p>
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      id: 'ai_coach_personas',
+      title: '11. יועצי התזונה והספורט ב-AI (איתי ומאיה) והתמודדות עם שובע כבד',
+      badge: 'ייעוץ וזיכרון',
+      icon: <Sparkles className="w-4 h-4 text-tertiary" />,
+      summary: 'בחירת יועץ/יועצת אישיים, מענה מדעי למצבי כבדות ונפיחות וזיכרון מתמשך',
+      keywords: ['יועץ', 'יועצת', 'איתי', 'מאיה', 'מאמן AI', 'שובע', 'מפוצץ', 'כבד', 'נפיחות', 'שייק חלבון', 'זיכרון'],
+      content: (
+        <div className="space-y-2.5 text-xs text-on-surface leading-relaxed">
+          <p>
+            צ'אט המאמן האישי מבוסס על ספר חוקים קליני ומדעי מלא:
+          </p>
+          <div className="space-y-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+              <div className="p-2.5 rounded-xl bg-surface-container-low border border-surface-container-high">
+                <span className="font-bold text-on-surface block">👨‍⚕️ איתי (M.Sc):</span>
+                <span className="text-outline">דיאטן קליני וספורט • ממוקד ביצועים, סייקלינג פחמימות, עלייה נקייה בשריר והיפרטרופיה.</span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-surface-container-low border border-surface-container-high">
+                <span className="font-bold text-on-surface block">👩‍⚕️ מאיה (R.D):</span>
+                <span className="text-outline">תזונאית קלינית • מומחית להקשבה לגוף, בריאות מערכת העיכול, הפחתת נפיחות והרגלים.</span>
+              </div>
+            </div>
+
+            <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-on-surface">
+              <strong className="text-amber-500 block mb-1">🤢 התמודדות עם תחושת פיצוץ, כבדות ושובע קיצוני:</strong>
+              <p className="text-outline text-[11px]">
+                כאשר אתה מדווח שאתה מרגיש "מפוצץ ולא מסוגל לאכול עוד", היועץ לעולם לא יכריח אותך לאכול נפח גדול! הוא יציע לעבור ל<strong>קלוריות נוזליות ודחוסות (Liquid Macros)</strong> כמו שייק חלבון קל לעיכול שנספג במהירות, או יבצע התאמה קלורית להיום, וילמד את ההעדפה בזיכרון המערכת.
+              </p>
+            </div>
+
+            <div className="p-2.5 rounded-xl bg-surface-container-low border border-surface-container-high">
+              <strong className="text-primary block mb-1">🧠 זיכרון אישי ופרוטוקול קליני:</strong>
+              <p className="text-outline text-[11px]">
+                היועצים זוכרים את ההעדפות והרגישויות שלך. ניתן לצפות בזיכרון המערכת ובספר החוקים הקליני ישירות מתוך כפתור <strong>"פרוטוקול" (📄)</strong> בצ'אט.
+              </p>
+            </div>
+          </div>
+        </div>
+      ),
+    },
   ];
 
   const filteredSections = useMemo(() => {

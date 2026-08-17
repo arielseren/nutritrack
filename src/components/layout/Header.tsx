@@ -5,7 +5,6 @@ import {
   Sun,
   Moon,
   Flame,
-  BookOpen,
   Sparkles,
 } from 'lucide-react';
 import { formatHebrewDate } from '../../services/nutritionCalculator';
@@ -14,7 +13,6 @@ interface HeaderProps {
   currentDate: string;
   onOpenDatePicker: () => void;
   onOpenNotifications: () => void;
-  onOpenUserGuide?: () => void;
   onOpenAIHub?: () => void;
   unreadNotificationsCount?: number;
   streakCount?: number;
@@ -26,7 +24,6 @@ export const Header: React.FC<HeaderProps> = ({
   currentDate,
   onOpenDatePicker,
   onOpenNotifications,
-  onOpenUserGuide,
   onOpenAIHub,
   unreadNotificationsCount = 0,
   streakCount = 0,
@@ -86,18 +83,6 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Sparkles className="w-3.5 h-3.5 animate-pulse text-primary" />
               <span>AI</span>
-            </button>
-          )}
-
-          {/* User Guide Button */}
-          {onOpenUserGuide && (
-            <button
-              onClick={onOpenUserGuide}
-              aria-label="מדריך למשתמש"
-              className="p-2 rounded-xl bg-surface-container-low hover:bg-surface-container border border-surface-container-high text-primary transition-all active:scale-95 shadow-xs"
-              title="מדריך למשתמש"
-            >
-              <BookOpen className="w-4 h-4" />
             </button>
           )}
 

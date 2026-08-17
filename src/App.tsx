@@ -483,7 +483,6 @@ export function App() {
         currentDate={currentDate}
         onOpenDatePicker={() => setIsDatePickerModalOpen(true)}
         onOpenNotifications={() => setIsNotificationsModalOpen(true)}
-        onOpenUserGuide={() => setIsUserGuideOpen(true)}
         onOpenAIHub={() => setIsAIHubOpen(true)}
         unreadNotificationsCount={unreadNotifsCount}
         streakCount={streakCount}

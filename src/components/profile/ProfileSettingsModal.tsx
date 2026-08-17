@@ -304,10 +304,10 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                   </div>
                   <div className="text-right">
                     <span className="font-bold text-xs text-primary block group-hover:underline">
-                      מדריך למשתמש ומרכז עזרה 📖
+                      מדריך למשתמש ומרכז עזרה (11 פרקים) 📖
                     </span>
                     <span className="text-[10px] text-outline block">
-                      הסברים מקיפים על אימונים, תפריט שבועי, הזנה ישירה ועוד
+                      מדריך מקיף: כלי AI, יועצי תזונה (איתי/מאיה), שקילות, תפריטים ואימונים
                     </span>
                   </div>
                 </div>
