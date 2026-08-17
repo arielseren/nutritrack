@@ -497,7 +497,7 @@ export function App() {
             <DashboardView
               userProfile={userProfile}
               dayLog={currentDayLog}
-              onOpenQuickAdd={() => handleOpenQuickAdd('lunch')}
+              onOpenQuickAdd={(mealType) => handleOpenQuickAdd(mealType || 'lunch')}
               onOpenMealPlans={() => setIsMealPlansOpen(true)}
               onOpenProfile={() => setIsProfileModalOpen(true)}
               onOpenWeightProgress={() => setIsWeightProgressModalOpen(true)}
