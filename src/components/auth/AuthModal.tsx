@@ -16,7 +16,7 @@ import {
 import type { UserProfile, FitnessGoal, ActivityLevel } from '../../types';
 import { StorageService, DEFAULT_USER_PROFILE } from '../../services/storageService';
 import { BiometricAuthService } from '../../services/biometricAuthService';
-import { calculateScientificTargets } from '../../services/nutritionCalculator';
+import { calculateScientificTargets, getTodayDateString } from '../../services/nutritionCalculator';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -140,8 +140,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       gender,
       age,
       height,
+      initialWeight: currentWeight,
       currentWeight,
       targetWeight,
+      weightLogs: [
+        {
+          id: 'w_' + Date.now(),
+          date: getTodayDateString(),
+          weight: currentWeight,
+          note: 'שקילה ראשונית',
+          timestamp: new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }),
+        },
+      ],
       activityLevel,
       goal,
       dailyCalorieTarget: calculated.calories,
@@ -156,6 +166,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       mealReminderBreakfast: '08:30',
       mealReminderLunch: '13:30',
       mealReminderDinner: '19:30',
+      weeklyWeightReminderEnabled: true,
+      weeklyWeightReminderDay: 0,
+      weeklyWeightReminderTime: '08:00',
     };
 
     onLoginSuccess(newUser);

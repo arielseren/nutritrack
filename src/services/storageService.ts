@@ -24,30 +24,30 @@ export const DEFAULT_WEEKLY_MEAL_PLAN: WeeklyMealPlanSchedule = {
 
 export const DEFAULT_USER_PROFILE: UserProfile = {
   id: 'usr_default_1',
-  name: 'דני כהן',
-  email: 'dani@example.com',
+  name: 'משתמש חדש',
+  email: 'user@example.com',
   isLoggedIn: true,
   hasBiometrics: false,
   gender: 'male',
   age: 28,
-  height: 178,
-  initialWeight: 76,
-  currentWeight: 76,
-  targetWeight: 72,
+  height: 175,
+  initialWeight: 70,
+  currentWeight: 70,
+  targetWeight: 68,
   weightLogs: [
     {
       id: 'w_init',
       date: getTodayDateString(),
-      weight: 76,
+      weight: 70,
       note: 'משקל התחלתי',
       timestamp: '08:00',
     },
   ],
   activityLevel: 'moderate',
-  goal: 'lose_weight',
-  dailyCalorieTarget: 2000,
-  dailyProteinTarget: 140,
-  dailyCarbsTarget: 200,
+  goal: 'lean_bulk',
+  dailyCalorieTarget: 2200,
+  dailyProteinTarget: 155,
+  dailyCarbsTarget: 220,
   dailyFatTarget: 65,
   dailyWaterTargetGlasses: 8,
   theme: 'light',
@@ -220,14 +220,23 @@ export const StorageService = {
       // 1. Check user-specific storage key
       const userSpecificData = localStorage.getItem(PROFILE_KEY_PREFIX + uid);
       if (userSpecificData) {
-        return { ...DEFAULT_USER_PROFILE, ...JSON.parse(userSpecificData) };
+        const parsed = JSON.parse(userSpecificData);
+        const merged: UserProfile = { ...DEFAULT_USER_PROFILE, ...parsed };
+        if (parsed.initialWeight === undefined) {
+          merged.initialWeight = parsed.currentWeight ?? merged.currentWeight;
+        }
+        return merged;
       }
 
       // 2. Check users registry
       const registry = this.getUsersRegistry();
       const userInRegistry = registry.find((u) => u.id === uid);
       if (userInRegistry) {
-        return { ...DEFAULT_USER_PROFILE, ...userInRegistry };
+        const merged: UserProfile = { ...DEFAULT_USER_PROFILE, ...userInRegistry };
+        if (userInRegistry.initialWeight === undefined) {
+          merged.initialWeight = userInRegistry.currentWeight ?? merged.currentWeight;
+        }
+        return merged;
       }
 
       // 3. Check legacy key if default
@@ -235,7 +244,11 @@ export const StorageService = {
       if (legacyData) {
         const parsed = JSON.parse(legacyData);
         if (parsed.id === uid || uid === DEFAULT_USER_PROFILE.id) {
-          return { ...DEFAULT_USER_PROFILE, ...parsed };
+          const merged: UserProfile = { ...DEFAULT_USER_PROFILE, ...parsed };
+          if (parsed.initialWeight === undefined) {
+            merged.initialWeight = parsed.currentWeight ?? merged.currentWeight;
+          }
+          return merged;
         }
       }
 
@@ -247,7 +260,13 @@ export const StorageService = {
 
   saveProfile(profile: UserProfile): void {
     const uid = profile.id || `usr_${Date.now()}`;
-    const userToSave: UserProfile = { ...profile, id: uid };
+    const initialW = profile.initialWeight || profile.currentWeight;
+    const userToSave: UserProfile = {
+      ...profile,
+      id: uid,
+      initialWeight: initialW,
+      currentWeight: profile.currentWeight,
+    };
 
     try {
       this.setActiveUserId(uid);

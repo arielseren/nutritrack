@@ -102,8 +102,11 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
       formData.goal
     );
 
+    const initialW = formData.initialWeight || formData.currentWeight;
+
     const updated: UserProfile = {
       ...formData,
+      initialWeight: initialW,
       dailyCalorieTarget: calculated.calories,
       dailyProteinTarget: calculated.protein,
       dailyCarbsTarget: calculated.carbs,
@@ -413,9 +416,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                       <span className="font-bold text-on-surface">{formData.height} ס"מ</span>
                     </div>
                     <div className="p-2.5 rounded-xl bg-surface-container-low border border-surface-container-high/60">
-                      <span className="text-[10px] text-outline block">משקל נוכחי / יעד</span>
+                      <span className="text-[10px] text-outline block">משקלים (התחלה / נוכחי / יעד)</span>
                       <span className="font-bold text-on-surface">
-                        {formData.currentWeight} ק"ג <span className="text-outline font-normal">→ {formData.targetWeight} ק"ג</span>
+                        {formData.initialWeight || formData.currentWeight}kg → <strong>{formData.currentWeight}kg</strong> → {formData.targetWeight}kg
                       </span>
                     </div>
                     <div className="col-span-2 p-2.5 rounded-xl bg-surface-container-low border border-surface-container-high/60">
@@ -464,7 +467,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       <div>
                         <label className="text-[10px] font-bold text-outline block mb-1">גובה (ס"מ)</label>
                         <input
@@ -476,7 +479,17 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                         />
                       </div>
                       <div>
-                        <label className="text-[10px] font-bold text-outline block mb-1">משקל (ק"ג)</label>
+                        <label className="text-[10px] font-bold text-outline block mb-1">משקל התחלתי</label>
+                        <input
+                          type="number"
+                          value={(formData.initialWeight ?? formData.currentWeight) === 0 ? '' : (formData.initialWeight ?? formData.currentWeight)}
+                          onChange={(e) => setFormData({ ...formData, initialWeight: e.target.value === '' ? 0 : Number(e.target.value) })}
+                          placeholder="0"
+                          className="w-full px-2.5 py-2 rounded-xl bg-surface-container border border-surface-container-high text-on-surface text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-outline block mb-1">משקל נוכחי (ק"ג)</label>
                         <input
                           type="number"
                           value={formData.currentWeight === 0 ? '' : formData.currentWeight}
