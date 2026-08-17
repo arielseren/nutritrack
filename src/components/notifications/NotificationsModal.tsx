@@ -88,7 +88,7 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
-      <div className="w-full max-w-[480px] max-h-[90dvh] bg-surface rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden border border-surface-container-high animate-modal-sheet modal-safe-bottom">
+      <div className="w-full max-w-lg sm:max-w-xl max-h-[90dvh] bg-surface rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden border border-surface-container-high animate-modal-sheet modal-safe-bottom">
         
         {/* Header */}
         <div className="p-4 border-b border-surface-container-high flex items-center justify-between bg-surface-container-lowest flex-shrink-0">

@@ -149,7 +149,7 @@ export const MealPlansModal: React.FC<MealPlansModalProps> = ({
   const assignedDaysCount = Object.values(weeklySchedule).filter((d) => d.planId).length;
 
   const contentMarkup = (
-    <div className={`bg-surface rounded-3xl w-full max-w-[480px] flex flex-col border border-surface-container-high overflow-hidden ${
+    <div className={`bg-surface rounded-3xl w-full max-w-lg sm:max-w-xl flex flex-col border border-surface-container-high overflow-hidden ${
       isInline ? 'shadow-xs animate-page-enter' : 'shadow-2xl max-h-[90dvh] animate-modal-sheet'
     }`}>
       
