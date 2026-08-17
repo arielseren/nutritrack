@@ -1,4 +1,4 @@
-import type { DayLog, FoodItem, LoggedFoodItem, MealType, UserProfile, NotificationItem, MealPlanPreset, WorkoutDayType, WeeklyMealPlanSchedule, WeeklyMealPlanDay } from '../types';
+import type { DayLog, FoodItem, LoggedFoodItem, MealType, UserProfile, NotificationItem, MealPlanPreset, WorkoutDayType, WeeklyMealPlanSchedule, WeeklyMealPlanDay, AICoachMessage, AICoachMemory } from '../types';
 import { INITIAL_FOOD_DATABASE } from '../data/foodDatabase';
 import { calculateItemNutrition, getTodayDateString } from './nutritionCalculator';
 
@@ -11,6 +11,8 @@ const FOOD_DB_PREFIX = 'nutritrack_custom_food_db_v1_';
 const CUSTOM_MEAL_PLANS_PREFIX = 'nutritrack_custom_meal_plans_v1_';
 const WEEKLY_MEAL_PLAN_PREFIX = 'nutritrack_weekly_meal_plan_v1_';
 const NOTIFICATIONS_PREFIX = 'nutritrack_notifications_v1_';
+const AI_COACH_MESSAGES_PREFIX = 'nutritrack_ai_coach_messages_v1_';
+const AI_COACH_MEMORY_PREFIX = 'nutritrack_ai_coach_memory_v1_';
 
 export const DEFAULT_WEEKLY_MEAL_PLAN: WeeklyMealPlanSchedule = {
   0: { dayOfWeek: 0, dayName: 'יום ראשון' },
@@ -878,6 +880,71 @@ export const StorageService = {
     }
   },
 
+  getAICoachMessages(userId?: string): AICoachMessage[] {
+    const uid = userId || this.getActiveUserId();
+    const raw = localStorage.getItem(AI_COACH_MESSAGES_PREFIX + uid);
+    if (!raw) {
+      return [
+        {
+          id: 'init_welcome',
+          role: 'assistant',
+          content: 'שלום! 👋 אני מאמן התזונה האישי שלך ב-NutriTrack. אני כאן כדי לעזור לך להגיע ליעדים שלך, להתאים את התפריט אם אתה מרגיש שבע מדי או כבד, לענות על שאלות תזונה ולהציע מתכונים מדויקים. במה אוכל לעזור לך היום?',
+          timestamp: 'עכשיו',
+          suggestedActions: [
+            { label: '🤢 מרגיש מפוצץ / כבד - מה לעשות?', type: 'replace_meal' },
+            { label: '🍳 הצע לי ארוחה להשלמת החלבון', type: 'open_recipe_generator' },
+            { label: '📊 נתח את ההתקדמות השבועית שלי', type: 'adjust_today_targets' },
+            { label: '⚡ מה לאכול לפני אימון?', type: 'replace_meal' },
+          ],
+        },
+      ];
+    }
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return [];
+    }
+  },
+
+  saveAICoachMessages(messages: AICoachMessage[], userId?: string): void {
+    const uid = userId || this.getActiveUserId();
+    localStorage.setItem(AI_COACH_MESSAGES_PREFIX + uid, JSON.stringify(messages));
+  },
+
+  getAICoachMemory(userId?: string): AICoachMemory {
+    const uid = userId || this.getActiveUserId();
+    const raw = localStorage.getItem(AI_COACH_MEMORY_PREFIX + uid);
+    if (!raw) {
+      return {
+        preferences: [],
+        allergiesOrDislikes: [],
+        satietyState: 'normal',
+        userNotes: [],
+      };
+    }
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return {
+        preferences: [],
+        allergiesOrDislikes: [],
+        satietyState: 'normal',
+        userNotes: [],
+      };
+    }
+  },
+
+  saveAICoachMemory(memory: AICoachMemory, userId?: string): void {
+    const uid = userId || this.getActiveUserId();
+    localStorage.setItem(AI_COACH_MEMORY_PREFIX + uid, JSON.stringify(memory));
+  },
+
+  clearAICoachHistory(userId?: string): void {
+    const uid = userId || this.getActiveUserId();
+    localStorage.removeItem(AI_COACH_MESSAGES_PREFIX + uid);
+    localStorage.removeItem(AI_COACH_MEMORY_PREFIX + uid);
+  },
+
   resetAllData(userId?: string): void {
     const uid = userId || this.getActiveUserId();
     localStorage.removeItem(PROFILE_KEY_PREFIX + uid);
@@ -885,5 +952,7 @@ export const StorageService = {
     localStorage.removeItem(FOOD_DB_PREFIX + uid);
     localStorage.removeItem(NOTIFICATIONS_PREFIX + uid);
     localStorage.removeItem(CUSTOM_MEAL_PLANS_PREFIX + uid);
+    localStorage.removeItem(AI_COACH_MESSAGES_PREFIX + uid);
+    localStorage.removeItem(AI_COACH_MEMORY_PREFIX + uid);
   },
 };

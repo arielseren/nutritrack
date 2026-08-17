@@ -47,7 +47,7 @@ interface ProfileSettingsModalProps {
   isInline?: boolean;
 }
 
-type AccordionSection = 'personal' | 'targets' | 'schedule' | 'notifications' | 'security' | 'backup';
+type AccordionSection = 'personal' | 'targets' | 'schedule' | 'notifications' | 'security' | 'backup' | 'ai';
 
 export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
   isOpen,
@@ -70,6 +70,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
     schedule: false,
     notifications: false,
     security: false,
+    ai: false,
     backup: false,
   });
 
@@ -1106,7 +1107,61 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
           </div>
 
           {/* ========================================================================= */}
-          {/* ACCORDION 5: גיבוי וניהול נתונים (Backup & Data Management) */}
+          {/* ACCORDION 5: הגדרות AI ועוזר חכם (AI Settings & Assistant) */}
+          {/* ========================================================================= */}
+          <div className="pt-2">
+            <div
+              onClick={() => toggleSection('ai')}
+              className="p-3.5 rounded-2xl bg-surface-container-low hover:bg-surface-container flex items-center justify-between cursor-pointer transition-all border border-surface-container-high"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-primary/15 flex items-center justify-center text-primary">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-headline font-bold text-xs text-on-surface">הגדרות AI ועוזר חכם</h3>
+                  <p className="text-[10px] text-outline">מפתח Google Gemini API, זיכרון ומודל</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {openSections.ai ? (
+                  <ChevronUp className="w-4 h-4 text-outline" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-outline" />
+                )}
+              </div>
+            </div>
+
+            {openSections.ai && (
+              <div className="mt-2.5 p-3.5 rounded-2xl bg-surface-container-lowest border border-surface-container-high space-y-3 animate-in fade-in duration-150 text-xs">
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-outline block">
+                    מפתח Google Gemini API (אופציונלי):
+                  </label>
+                  <input
+                    type="password"
+                    value={formData.aiApiKey || ''}
+                    onChange={(e) => setFormData({ ...formData, aiApiKey: e.target.value })}
+                    placeholder="הדבק כאן מפתח AIzaSy..."
+                    className="w-full bg-surface-container text-on-surface p-2.5 rounded-xl border border-surface-container-high text-xs outline-hidden focus:border-primary"
+                  />
+                  <p className="text-[10px] text-outline">
+                    NutriTrack כולל מנוע הדמיה וניתוח ישראלי מובנה, ומפתח זה מאפשר חיבור ישיר ל-Gemini Flash.
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between p-2.5 bg-surface-container-low rounded-xl border border-surface-container-high">
+                  <span className="font-bold text-xs text-on-surface">מודל ה-AI הפעיל:</span>
+                  <span className="text-xs font-bold text-primary px-2 py-0.5 rounded-md bg-primary/10">
+                    Gemini 2.5 Flash
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ========================================================================= */}
+          {/* ACCORDION 6: גיבוי וניהול נתונים (Backup & Data Management) */}
           {/* ========================================================================= */}
           <div className="pt-2">
             <div

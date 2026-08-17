@@ -15,6 +15,8 @@ import {
   Activity,
   Zap,
   BedDouble,
+  Camera,
+  Mic,
 } from 'lucide-react';
 import type { DayLog, MealType, UserProfile, WorkoutDayType } from '../../types';
 import {
@@ -40,6 +42,8 @@ interface DayDiaryViewProps {
     title?: string,
     durationMinutes?: number
   ) => void;
+  onOpenAIVoiceForMeal?: (mealType: MealType) => void;
+  onOpenAIScannerForMeal?: (mealType: MealType) => void;
 }
 
 export const DayDiaryView: React.FC<DayDiaryViewProps> = ({
@@ -51,6 +55,8 @@ export const DayDiaryView: React.FC<DayDiaryViewProps> = ({
   onAddFoodToMeal,
   onDeleteItem,
   onUpdateDayWorkout,
+  onOpenAIVoiceForMeal,
+  onOpenAIScannerForMeal,
 }) => {
   const [isWorkoutModalOpen, setIsWorkoutModalOpen] = useState(false);
   const totals = calculateDayTotals(dayLog);
@@ -257,13 +263,35 @@ export const DayDiaryView: React.FC<DayDiaryViewProps> = ({
                   </div>
                 </div>
 
-                <button
-                  onClick={() => onAddFoodToMeal(type)}
-                  className="px-3 py-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-bold text-xs flex items-center gap-1 active:scale-95 transition-all shadow-xs flex-shrink-0"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>הוסף</span>
-                </button>
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  {onOpenAIVoiceForMeal && (
+                    <button
+                      onClick={() => onOpenAIVoiceForMeal(type)}
+                      className="p-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-primary transition-all active:scale-95 shadow-xs"
+                      title="הזנה קולית וחופשית ב-AI"
+                    >
+                      <Mic className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+
+                  {onOpenAIScannerForMeal && (
+                    <button
+                      onClick={() => onOpenAIScannerForMeal(type)}
+                      className="p-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-secondary transition-all active:scale-95 shadow-xs"
+                      title="סריקת צלחת ותמונה ב-AI"
+                    >
+                      <Camera className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => onAddFoodToMeal(type)}
+                    className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-bold text-xs flex items-center gap-1 active:scale-95 transition-all shadow-xs"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>הוסף</span>
+                  </button>
+                </div>
               </div>
 
               {/* Meal Logged Items List */}

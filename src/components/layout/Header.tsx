@@ -6,6 +6,7 @@ import {
   Moon,
   Flame,
   BookOpen,
+  Sparkles,
 } from 'lucide-react';
 import { formatHebrewDate } from '../../services/nutritionCalculator';
 
@@ -14,6 +15,7 @@ interface HeaderProps {
   onOpenDatePicker: () => void;
   onOpenNotifications: () => void;
   onOpenUserGuide?: () => void;
+  onOpenAIHub?: () => void;
   unreadNotificationsCount?: number;
   streakCount?: number;
   currentTheme: 'light' | 'dark';
@@ -25,6 +27,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenDatePicker,
   onOpenNotifications,
   onOpenUserGuide,
+  onOpenAIHub,
   unreadNotificationsCount = 0,
   streakCount = 0,
   currentTheme,
@@ -77,6 +80,19 @@ export const Header: React.FC<HeaderProps> = ({
             <Flame className={`w-4 h-4 ${streakCount > 0 ? 'fill-amber-500 text-amber-500 animate-pulse' : 'text-outline'}`} />
             <span>{streakCount}</span>
           </div>
+
+          {/* AI Assistant Hub Button */}
+          {onOpenAIHub && (
+            <button
+              onClick={onOpenAIHub}
+              aria-label="עוזר תזונה AI"
+              className="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-primary/15 to-primary-container/25 hover:from-primary/25 hover:to-primary-container/35 border border-primary/30 text-primary font-black text-xs transition-all active:scale-95 shadow-xs flex items-center gap-1"
+              title="מרכז העוזר החכם AI"
+            >
+              <Sparkles className="w-3.5 h-3.5 animate-pulse text-primary" />
+              <span>AI</span>
+            </button>
+          )}
 
           {/* User Guide Button */}
           {onOpenUserGuide && (

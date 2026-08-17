@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { FoodItem, MealType, MealPlanPreset, UserProfile, DayLog, NotificationItem, WorkoutDayType, WeeklyMealPlanSchedule } from './types';
+import type { FoodItem, MealType, MealPlanPreset, UserProfile, DayLog, NotificationItem, WorkoutDayType, WeeklyMealPlanSchedule, AIParsedFoodItem } from './types';
 import { StorageService } from './services/storageService';
 import { getTodayDateString, WORKOUT_CONFIGS, calculateLoggingStreak } from './services/nutritionCalculator';
 import { NotificationService } from './services/notificationService';
@@ -17,6 +17,12 @@ import { DatePickerModal } from './components/common/DatePickerModal';
 import { AuthModal } from './components/auth/AuthModal';
 import { UserGuideModal } from './components/guide/UserGuideModal';
 import { WeightProgressModal } from './components/progress/WeightProgressModal';
+import { AIHubModal } from './components/ai/AIHubModal';
+import { AINaturalLanguageModal } from './components/ai/AINaturalLanguageModal';
+import { AIPhotoScannerModal } from './components/ai/AIPhotoScannerModal';
+import type { AIScannerTab } from './components/ai/AIPhotoScannerModal';
+import { AIMealGeneratorModal } from './components/ai/AIMealGeneratorModal';
+import { AICoachModal } from './components/ai/AICoachModal';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 export function App() {
@@ -40,6 +46,15 @@ export function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isUserGuideOpen, setIsUserGuideOpen] = useState(false);
   const [isWeightProgressModalOpen, setIsWeightProgressModalOpen] = useState(false);
+
+  // AI Modals State
+  const [isAIHubOpen, setIsAIHubOpen] = useState(false);
+  const [isAIVoiceModalOpen, setIsAIVoiceModalOpen] = useState(false);
+  const [isAIScannerModalOpen, setIsAIScannerModalOpen] = useState(false);
+  const [aiScannerDefaultTab, setAiScannerDefaultTab] = useState<AIScannerTab>('plate_vision');
+  const [isAIMealGenModalOpen, setIsAIMealGenModalOpen] = useState(false);
+  const [isAICoachModalOpen, setIsAICoachModalOpen] = useState(false);
+  const [aiDefaultMealType, setAiDefaultMealType] = useState<MealType>('lunch');
 
   // Toast feedback state
   const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
@@ -265,6 +280,75 @@ export function App() {
     showToast(`מצב אימון עודכן: ${cfg.emoji} ${title || cfg.title}`);
   };
 
+  const handleOpenAIScanner = (tab: AIScannerTab = 'plate_vision', mealType: MealType = 'lunch') => {
+    setAiScannerDefaultTab(tab);
+    setAiDefaultMealType(mealType);
+    setIsAIScannerModalOpen(true);
+  };
+
+  const handleOpenAIVoice = (mealType: MealType = 'lunch') => {
+    setAiDefaultMealType(mealType);
+    setIsAIVoiceModalOpen(true);
+  };
+
+  const handleOpenAIMealGen = (mealType: MealType = 'dinner') => {
+    setAiDefaultMealType(mealType);
+    setIsAIMealGenModalOpen(true);
+  };
+
+  const handleLogParsedItems = (mealType: MealType, items: AIParsedFoodItem[]) => {
+    let updated = dayLogs[currentDate] || StorageService.getDayLog(currentDate, userProfile.id);
+    let totalCaloriesAdded = 0;
+
+    items.forEach((item) => {
+      const foodItem: FoodItem = {
+        id: `ai_item_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        name: item.name,
+        calories: Math.round((item.calories / (item.grams || 100)) * 100),
+        protein: Math.round(((item.protein / (item.grams || 100)) * 100) * 10) / 10,
+        carbs: Math.round(((item.carbs / (item.grams || 100)) * 100) * 10) / 10,
+        fat: Math.round(((item.fat / (item.grams || 100)) * 100) * 10) / 10,
+        servingUnit: item.amountDesc || `${item.grams} גרם`,
+        servingGrams: item.grams || 100,
+        category: 'popular',
+        isCustom: true,
+      };
+
+      updated = StorageService.addFoodToMeal(
+        currentDate,
+        mealType,
+        foodItem,
+        item.grams || 100,
+        1,
+        item.amountDesc || `${item.grams} גרם`,
+        userProfile.id
+      );
+      totalCaloriesAdded += item.calories;
+    });
+
+    setDayLogs({ ...dayLogs, [currentDate]: updated });
+    showToast(`ה-AI תיעד בהצלחה ${items.length} מאכלים ליומן (${Math.round(totalCaloriesAdded)} קק"ל) 🎉`);
+  };
+
+  const handleAdjustDayTargets = (calorieDelta: number) => {
+    const newCal = Math.max(1200, (userProfile.dailyCalorieTarget || 2000) + calorieDelta);
+    const updated: UserProfile = {
+      ...userProfile,
+      dailyCalorieTarget: newCal,
+    };
+    handleSaveProfile(updated);
+    showToast(`יעד הקלוריות היומי הותאם ל-${newCal} קק"ל עפ"י המלצת המאמן!`);
+  };
+
+  const handleSaveApiKey = (apiKey: string) => {
+    const updated: UserProfile = {
+      ...userProfile,
+      aiApiKey: apiKey,
+    };
+    handleSaveProfile(updated);
+    showToast('מפתח Google Gemini נשמר בהצלחה!');
+  };
+
   const syncUserData = (user: UserProfile) => {
     setUserProfile(user);
     setDayLogs(StorageService.getAllDayLogs(user.id));
@@ -400,6 +484,7 @@ export function App() {
         onOpenDatePicker={() => setIsDatePickerModalOpen(true)}
         onOpenNotifications={() => setIsNotificationsModalOpen(true)}
         onOpenUserGuide={() => setIsUserGuideOpen(true)}
+        onOpenAIHub={() => setIsAIHubOpen(true)}
         unreadNotificationsCount={unreadNotifsCount}
         streakCount={streakCount}
         currentTheme={userProfile.theme}
@@ -421,6 +506,11 @@ export function App() {
               onUpdateWater={handleUpdateWater}
               onDeleteItem={handleDeleteItem}
               onUpdateDayWorkout={handleUpdateDayWorkout}
+              onOpenAIHub={() => setIsAIHubOpen(true)}
+              onOpenAIVoice={() => handleOpenAIVoice('lunch')}
+              onOpenAIScanner={(tab) => handleOpenAIScanner(tab || 'plate_vision', 'lunch')}
+              onOpenAICoach={() => setIsAICoachModalOpen(true)}
+              onOpenAIMealGen={() => handleOpenAIMealGen('dinner')}
             />
           )}
 
@@ -434,6 +524,8 @@ export function App() {
               onAddFoodToMeal={(mealType) => handleOpenQuickAdd(mealType)}
               onDeleteItem={handleDeleteItem}
               onUpdateDayWorkout={handleUpdateDayWorkout}
+              onOpenAIVoiceForMeal={(mealType) => handleOpenAIVoice(mealType)}
+              onOpenAIScannerForMeal={(mealType) => handleOpenAIScanner('plate_vision', mealType)}
             />
           )}
 
@@ -501,6 +593,8 @@ export function App() {
         onDeleteCustomFood={handleDeleteCustomFood}
         onToggleFavorite={handleToggleFavorite}
         onLogDirectMeal={handleLogDirectMeal}
+        onOpenAIVoice={(mealType) => handleOpenAIVoice(mealType)}
+        onOpenAIScanner={(mealType) => handleOpenAIScanner('plate_vision', mealType)}
       />
 
       <CustomFoodModal
@@ -578,6 +672,62 @@ export function App() {
       <UserGuideModal
         isOpen={isUserGuideOpen}
         onClose={() => setIsUserGuideOpen(false)}
+      />
+
+      {/* ========================================================================= */}
+      {/* AI SUITE MODALS                                                           */}
+      {/* ========================================================================= */}
+      <AIHubModal
+        isOpen={isAIHubOpen}
+        onClose={() => setIsAIHubOpen(false)}
+        userProfile={userProfile}
+        dayLog={currentDayLog}
+        onOpenVoiceModal={() => handleOpenAIVoice(searchDefaultMealType)}
+        onOpenPhotoScannerModal={(tab) => handleOpenAIScanner(tab || 'plate_vision', searchDefaultMealType)}
+        onOpenMealGeneratorModal={() => handleOpenAIMealGen('dinner')}
+        onOpenCoachModal={() => setIsAICoachModalOpen(true)}
+        onSaveApiKey={handleSaveApiKey}
+      />
+
+      <AINaturalLanguageModal
+        isOpen={isAIVoiceModalOpen}
+        onClose={() => setIsAIVoiceModalOpen(false)}
+        defaultMealType={aiDefaultMealType}
+        apiKey={userProfile.aiApiKey}
+        onLogParsedItems={handleLogParsedItems}
+      />
+
+      <AIPhotoScannerModal
+        isOpen={isAIScannerModalOpen}
+        onClose={() => setIsAIScannerModalOpen(false)}
+        defaultTab={aiScannerDefaultTab}
+        defaultMealType={aiDefaultMealType}
+        foodDatabase={foodDatabase}
+        apiKey={userProfile.aiApiKey}
+        onLogParsedItems={handleLogParsedItems}
+        onSaveCustomFood={handleSaveCustomFood}
+        onLogFood={handleLogFood}
+      />
+
+      <AIMealGeneratorModal
+        isOpen={isAIMealGenModalOpen}
+        onClose={() => setIsAIMealGenModalOpen(false)}
+        userProfile={userProfile}
+        dayLog={currentDayLog}
+        apiKey={userProfile.aiApiKey}
+        defaultMealType={aiDefaultMealType}
+        onLogParsedItems={handleLogParsedItems}
+      />
+
+      <AICoachModal
+        isOpen={isAICoachModalOpen}
+        onClose={() => setIsAICoachModalOpen(false)}
+        userProfile={userProfile}
+        dayLog={currentDayLog}
+        apiKey={userProfile.aiApiKey}
+        onOpenMealGenerator={() => handleOpenAIMealGen('dinner')}
+        onLogParsedItems={handleLogParsedItems}
+        onAdjustDayTargets={handleAdjustDayTargets}
       />
     </div>
   );

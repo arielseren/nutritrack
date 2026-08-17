@@ -17,6 +17,8 @@ import {
   Layers,
   Edit2,
   Trash2,
+  Camera,
+  Mic,
 } from 'lucide-react';
 import type { FoodCategory, FoodItem, MealType } from '../../types';
 import { calculateItemNutrition } from '../../services/nutritionCalculator';
@@ -40,6 +42,8 @@ interface FoodSearchModalProps {
     fat: number,
     saveToDb?: boolean
   ) => void;
+  onOpenAIVoice?: (mealType: MealType) => void;
+  onOpenAIScanner?: (mealType: MealType) => void;
 }
 
 export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
@@ -53,6 +57,8 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
   onDeleteCustomFood,
   onToggleFavorite,
   onLogDirectMeal,
+  onOpenAIVoice,
+  onOpenAIScanner,
 }) => {
   const [activeTab, setActiveTab] = useState<'search' | 'direct'>('search');
   const [searchQuery, setSearchQuery] = useState('');
@@ -383,15 +389,45 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
                   )}
                 </div>
 
-                <button
-                  type="button"
-                  onClick={onOpenCustomFoodModal}
-                  className="p-2.5 rounded-2xl bg-surface-container hover:bg-surface-container-high text-primary border border-surface-container-high flex items-center gap-1 text-xs font-bold transition-all flex-shrink-0"
-                  title="צור מאכל חדש"
-                >
-                  <PlusCircle className="w-4 h-4" />
-                  <span className="hidden sm:inline">מאכל חדש</span>
-                </button>
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  {onOpenAIVoice && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        onOpenAIVoice(selectedMealType);
+                      }}
+                      className="p-2.5 rounded-2xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 flex items-center gap-1 text-xs font-bold transition-all"
+                      title="הזנה קולית וחופשית ב-AI"
+                    >
+                      <Mic className="w-4 h-4" />
+                    </button>
+                  )}
+
+                  {onOpenAIScanner && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        onOpenAIScanner(selectedMealType);
+                      }}
+                      className="p-2.5 rounded-2xl bg-secondary/10 hover:bg-secondary/20 text-secondary border border-secondary/20 flex items-center gap-1 text-xs font-bold transition-all"
+                      title="סריקת צלחת ותמונה ב-AI"
+                    >
+                      <Camera className="w-4 h-4" />
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={onOpenCustomFoodModal}
+                    className="p-2.5 rounded-2xl bg-surface-container hover:bg-surface-container-high text-primary border border-surface-container-high flex items-center gap-1 text-xs font-bold transition-all flex-shrink-0"
+                    title="צור מאכל חדש"
+                  >
+                    <PlusCircle className="w-4 h-4" />
+                    <span className="hidden sm:inline">מאכל חדש</span>
+                  </button>
+                </div>
               </div>
 
               {/* Visual Portion Guide (Collapsible) */}

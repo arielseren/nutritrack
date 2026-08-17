@@ -132,7 +132,11 @@ export interface UserProfile {
   weeklyWeightReminderEnabled?: boolean;
   weeklyWeightReminderDay?: number; // 0=Sunday, 1=Monday...
   weeklyWeightReminderTime?: string; // HH:mm
+  aiApiKey?: string;
+  aiModel?: string;
 }
+
+export * from './ai';
 
 export interface MealPlanPreset {
   id: string;

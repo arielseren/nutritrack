@@ -13,6 +13,11 @@ import {
   Edit3,
   Scale,
   TrendingDown,
+  Sparkles,
+  Camera,
+  Mic,
+  ChefHat,
+  Bot,
 } from 'lucide-react';
 import type { DayLog, UserProfile, MealType, WorkoutDayType } from '../../types';
 import {
@@ -43,6 +48,11 @@ interface DashboardViewProps {
     title?: string,
     durationMinutes?: number
   ) => void;
+  onOpenAIHub?: () => void;
+  onOpenAIVoice?: () => void;
+  onOpenAIScanner?: (tab?: 'plate_vision' | 'label_ocr' | 'barcode') => void;
+  onOpenAICoach?: () => void;
+  onOpenAIMealGen?: () => void;
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
@@ -56,6 +66,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onUpdateWater,
   onDeleteItem,
   onUpdateDayWorkout,
+  onOpenAIHub,
+  onOpenAIVoice,
+  onOpenAIScanner,
+  onOpenAICoach,
+  onOpenAIMealGen,
 }) => {
   const [isWorkoutModalOpen, setIsWorkoutModalOpen] = useState(false);
   const [showWorkoutOptions, setShowWorkoutOptions] = useState(false);
@@ -204,6 +219,76 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
           <span className="text-xs sm:text-sm font-extrabold text-on-surface truncate">תפריט מוכן</span>
         </button>
+      </section>
+
+      {/* AI Smart Nutrition Suite Bar */}
+      <section className="p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-primary/10 via-surface-container-lowest to-secondary/10 border border-primary/20 shadow-xs space-y-2.5 w-full">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-xl bg-primary text-on-primary flex items-center justify-center font-black text-xs shadow-xs">
+              <Sparkles className="w-4 h-4" />
+            </div>
+            <span className="font-headline font-black text-xs sm:text-sm text-on-surface">
+              עוזר תזונה חכם ב-AI
+            </span>
+          </div>
+
+          {onOpenAIHub && (
+            <button
+              onClick={onOpenAIHub}
+              className="text-[11px] font-extrabold text-primary hover:underline flex items-center gap-0.5"
+            >
+              <span>מרכז AI</span>
+              <Sparkles className="w-3 h-3" />
+            </button>
+          )}
+        </div>
+
+        <div className="grid grid-cols-4 gap-1.5">
+          {onOpenAIVoice && (
+            <button
+              onClick={onOpenAIVoice}
+              className="p-2 rounded-xl bg-surface-container hover:bg-surface-container-high border border-surface-container-high/60 flex flex-col items-center justify-center gap-1 text-center transition-all active:scale-95 shadow-2xs group"
+              title="הזנה קולית וחופשית"
+            >
+              <Mic className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
+              <span className="text-[10px] font-bold text-on-surface truncate w-full">הזנה קולית</span>
+            </button>
+          )}
+
+          {onOpenAIScanner && (
+            <button
+              onClick={() => onOpenAIScanner('plate_vision')}
+              className="p-2 rounded-xl bg-surface-container hover:bg-surface-container-high border border-surface-container-high/60 flex flex-col items-center justify-center gap-1 text-center transition-all active:scale-95 shadow-2xs group"
+              title="סריקת צלחת ותמונה"
+            >
+              <Camera className="w-4 h-4 text-secondary group-hover:scale-110 transition-transform" />
+              <span className="text-[10px] font-bold text-on-surface truncate w-full">סריקת צלחת</span>
+            </button>
+          )}
+
+          {onOpenAIMealGen && (
+            <button
+              onClick={onOpenAIMealGen}
+              className="p-2 rounded-xl bg-surface-container hover:bg-surface-container-high border border-surface-container-high/60 flex flex-col items-center justify-center gap-1 text-center transition-all active:scale-95 shadow-2xs group"
+              title="השלמת מאקרו ומתכונים"
+            >
+              <ChefHat className="w-4 h-4 text-tertiary group-hover:scale-110 transition-transform" />
+              <span className="text-[10px] font-bold text-on-surface truncate w-full">השלם מאקרו</span>
+            </button>
+          )}
+
+          {onOpenAICoach && (
+            <button
+              onClick={onOpenAICoach}
+              className="p-2 rounded-xl bg-surface-container hover:bg-surface-container-high border border-surface-container-high/60 flex flex-col items-center justify-center gap-1 text-center transition-all active:scale-95 shadow-2xs group"
+              title="התייעצות עם מאמן תזונה"
+            >
+              <Bot className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
+              <span className="text-[10px] font-bold text-on-surface truncate w-full">מאמן אישי</span>
+            </button>
+          )}
+        </div>
       </section>
 
       {/* Quick Weight & Progress Banner */}
