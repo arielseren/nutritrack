@@ -93,9 +93,12 @@ export const UserGuideModal: React.FC<UserGuideModalProps> = ({
             </div>
 
             <div className="p-2.5 rounded-xl bg-surface-container-low border border-surface-container-high">
-              <strong className="text-primary block mb-1">חיפוש במאגר ישראלי עשיר:</strong>
+              <strong className="text-primary block mb-1">חיפוש במאגר ישראלי עשיר ועריכת מאכלים:</strong>
               <p className="text-outline text-[11px]">
                 חפש מאכלים, בחר לפי יחידות מנה מובנות (קציצה, ביצה, פרוסה, גביע) או הזן גרמים בקלות.
+              </p>
+              <p className="text-outline text-[11px] mt-1 pt-1 border-t border-surface-container-high/60">
+                ✨ <strong>עריכה ומחיקה:</strong> ליד כל מאכל אישי שיצרת מופיעים כפתורי <strong>עריכה (✏️)</strong> ו-<strong>מחיקה (🗑️)</strong> לעדכון ערכים או הסרה מיידית.
               </p>
             </div>
           </div>
@@ -172,10 +175,12 @@ export const UserGuideModal: React.FC<UserGuideModalProps> = ({
             בלשונית <strong>"התפריטים שלי"</strong> תוכל לבנות תפריטים מותאמים אישית:
           </p>
           <ul className="space-y-1.5 list-disc list-inside text-outline">
-            <li>הגדרת שם התפריט ומטרת התזונה.</li>
-            <li>הוספת מאכלים מתוך המאגר וכמויות מדויקות בגרמים ל-4 ארוחות (בוקר, צהריים, ערב, נשנוש).</li>
+            <li><strong className="text-on-surface">הגדרת תפריט:</strong> שם התפריט, מטרת התזונה ותיאור.</li>
+            <li><strong className="text-on-surface">הוספת מאכלים וחיפוש:</strong> בחירת מאכלים מתוך המאגר וכמויות מדויקות ל-4 ארוחות (בוקר, צהריים, ערב, נשנוש).</li>
+            <li><strong className="text-on-surface">יצירת מאכל והזנה ישירה על המקום:</strong> בלשונית הוספת מאכל, ניתן ליצור מאכל מותאם או להזין קלוריות ומאקרו ישירות ללא צורך לצאת מבונה התפריט!</li>
             <li><strong className="text-on-surface">חישוב חי בזמן אמת:</strong> סרגלי המאקרו והקלוריות מתעדכנים מיידית תוך כדי עריכת המאכלים.</li>
-            <li>החלה בלחיצה אחת על יומן היום או שיבוץ במתכנן השבועי.</li>
+            <li><strong className="text-on-surface">עריכה ומחיקה לתפריטים:</strong> כל תפריט שבנית ניתן לעריכה חוזרת או למחיקה בלשונית "התפריטים שלי".</li>
+            <li><strong className="text-on-surface">החלה ושיבוץ:</strong> החלה בלחיצה אחת על יומן היום או שיבוץ במתכנן השבועי.</li>
           </ul>
         </div>
       ),
