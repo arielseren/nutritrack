@@ -45,7 +45,9 @@ c:\projects\nutrition
 │   │   └── ai.ts                 # הגדרות מערכת ה-AI (AIVisionAnalysisResult, AILabelOcrResult, AINLParseResult, AICoachMessage ועוד)
 │   ├── data/
 │   │   ├── foodDatabase.ts       # מאגר מאכלים ישראלי ובינלאומי עשיר (קציצות, בשרים, חלבונים, פחמימות, שומנים)
-│   │   └── presetMenus.ts        # תפריטי תזונה מוכנים (חיטוב 1,800, מסה 2,400, ים-תיכוני 2,000)
+│   │   ├── presetMenus.ts        # תפריטי תזונה מוכנים (חיטוב 1,800, מסה 2,400, ים-תיכוני 2,000)
+│   │   ├── coachPersonas.ts      # הגדרות דמויות יועצי ה-AI: איתי (דיאטן ספורט) ומאיה (תזונאית קלינית)
+│   │   └── nutritionCoachSystemPrompt.md # ספר החוקים, המתודולוגיה והפרוטוקול הקליני של יועצי התזונה
 │   ├── services/
 │   │   ├── aiService.ts          # מנוע ה-AI המשולב: Gemini Vision, OCR תוויות, ניתוח שפה טבעית, מתכונים ומאמן אישי
 │   │   ├── nutritionCalculator.ts# מחשבוני BMR & TDEE (Mifflin-St Jeor), מאקרואים, סייקלינג ורצף דינמי
