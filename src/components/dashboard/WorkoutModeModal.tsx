@@ -98,8 +98,8 @@ export const WorkoutModeModal: React.FC<WorkoutModeModalProps> = ({
   const previewAdjusted = getDailyAdjustedTargets(userProfile, previewDayLog, currentDate);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-surface rounded-3xl w-full max-w-[460px] max-h-[90dvh] flex flex-col shadow-2xl border border-outline-variant/30 overflow-hidden animate-modal-sheet">
+    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+      <div className="bg-surface rounded-t-3xl sm:rounded-3xl w-full max-w-[480px] max-h-[92dvh] sm:max-h-[90dvh] flex flex-col shadow-2xl border border-surface-container-high overflow-hidden animate-modal-sheet modal-safe-bottom">
         
         {/* Header */}
         <div className="px-5 py-4 border-b border-surface-container-high bg-surface-container-lowest flex items-center justify-between flex-shrink-0">

@@ -153,20 +153,20 @@ export const WeightProgressModal: React.FC<WeightProgressModalProps> = ({
   const daysOfWeek = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-surface rounded-3xl w-full max-w-[480px] sm:max-w-xl max-h-[92dvh] flex flex-col shadow-2xl border border-outline-variant/30 overflow-hidden animate-modal-sheet">
+    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+      <div className="bg-surface rounded-t-3xl sm:rounded-3xl w-full max-w-[480px] sm:max-w-xl max-h-[92dvh] sm:max-h-[90dvh] flex flex-col shadow-2xl border border-surface-container-high overflow-hidden animate-modal-sheet modal-safe-bottom">
         
         {/* Header */}
-        <div className="px-5 py-4 border-b border-surface-container-high bg-surface-container-lowest flex items-center justify-between flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-xs">
+        <div className="px-4 py-3.5 sm:px-5 sm:py-4 border-b border-surface-container-high bg-surface-container-lowest flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-xs flex-shrink-0">
               <Scale className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="font-headline text-base font-bold text-on-surface">
+              <h2 className="font-headline text-sm sm:text-base font-bold text-on-surface">
                 מעקב משקל, גרפים והתקדמות
               </h2>
-              <p className="text-xs text-outline">
+              <p className="text-[11px] sm:text-xs text-outline">
                 מעקב שקילות שבועי, קצב שינוי משקל ויעד אישי
               </p>
             </div>
@@ -174,14 +174,14 @@ export const WeightProgressModal: React.FC<WeightProgressModalProps> = ({
           <button
             onClick={onClose}
             aria-label="סגור"
-            className="p-2 rounded-xl text-outline hover:bg-surface-container hover:text-on-surface transition-all"
+            className="p-1.5 sm:p-2 rounded-xl text-outline hover:bg-surface-container hover:text-on-surface transition-all flex-shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Scrollable Body */}
-        <div className="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1 text-xs">
+        <div className="p-3.5 sm:p-5 overflow-y-auto space-y-3.5 sm:space-y-4 flex-1 min-h-0 text-xs">
           
           {/* 3 Main Stat Cards */}
           <div className="grid grid-cols-3 gap-2.5">

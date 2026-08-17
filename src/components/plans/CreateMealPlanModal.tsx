@@ -256,59 +256,59 @@ export const CreateMealPlanModal: React.FC<CreateMealPlanModalProps> = ({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-surface rounded-3xl w-full max-w-[480px] sm:max-w-2xl max-h-[92dvh] flex flex-col shadow-2xl border border-outline-variant/30 overflow-hidden animate-modal-sheet">
+    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+      <div className="bg-surface rounded-t-3xl sm:rounded-3xl w-full max-w-[480px] sm:max-w-2xl max-h-[92dvh] sm:max-h-[90dvh] flex flex-col shadow-2xl border border-surface-container-high overflow-hidden animate-modal-sheet modal-safe-bottom">
         
         {/* Header */}
-        <div className="px-5 py-4 flex items-center justify-between border-b border-surface-container-high bg-surface-container-lowest flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-primary/15 flex items-center justify-center text-primary shadow-xs">
+        <div className="px-4 py-3.5 sm:px-5 sm:py-4 flex items-center justify-between border-b border-surface-container-high bg-surface-container-lowest flex-shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-primary/15 flex items-center justify-center text-primary shadow-xs flex-shrink-0">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="font-headline font-bold text-base text-on-surface">
+              <h2 className="font-headline font-bold text-sm sm:text-base text-on-surface">
                 {existingPlan ? 'עריכת תפריט מותאם אישית' : 'בונה תפריטי תזונה מותאמים אישית'}
               </h2>
-              <p className="text-xs text-outline">הרכב ארוחות, הוסף מאכלים או הזן ערכים ישירות, וצפה בערכים בזמן אמת</p>
+              <p className="text-[11px] sm:text-xs text-outline">הרכב ארוחות, הוסף מאכלים או הזן ערכים ישירות, וצפה בערכים בזמן אמת</p>
             </div>
           </div>
           <button
             onClick={onClose}
             aria-label="סגור"
-            className="p-2 rounded-xl text-outline hover:bg-surface-container hover:text-on-surface transition-all"
+            className="p-1.5 sm:p-2 rounded-xl text-outline hover:bg-surface-container hover:text-on-surface transition-all flex-shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Live Total Macro Summary Bar */}
-        <div className="p-3.5 bg-surface-container-low border-b border-surface-container-high flex-shrink-0">
-          <div className="flex items-center justify-between mb-2 text-xs">
+        <div className="p-3 sm:p-3.5 bg-surface-container-low border-b border-surface-container-high flex-shrink-0">
+          <div className="flex items-center justify-between mb-1.5 text-xs">
             <span className="text-xs font-bold text-outline">סך ערכים מחושב בזמן אמת לתפריט:</span>
-            <span className="font-extrabold text-tertiary flex items-center gap-1.5 font-headline text-base">
+            <span className="font-extrabold text-tertiary flex items-center gap-1 font-headline text-sm sm:text-base">
               <Flame className="w-4 h-4 fill-tertiary" />
               {Math.round(totalCalories)} קק"ל
             </span>
           </div>
 
           <div className="grid grid-cols-3 gap-2 text-center text-xs">
-            <div className="p-2 rounded-xl bg-surface-container-lowest border border-surface-container-high shadow-xs">
-              <span className="text-[11px] text-outline block">חלבון</span>
-              <span className="font-bold text-sm text-on-surface">{Math.round(totalProtein)}g</span>
+            <div className="p-1.5 sm:p-2 rounded-xl bg-surface-container-lowest border border-surface-container-high shadow-xs">
+              <span className="text-[10px] sm:text-[11px] text-outline block">חלבון</span>
+              <span className="font-bold text-xs sm:text-sm text-on-surface">{Math.round(totalProtein)}g</span>
             </div>
-            <div className="p-2 rounded-xl bg-surface-container-lowest border border-surface-container-high shadow-xs">
-              <span className="text-[11px] text-outline block">פחמימות</span>
-              <span className="font-bold text-sm text-on-surface">{Math.round(totalCarbs)}g</span>
+            <div className="p-1.5 sm:p-2 rounded-xl bg-surface-container-lowest border border-surface-container-high shadow-xs">
+              <span className="text-[10px] sm:text-[11px] text-outline block">פחמימות</span>
+              <span className="font-bold text-xs sm:text-sm text-on-surface">{Math.round(totalCarbs)}g</span>
             </div>
-            <div className="p-2 rounded-xl bg-surface-container-lowest border border-surface-container-high shadow-xs">
-              <span className="text-[11px] text-outline block">שומן</span>
-              <span className="font-bold text-sm text-on-surface">{Math.round(totalFat)}g</span>
+            <div className="p-1.5 sm:p-2 rounded-xl bg-surface-container-lowest border border-surface-container-high shadow-xs">
+              <span className="text-[10px] sm:text-[11px] text-outline block">שומן</span>
+              <span className="font-bold text-xs sm:text-sm text-on-surface">{Math.round(totalFat)}g</span>
             </div>
           </div>
         </div>
 
         {/* Scrollable Form Body */}
-        <div className="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1 text-xs">
+        <div className="p-3.5 sm:p-5 overflow-y-auto space-y-3.5 sm:space-y-4 flex-1 min-h-0 text-xs">
           
           {/* Plan Details Card */}
           <div className="p-4 rounded-2xl bg-surface-container-lowest border border-surface-container-high space-y-3">
