@@ -53,6 +53,54 @@ export const NotificationService = {
   },
 
   /**
+   * Close / dismiss any active notification matching a specific tag
+   */
+  async clearNotificationByTag(tag: string): Promise<void> {
+    if (!('serviceWorker' in navigator)) return;
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      if (reg && reg.getNotifications) {
+        const notifs = await reg.getNotifications({ tag });
+        notifs.forEach((n) => n.close());
+      }
+    } catch (err) {
+      console.warn('Failed to clear notification by tag:', err);
+    }
+  },
+
+  /**
+   * Live sync water status with device notification tray
+   * If user reached target -> closes any pending water reminder.
+   * If user logged water -> updates notification banner text to live current count.
+   */
+  async syncWaterStatus(glasses: number, target: number): Promise<void> {
+    if (!('serviceWorker' in navigator) || this.getPermission() !== 'granted') return;
+
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      if (reg && reg.getNotifications) {
+        const notifs = await reg.getNotifications({ tag: 'nutritrack-water' });
+        if (glasses >= target) {
+          // Goal reached, dismiss reminder banner
+          notifs.forEach((n) => n.close());
+        } else if (notifs.length > 0) {
+          // Refresh the open notification with the live glass count
+          await reg.showNotification('💧 מעקב שתיית מים מעודכן', {
+            body: `שתית עד כה ${glasses} מתוך ${target} כוסות. נותרו עוד ${target - glasses} כוסות להשלמת היעד!`,
+            icon: '/icon.svg',
+            badge: '/icon.svg',
+            tag: 'nutritrack-water',
+            dir: 'rtl',
+            lang: 'he',
+          });
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to sync water notification status:', e);
+    }
+  },
+
+  /**
    * Send an immediate system / push notification to the user's device
    */
   async sendNotification(
@@ -130,14 +178,15 @@ export const NotificationService = {
     const currentMinutes = String(now.getMinutes()).padStart(2, '0');
     const currentTimeStr = `${currentHours}:${currentMinutes}`;
 
-    // 1. Water Reminder Check (if under target and midday)
+    // 1. Water Reminder Check (only if user hasn't reached target yet)
     if (waterEnabled && waterGlasses < waterTarget && now.getHours() >= 9 && now.getHours() <= 21) {
       const lastWaterNoticeKey = `nutritrack_water_notice_${now.toISOString().split('T')[0]}_${now.getHours()}`;
       if (!localStorage.getItem(lastWaterNoticeKey)) {
         localStorage.setItem(lastWaterNoticeKey, 'sent');
+        const remaining = waterTarget - waterGlasses;
         this.sendNotification(
           '💧 תזכורת שתיית מים',
-          `שתית עד כה ${waterGlasses} מתוך ${waterTarget} כוסות. קח כוס מים צוננת להמשך אנרגיה!`,
+          `שתית עד כה ${waterGlasses} מתוך ${waterTarget} כוסות (נותרו עוד ${remaining}). קח כוס מים צוננת!`,
           { tag: 'nutritrack-water' }
         );
       }
@@ -164,6 +213,18 @@ export const NotificationService = {
           '🥗 זמן לארוחת צהריים!',
           'הגיע הזמן להפסקת צהריים מזינה. פתח את היומן ותעד את המנה.',
           { tag: 'nutritrack-meal-lunch' }
+        );
+      }
+    }
+
+    if (mealTimes.dinner && mealTimes.dinner === currentTimeStr) {
+      const key = `nutritrack_meal_notice_dinner_${now.toISOString().split('T')[0]}`;
+      if (!localStorage.getItem(key)) {
+        localStorage.setItem(key, 'sent');
+        this.sendNotification(
+          '🍲 זמן לארוחת ערב!',
+          'סוגרים את היום! תעד את ארוחת הערב ובדוק את עמידתך ביעדי הקלוריות והמאקרו.',
+          { tag: 'nutritrack-meal-dinner' }
         );
       }
     }

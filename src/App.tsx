@@ -50,11 +50,12 @@ export function App() {
 
     // Check reminders every 60 seconds
     const interval = setInterval(() => {
-      const currentLog = StorageService.getDayLog(getTodayDateString());
+      const todayStr = getTodayDateString();
+      const currentLog = StorageService.getDayLog(todayStr, userProfile.id);
       NotificationService.checkAndTriggerReminders(
         !!userProfile.waterReminderEnabled && !!userProfile.pushNotificationsEnabled,
         currentLog.waterGlasses,
-        userProfile.dailyWaterTargetGlasses,
+        userProfile.dailyWaterTargetGlasses || 8,
         {
           breakfast: userProfile.mealReminderBreakfast,
           lunch: userProfile.mealReminderLunch,
@@ -183,6 +184,8 @@ export function App() {
   const handleUpdateWater = (newCount: number) => {
     const updated = StorageService.updateWater(currentDate, newCount, userProfile.id);
     setDayLogs({ ...dayLogs, [currentDate]: updated });
+    // Live update or dismiss notification in the phone's notification tray
+    NotificationService.syncWaterStatus(newCount, userProfile.dailyWaterTargetGlasses || 8);
   };
 
   const handleApplyMealPlan = (plan: MealPlanPreset) => {
