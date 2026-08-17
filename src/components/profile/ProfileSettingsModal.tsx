@@ -256,7 +256,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
   };
 
   const contentMarkup = (
-    <div className={`bg-surface rounded-3xl w-full max-w-lg sm:max-w-xl flex flex-col border border-surface-container-high overflow-hidden ${
+    <div className={`bg-surface rounded-3xl w-full max-w-[480px] sm:max-w-xl flex flex-col border border-surface-container-high overflow-hidden ${
       isInline ? 'shadow-xs animate-page-enter' : 'shadow-2xl max-h-[90dvh] animate-modal-sheet'
     }`}>
       

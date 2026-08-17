@@ -15,8 +15,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   onOpenQuickAdd,
 }) => {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface-container-lowest/95 backdrop-blur-lg border-t border-surface-container-high shadow-[0_-4px_24px_0_rgba(0,107,95,0.06)] pt-2 px-4 bottom-nav-safe">
-      <div className="w-full max-w-[540px] sm:max-w-xl mx-auto flex items-center justify-between">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface-container-lowest/95 backdrop-blur-lg border-t border-surface-container-high shadow-[0_-4px_24px_0_rgba(0,107,95,0.06)] pt-1.5 sm:pt-2 px-3.5 sm:px-4 bottom-nav-safe">
+      <div className="w-full max-w-[480px] mx-auto flex items-center justify-between">
         {/* דף הבית */}
         <button
           onClick={() => onTabChange('dashboard')}

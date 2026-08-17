@@ -34,10 +34,10 @@ export const CalorieRing: React.FC<CalorieRingProps> = ({
     : circumference - (percentage / 100) * circumference;
 
   return (
-    <section className="bg-surface-container-lowest rounded-3xl p-5 sm:p-6 ambient-shadow soft-ui-border flex flex-col items-center justify-center relative overflow-hidden">
+    <section className="bg-surface-container-lowest rounded-3xl p-4 sm:p-5 ambient-shadow soft-ui-border flex flex-col items-center justify-center relative overflow-hidden w-full">
       {/* Target Badge & Workout Indicator */}
       <div className="w-full flex justify-between items-center mb-2">
-        <div className="flex items-center gap-1.5 text-sm font-bold text-outline">
+        <div className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-outline">
           <Target className="w-4 h-4 text-primary" />
           <span>יעד: {target.toLocaleString()} קק"ל</span>
           {isAdjusted && baseCalories && (
@@ -46,11 +46,11 @@ export const CalorieRing: React.FC<CalorieRingProps> = ({
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {onWorkoutClick && (
             <button
               onClick={onWorkoutClick}
-              className="text-xs font-bold px-2.5 py-1 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary flex items-center gap-1.5 transition-all shadow-2xs"
+              className="text-xs font-bold px-2 sm:px-2.5 py-1 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary flex items-center gap-1 transition-all shadow-2xs"
             >
               <span>{workoutEmoji || '⚡'}</span>
               <span>{workoutBadge || 'מצב אימון'}</span>
@@ -68,7 +68,7 @@ export const CalorieRing: React.FC<CalorieRingProps> = ({
       </div>
 
       {/* Main Circular Progress Bar */}
-      <div className="relative w-56 h-56 sm:w-60 sm:h-60 my-2 flex items-center justify-center">
+      <div className="relative w-48 h-48 sm:w-56 sm:h-56 my-1 sm:my-2 flex items-center justify-center max-w-full">
         <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 150 150">
           {/* Background Track Circle */}
           <circle

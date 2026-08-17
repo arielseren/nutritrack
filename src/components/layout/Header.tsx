@@ -31,8 +31,8 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleTheme,
 }) => {
   return (
-    <header className="sticky top-0 z-40 bg-surface/95 backdrop-blur-md border-b border-surface-container-high px-4 pb-3 header-safe-top transition-colors">
-      <div className="max-w-[540px] sm:max-w-xl mx-auto flex items-center justify-between gap-2">
+    <header className="sticky top-0 z-40 bg-surface/95 backdrop-blur-md border-b border-surface-container-high px-3.5 sm:px-4 pb-2.5 sm:pb-3 header-safe-top transition-colors">
+      <div className="w-full max-w-[480px] mx-auto flex items-center justify-between gap-1.5 sm:gap-2">
         
         {/* Left / Brand Side (RTL) */}
         <div className="flex items-center gap-2.5">

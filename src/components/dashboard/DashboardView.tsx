@@ -71,7 +71,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     }
   };
 
-  const getWorkoutIcon = (type: WorkoutDayType, className: string = 'w-5 h-5') => {
+  const getWorkoutIcon = (type: WorkoutDayType, className: string = 'w-4.5 h-4.5') => {
     switch (type) {
       case 'rest':
         return <BedDouble className={className} />;
@@ -89,13 +89,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   };
 
   return (
-    <div className="space-y-4 sm:space-y-5 pb-8">
+    <div className="space-y-3.5 sm:space-y-4 pb-8 w-full max-w-full overflow-hidden">
       {/* Greeting Banner */}
-      <section className="pt-1 px-1">
+      <section className="pt-0.5 px-0.5">
         <h2 className="font-headline text-2xl sm:text-3xl font-black text-on-surface">
           שלום, {userProfile.name}
         </h2>
-        <p className="text-sm text-outline mt-0.5 font-medium">
+        <p className="text-xs sm:text-sm text-outline mt-0.5 font-medium">
           {totals.totalCalories === 0
             ? 'מוכן להתחיל לתעד את היום שלך?'
             : 'הנה תמונת המצב התזונתית שלך להיום.'}
@@ -103,22 +103,22 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </section>
 
       {/* Dynamic Workout Mode Banner with Hidden Options by Default */}
-      <section className="p-4 rounded-3xl bg-surface-container-lowest ambient-shadow soft-ui-border space-y-3">
+      <section className="p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-surface-container-lowest ambient-shadow soft-ui-border space-y-2.5 w-full">
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold flex-shrink-0">
-              {getWorkoutIcon(adjusted.workoutType, 'w-5 h-5')}
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <div className="w-9 h-9 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold flex-shrink-0">
+              {getWorkoutIcon(adjusted.workoutType, 'w-4.5 h-4.5')}
             </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm font-bold text-on-surface truncate">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-xs sm:text-sm font-bold text-on-surface truncate">
                   {adjusted.workoutTitle}
                 </span>
-                <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-xs">
+                <span className="px-1.5 py-0.2 rounded-full bg-primary/10 text-primary font-bold text-[10px] sm:text-xs flex-shrink-0">
                   {adjusted.workoutBadge}
                 </span>
               </div>
-              <p className="text-xs text-outline truncate mt-0.5">
+              <p className="text-[11px] text-outline truncate mt-0.5">
                 {adjusted.isAdjusted
                   ? `תוספת אימון: +${adjusted.burnedCalories} קק"ל ליעד היומי`
                   : 'מאזן בסיסי ליום מנוחה'}
@@ -126,23 +126,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
             <button
               onClick={() => setShowWorkoutOptions(!showWorkoutOptions)}
-              className="px-3.5 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-primary font-bold text-xs sm:text-sm flex items-center gap-1.5 transition-all active:scale-95 shadow-xs"
+              className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-primary font-bold text-xs flex items-center gap-1 transition-all active:scale-95 shadow-xs"
               title="שנה מצב אימון"
             >
-              <Edit3 className="w-4 h-4" />
+              <Edit3 className="w-3.5 h-3.5" />
               <span>שינוי</span>
-              {showWorkoutOptions ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              {showWorkoutOptions ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
             </button>
           </div>
         </div>
 
         {/* 1-Click Workout Type Options (Hidden by default, toggled via 'שינוי') */}
         {showWorkoutOptions && (
-          <div className="pt-2.5 border-t border-surface-container-high/60 space-y-2.5 animate-in fade-in duration-150">
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <div className="pt-2 border-t border-surface-container-high/60 space-y-2 animate-in fade-in duration-150">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 sm:gap-2">
               {(
                 [
                   { type: 'rest', label: 'מנוחה' },
@@ -155,13 +155,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <button
                   key={item.type}
                   onClick={() => handleQuickSelectWorkout(item.type)}
-                  className={`p-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 border ${
+                  className={`p-2 sm:p-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border ${
                     adjusted.workoutType === item.type
                       ? 'bg-primary text-on-primary border-primary shadow-xs'
                       : 'bg-surface-container-low hover:bg-surface-container text-on-surface border-surface-container-high/60'
                   }`}
                 >
-                  {getWorkoutIcon(item.type, 'w-4 h-4')}
+                  {getWorkoutIcon(item.type, 'w-3.5 h-3.5')}
                   <span>{item.label}</span>
                 </button>
               ))}
@@ -172,10 +172,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   setShowWorkoutOptions(false);
                   setIsWorkoutModalOpen(true);
                 }}
-                className="p-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 bg-surface-container hover:bg-surface-container-high text-outline hover:text-on-surface border border-surface-container-high/60"
+                className="p-2 sm:p-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 bg-surface-container hover:bg-surface-container-high text-outline hover:text-on-surface border border-surface-container-high/60"
                 title="הזנת קלוריות ודקות אימון ידנית"
               >
-                <SlidersHorizontal className="w-4 h-4 text-secondary" />
+                <SlidersHorizontal className="w-3.5 h-3.5 text-secondary" />
                 <span>התאמה אישית</span>
               </button>
             </div>
@@ -184,25 +184,25 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </section>
 
       {/* Quick Action Buttons Row (2 Columns: Food Search & Meal Plans) */}
-      <section className="grid grid-cols-2 gap-3 sm:gap-4">
+      <section className="grid grid-cols-2 gap-2.5 sm:gap-3 w-full">
         <button
           onClick={onOpenQuickAdd}
-          className="p-4 rounded-3xl bg-surface-container-lowest ambient-shadow soft-ui-border flex items-center justify-center gap-2.5 hover:bg-surface-container-low transition-all active:scale-95 text-center"
+          className="p-3 sm:p-3.5 rounded-2xl sm:rounded-3xl bg-surface-container-lowest ambient-shadow soft-ui-border flex items-center justify-center gap-2 hover:bg-surface-container-low transition-all active:scale-95 text-center min-w-0"
         >
-          <div className="w-9 h-9 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
-            <Search className="w-5 h-5" />
+          <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+            <Search className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
           </div>
-          <span className="text-sm font-extrabold text-on-surface">חיפוש מאכל</span>
+          <span className="text-xs sm:text-sm font-extrabold text-on-surface truncate">חיפוש מאכל</span>
         </button>
 
         <button
           onClick={onOpenMealPlans}
-          className="p-4 rounded-3xl bg-surface-container-lowest ambient-shadow soft-ui-border flex items-center justify-center gap-2.5 hover:bg-surface-container-low transition-all active:scale-95 text-center"
+          className="p-3 sm:p-3.5 rounded-2xl sm:rounded-3xl bg-surface-container-lowest ambient-shadow soft-ui-border flex items-center justify-center gap-2 hover:bg-surface-container-low transition-all active:scale-95 text-center min-w-0"
         >
-          <div className="w-9 h-9 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center">
-            <UtensilsCrossed className="w-5 h-5" />
+          <div className="w-8 h-8 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center flex-shrink-0">
+            <UtensilsCrossed className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
           </div>
-          <span className="text-sm font-extrabold text-on-surface">תפריט מוכן</span>
+          <span className="text-xs sm:text-sm font-extrabold text-on-surface truncate">תפריט מוכן</span>
         </button>
       </section>
 
@@ -210,28 +210,28 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {onOpenWeightProgress && (
         <section
           onClick={onOpenWeightProgress}
-          className="p-4 rounded-3xl bg-surface-container-lowest ambient-shadow soft-ui-border flex items-center justify-between gap-3 cursor-pointer hover:bg-surface-container-low transition-all active:scale-98"
+          className="p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-surface-container-lowest ambient-shadow soft-ui-border flex items-center justify-between gap-2.5 cursor-pointer hover:bg-surface-container-low transition-all active:scale-98 w-full"
         >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold">
-              <Scale className="w-5 h-5" />
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <div className="w-9 h-9 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold flex-shrink-0">
+              <Scale className="w-4.5 h-4.5" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-on-surface">מעקב משקל וגרפים</span>
-                <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded-md font-bold">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-xs sm:text-sm font-bold text-on-surface truncate">מעקב משקל וגרפים</span>
+                <span className="text-[10px] sm:text-xs px-1.5 py-0.2 bg-primary/10 text-primary rounded-md font-bold flex-shrink-0">
                   {userProfile.currentWeight} ק"ג
                 </span>
               </div>
-              <p className="text-xs text-outline mt-0.5 font-medium">
+              <p className="text-[11px] text-outline mt-0.5 font-medium truncate">
                 התחלה: {userProfile.initialWeight || userProfile.currentWeight}kg • יעד: {userProfile.targetWeight}kg
               </p>
             </div>
           </div>
 
-          <span className="text-xs sm:text-sm font-extrabold text-primary flex items-center gap-1">
+          <span className="text-xs sm:text-sm font-extrabold text-primary flex items-center gap-1 flex-shrink-0">
             <span>גרף התקדמות</span>
-            <TrendingDown className="w-4 h-4" />
+            <TrendingDown className="w-3.5 h-3.5" />
           </span>
         </section>
       )}

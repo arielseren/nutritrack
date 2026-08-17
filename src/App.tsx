@@ -390,7 +390,7 @@ export function App() {
   const streakCount = calculateLoggingStreak(dayLogs, currentDate);
 
   return (
-    <div className="min-h-screen bg-background text-on-background flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-container">
+    <div className="min-h-screen bg-background text-on-background flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-container w-full overflow-x-hidden">
       {/* Top Header */}
       <Header
         currentDate={currentDate}
@@ -404,7 +404,7 @@ export function App() {
       />
 
       {/* Main Container with Page Fade Transition & iPhone Safe Bottom Scroll */}
-      <main className="flex-1 w-full max-w-[540px] sm:max-w-xl mx-auto px-4 pt-3.5 main-scroll-padding">
+      <main className="flex-1 w-full max-w-[480px] mx-auto px-3.5 sm:px-4 pt-3 main-scroll-padding overflow-x-hidden">
         <div key={activeTab} className="animate-page-enter">
           {activeTab === 'dashboard' && (
             <DashboardView
