@@ -154,7 +154,7 @@ export const WeightProgressModal: React.FC<WeightProgressModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
-      <div className="bg-surface rounded-t-3xl sm:rounded-3xl w-full max-w-[480px] sm:max-w-xl max-h-[92dvh] sm:max-h-[90dvh] flex flex-col shadow-2xl border border-surface-container-high overflow-hidden animate-modal-sheet modal-safe-bottom">
+      <div className="bg-surface rounded-t-3xl sm:rounded-3xl w-full max-w-[480px] sm:max-w-xl h-[94dvh] sm:h-[88dvh] sm:max-h-[90dvh] flex flex-col shadow-2xl border border-surface-container-high overflow-hidden animate-modal-sheet modal-safe-bottom">
         
         {/* Header */}
         <div className="px-4 py-3.5 sm:px-5 sm:py-4 border-b border-surface-container-high bg-surface-container-lowest flex items-center justify-between flex-shrink-0">
