@@ -5,10 +5,10 @@ import {
   Calendar,
   Plus,
   Trash2,
-  Utensils,
+  SunMedium,
   Sun,
   Sunset,
-  Cookie,
+  Apple,
   SlidersHorizontal,
   Dumbbell,
   Flame,
@@ -72,18 +72,18 @@ export const DayDiaryView: React.FC<DayDiaryViewProps> = ({
   const getWorkoutIcon = (type: WorkoutDayType) => {
     switch (type) {
       case 'light_strength':
-        return <Dumbbell className="w-3.5 h-3.5" />;
+        return <Dumbbell className="w-4 h-4" />;
       case 'heavy_strength':
-        return <Flame className="w-3.5 h-3.5" />;
+        return <Flame className="w-4 h-4" />;
       case 'cardio':
-        return <Activity className="w-3.5 h-3.5" />;
+        return <Activity className="w-4 h-4" />;
       case 'hiit':
-        return <Zap className="w-3.5 h-3.5" />;
+        return <Zap className="w-4 h-4" />;
       case 'custom':
-        return <SlidersHorizontal className="w-3.5 h-3.5" />;
+        return <SlidersHorizontal className="w-4 h-4" />;
       case 'rest':
       default:
-        return <BedDouble className="w-3.5 h-3.5" />;
+        return <BedDouble className="w-4 h-4" />;
     }
   };
 
@@ -98,45 +98,45 @@ export const DayDiaryView: React.FC<DayDiaryViewProps> = ({
     {
       type: 'breakfast',
       title: 'ארוחת בוקר',
-      icon: <Sun className="w-4 h-4 text-tertiary" />,
+      icon: <SunMedium className="w-5 h-5 text-tertiary" />,
       color: 'border-tertiary/20',
     },
     {
       type: 'lunch',
       title: 'ארוחת צהריים',
-      icon: <Utensils className="w-4 h-4 text-primary" />,
+      icon: <Sun className="w-5 h-5 text-primary" />,
       color: 'border-primary/20',
     },
     {
       type: 'dinner',
       title: 'ארוחת ערב',
-      icon: <Sunset className="w-4 h-4 text-secondary" />,
+      icon: <Sunset className="w-5 h-5 text-secondary" />,
       color: 'border-secondary/20',
     },
     {
       type: 'snack',
       title: 'נשנושים וביניים',
-      icon: <Cookie className="w-4 h-4 text-tertiary" />,
-      color: 'border-tertiary/20',
+      icon: <Apple className="w-5 h-5 text-amber-500" />,
+      color: 'border-amber-500/20',
     },
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 sm:space-y-5 pb-8">
       {/* Date Switcher Bar */}
-      <div className="p-3 bg-surface-container-low rounded-2xl border border-surface-container-high flex items-center justify-between">
+      <div className="p-3.5 bg-surface-container-low rounded-3xl border border-surface-container-high flex items-center justify-between shadow-xs">
         <button
           onClick={handlePrevDay}
           aria-label="יום קודם"
-          className="p-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant active:scale-95 transition-all"
+          className="p-2.5 rounded-2xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant active:scale-95 transition-all shadow-xs"
         >
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight className="w-5 h-5" />
         </button>
 
         <div className="flex items-center gap-2">
           <button
             onClick={onOpenDatePicker}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container-lowest hover:bg-surface-container text-on-surface font-headline font-bold text-xs shadow-xs transition-all"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-surface-container-lowest hover:bg-surface-container text-on-surface font-headline font-bold text-sm shadow-xs transition-all"
           >
             <Calendar className="w-4 h-4 text-primary" />
             <span>{formatHebrewDate(currentDate)}</span>
@@ -145,7 +145,7 @@ export const DayDiaryView: React.FC<DayDiaryViewProps> = ({
           {!isToday && (
             <button
               onClick={() => onDateChange(getTodayDateString())}
-              className="px-2 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-[10px] font-bold transition-all"
+              className="px-2.5 py-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition-all shadow-2xs"
             >
               היום
             </button>
@@ -155,32 +155,32 @@ export const DayDiaryView: React.FC<DayDiaryViewProps> = ({
         <button
           onClick={handleNextDay}
           aria-label="יום הבא"
-          className="p-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant active:scale-95 transition-all"
+          className="p-2.5 rounded-2xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant active:scale-95 transition-all shadow-xs"
         >
-          <ChevronLeft className="w-4 h-4" />
+          <ChevronLeft className="w-5 h-5" />
         </button>
       </div>
 
       {/* Daily Summary Banner & Workout Mode */}
-      <div className="p-4 rounded-3xl bg-surface-container-lowest border border-surface-container-high shadow-sm space-y-2.5">
+      <div className="p-4 sm:p-5 rounded-3xl bg-surface-container-lowest border border-surface-container-high shadow-xs space-y-3">
         <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-outline">סיכום יומי</span>
+          <div className="flex items-center gap-2.5">
+            <span className="text-sm font-bold text-outline">סיכום יומי</span>
             {/* Workout badge button */}
             <button
               onClick={() => setIsWorkoutModalOpen(true)}
-              className="px-2.5 py-1 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-bold text-[11px] flex items-center gap-1.5 transition-all"
+              className="px-3 py-1 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-bold text-xs flex items-center gap-1.5 transition-all shadow-2xs"
               title="שנה מצב אימון"
             >
               {getWorkoutIcon(adjusted.workoutType)}
               <span>{adjusted.workoutBadge}</span>
               {adjusted.isAdjusted && <span>(+{adjusted.burnedCalories})</span>}
-              <SlidersHorizontal className="w-2.5 h-2.5 mr-0.5" />
+              <SlidersHorizontal className="w-3 h-3 mr-0.5" />
             </button>
           </div>
 
           <span
-            className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
+            className={`text-xs sm:text-sm font-extrabold px-3 py-1 rounded-full ${
               remainingCalories >= 0
                 ? 'bg-primary/10 text-primary'
                 : 'bg-error-container/40 text-error'
@@ -192,43 +192,43 @@ export const DayDiaryView: React.FC<DayDiaryViewProps> = ({
           </span>
         </div>
 
-        <div className="grid grid-cols-4 gap-1 text-center bg-surface-container-low p-2.5 rounded-2xl border border-surface-container-high text-xs">
+        <div className="grid grid-cols-4 gap-2 text-center bg-surface-container-low p-3 rounded-2xl border border-surface-container-high text-xs">
           <div>
-            <span className="text-[10px] text-outline block mb-0.5">קלוריות</span>
-            <span className="font-headline font-extrabold text-tertiary">
+            <span className="text-[11px] text-outline block mb-0.5">קלוריות</span>
+            <span className="font-headline font-black text-tertiary text-sm sm:text-base">
               {totals.totalCalories}
             </span>
-            <span className="text-[9px] text-outline block">/ {adjusted.targetCalories}</span>
+            <span className="text-[10px] text-outline block">/ {adjusted.targetCalories}</span>
           </div>
 
           <div>
-            <span className="text-[10px] text-outline block mb-0.5">חלבון</span>
-            <span className="font-headline font-bold text-on-surface">
+            <span className="text-[11px] text-outline block mb-0.5">חלבון</span>
+            <span className="font-headline font-black text-on-surface text-sm sm:text-base">
               {totals.totalProtein}g
             </span>
-            <span className="text-[9px] text-outline block">/ {adjusted.targetProtein}g</span>
+            <span className="text-[10px] text-outline block">/ {adjusted.targetProtein}g</span>
           </div>
 
           <div>
-            <span className="text-[10px] text-outline block mb-0.5">פחמימות</span>
-            <span className="font-headline font-bold text-on-surface">
+            <span className="text-[11px] text-outline block mb-0.5">פחמימות</span>
+            <span className="font-headline font-black text-on-surface text-sm sm:text-base">
               {totals.totalCarbs}g
             </span>
-            <span className="text-[9px] text-outline block">/ {adjusted.targetCarbs}g</span>
+            <span className="text-[10px] text-outline block">/ {adjusted.targetCarbs}g</span>
           </div>
 
           <div>
-            <span className="text-[10px] text-outline block mb-0.5">שומן</span>
-            <span className="font-headline font-bold text-on-surface">
+            <span className="text-[11px] text-outline block mb-0.5">שומן</span>
+            <span className="font-headline font-black text-on-surface text-sm sm:text-base">
               {totals.totalFat}g
             </span>
-            <span className="text-[9px] text-outline block">/ {adjusted.targetFat}g</span>
+            <span className="text-[10px] text-outline block">/ {adjusted.targetFat}g</span>
           </div>
         </div>
       </div>
 
       {/* 4 Meals Accordions/Cards */}
-      <div className="space-y-3">
+      <div className="space-y-3.5">
         {mealsConfig.map(({ type, title, icon }) => {
           const items = dayLog.meals[type] || [];
           const mealCalories = items.reduce((sum, i) => sum + (i.calculatedCalories || 0), 0);
@@ -242,15 +242,15 @@ export const DayDiaryView: React.FC<DayDiaryViewProps> = ({
               className="rounded-3xl bg-surface-container-lowest border border-surface-container-high shadow-xs overflow-hidden"
             >
               {/* Meal Header */}
-              <div className="p-3.5 flex items-center justify-between border-b border-surface-container-high/60 bg-surface-container-low/50">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-surface-container flex items-center justify-center">
+              <div className="p-4 flex items-center justify-between border-b border-surface-container-high/60 bg-surface-container-low/50">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-2xl bg-surface-container flex items-center justify-center">
                     {icon}
                   </div>
                   <div>
-                    <h3 className="font-headline font-bold text-xs text-on-surface">{title}</h3>
-                    <div className="flex items-center gap-1.5 text-[10px] text-outline mt-0.5">
-                      <span>{Math.round(mealCalories)} קק"ל</span>
+                    <h3 className="font-headline font-bold text-sm sm:text-base text-on-surface">{title}</h3>
+                    <div className="flex items-center gap-2 text-xs text-outline mt-0.5 font-medium">
+                      <span className="font-bold text-primary">{Math.round(mealCalories)} קק"ל</span>
                       <span>•</span>
                       <span>ח: {Math.round(mealProtein * 10) / 10}g</span>
                       <span>•</span>
@@ -263,35 +263,35 @@ export const DayDiaryView: React.FC<DayDiaryViewProps> = ({
 
                 <button
                   onClick={() => onAddFoodToMeal(type)}
-                  className="px-3 py-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-bold text-xs flex items-center gap-1 active:scale-95 transition-all"
+                  className="px-3.5 py-2 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-bold text-xs sm:text-sm flex items-center gap-1.5 active:scale-95 transition-all shadow-xs"
                 >
-                  <Plus className="w-3.5 h-3.5" />
+                  <Plus className="w-4 h-4" />
                   <span>הוסף</span>
                 </button>
               </div>
 
               {/* Meal Logged Items List */}
-              <div className="p-2 divide-y divide-surface-container-high/40">
+              <div className="p-2.5 divide-y divide-surface-container-high/40">
                 {items.length === 0 ? (
-                  <div className="py-4 text-center text-outline/60 text-xs">
+                  <div className="py-5 text-center text-outline text-xs sm:text-sm font-medium">
                     טרם נרשמו מאכלים לארוחה זו
                   </div>
                 ) : (
                   items.map((item) => (
                     <div
                       key={item.logId || item.id}
-                      className="py-2.5 px-2 flex items-center justify-between gap-2 hover:bg-surface-container-low/40 rounded-xl transition-all"
+                      className="py-3 px-2.5 flex items-center justify-between gap-2.5 hover:bg-surface-container-low/40 rounded-2xl transition-all"
                     >
                       <div className="flex-1 min-w-0">
                         <div className="flex items-baseline justify-between">
-                          <span className="font-bold text-xs text-on-surface truncate">
+                          <span className="font-bold text-sm text-on-surface truncate">
                             {item.name}
                           </span>
-                          <span className="font-bold text-xs text-primary flex-shrink-0">
+                          <span className="font-extrabold text-sm text-primary flex-shrink-0">
                             {item.calculatedCalories} קק"ל
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 text-[10px] text-outline mt-0.5">
+                        <div className="flex items-center gap-2 text-xs text-outline mt-1 font-medium">
                           <span>
                             {item.amount} {item.unit} ({item.totalGrams}g)
                           </span>
@@ -313,9 +313,9 @@ export const DayDiaryView: React.FC<DayDiaryViewProps> = ({
                       <button
                         onClick={() => onDeleteItem(type, item.logId || item.id || '')}
                         aria-label="מחק פריט"
-                        className="p-1.5 rounded-lg text-outline hover:bg-error-container/20 hover:text-error transition-all"
+                        className="p-2 rounded-xl text-outline hover:bg-error-container/20 hover:text-error transition-all"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="w-4.5 h-4.5" />
                       </button>
                     </div>
                   ))

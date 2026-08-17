@@ -23,63 +23,63 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
   });
 
   const mealLabels: Record<MealType, string> = {
-    breakfast: 'ארוחת בוקר',
-    lunch: 'ארוחת צהריים',
-    dinner: 'ארוחת ערב',
+    breakfast: 'בוקר',
+    lunch: 'צהריים',
+    dinner: 'ערב',
     snack: 'נשנוש',
   };
 
   return (
     <div className="space-y-3">
       <div className="flex justify-between items-center px-1">
-        <div className="flex items-center gap-1.5">
-          <Clock className="w-4 h-4 text-primary" />
-          <h3 className="font-headline font-bold text-sm text-on-surface">פעילות אחרונה ביומן</h3>
+        <div className="flex items-center gap-2">
+          <Clock className="w-4.5 h-4.5 text-primary" />
+          <h3 className="font-headline font-bold text-base text-on-surface">פעילות אחרונה ביומן</h3>
         </div>
         <button
           onClick={onNavigateToDiary}
-          className="text-xs text-primary font-bold hover:underline"
+          className="text-xs sm:text-sm text-primary font-bold hover:underline"
         >
-          לכל היומן
+          לכל היומן ←
         </button>
       </div>
 
       {allLogs.length === 0 ? (
-        <div className="p-6 rounded-2xl bg-surface-container-low border border-surface-container-high text-center">
-          <Utensils className="w-6 h-6 text-outline mx-auto mb-1.5 opacity-60" />
-          <p className="text-xs font-semibold text-outline">עדיין לא נרשמו מאכלים היום</p>
-          <p className="text-[11px] text-outline/80 mt-0.5">לחץ על כפתור הפלוס (+) למטה כדי להוסיף מזון</p>
+        <div className="p-7 rounded-3xl bg-surface-container-low border border-surface-container-high text-center">
+          <Utensils className="w-7 h-7 text-outline mx-auto mb-2 opacity-60" />
+          <p className="text-sm font-bold text-outline">עדיין לא נרשמו מאכלים היום</p>
+          <p className="text-xs text-outline/80 mt-1">לחץ על כפתור הפלוס (+) למטה כדי להוסיף מזון</p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           {allLogs.slice(-5).reverse().map(({ item, mealType }) => (
             <div
               key={item.logId || item.id || `${item.name}-${Math.random()}`}
-              className="p-3 rounded-2xl bg-surface-container-lowest border border-surface-container-high flex items-center justify-between gap-3 hover:bg-surface-container-low/40 transition-all"
+              className="p-3.5 rounded-2xl bg-surface-container-lowest border border-surface-container-high flex items-center justify-between gap-3 hover:bg-surface-container-low/40 transition-all shadow-xs"
             >
-              <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
                 {item.imageUrl ? (
                   <img
                     src={item.imageUrl}
                     alt={item.name}
-                    className="w-10 h-10 rounded-xl object-cover bg-surface-container flex-shrink-0"
+                    className="w-11 h-11 rounded-xl object-cover bg-surface-container flex-shrink-0"
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-outline flex-shrink-0">
-                    <Utensils className="w-4 h-4" />
+                  <div className="w-11 h-11 rounded-xl bg-surface-container flex items-center justify-center text-outline flex-shrink-0">
+                    <Utensils className="w-5 h-5" />
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <h4 className="text-xs font-bold text-on-surface truncate">{item.name}</h4>
-                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-primary/10 text-primary font-semibold flex-shrink-0">
+                    <h4 className="text-sm font-bold text-on-surface truncate">{item.name}</h4>
+                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold flex-shrink-0">
                       {mealLabels[mealType]}
                     </span>
                   </div>
-                  <div className="text-[11px] text-outline flex items-center gap-2 mt-0.5">
+                  <div className="text-xs text-outline flex items-center gap-2 mt-1 font-medium">
                     <span>{item.amount} {item.unit} ({item.totalGrams || item.grams || 100}g)</span>
                     <span>•</span>
-                    <span className="font-bold text-tertiary">{item.calculatedCalories || item.calories || 0} קק"ל</span>
+                    <span className="font-extrabold text-tertiary">{item.calculatedCalories || item.calories || 0} קק"ל</span>
                     <span>•</span>
                     <span>{item.calculatedProtein || item.protein || 0}g חלבון</span>
                   </div>
@@ -89,10 +89,10 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
               {onDeleteItem && (
                 <button
                   onClick={() => onDeleteItem(mealType, item.logId || item.id || '')}
-                  className="p-1.5 text-outline hover:text-error hover:bg-error-container/20 rounded-lg transition-all"
+                  className="p-2 text-outline hover:text-error hover:bg-error-container/20 rounded-xl transition-all"
                   title="הסר מהיומן"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-4.5 h-4.5" />
                 </button>
               )}
             </div>

@@ -15,8 +15,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   onOpenQuickAdd,
 }) => {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface-container-lowest/95 backdrop-blur-lg border-t border-surface-container-high shadow-[0_-4px_24px_0_rgba(0,107,95,0.06)] pt-1.5 px-4 bottom-nav-safe">
-      <div className="w-full max-w-[480px] mx-auto flex items-center justify-between">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface-container-lowest/95 backdrop-blur-lg border-t border-surface-container-high shadow-[0_-4px_24px_0_rgba(0,107,95,0.06)] pt-2 px-4 bottom-nav-safe">
+      <div className="w-full max-w-[540px] sm:max-w-xl mx-auto flex items-center justify-between">
         {/* דף הבית */}
         <button
           onClick={() => onTabChange('dashboard')}
@@ -27,13 +27,13 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           }`}
         >
           <div
-            className={`p-1.5 rounded-xl transition-all ${
-              activeTab === 'dashboard' ? 'bg-primary/10 text-primary' : ''
+            className={`p-2 rounded-xl transition-all ${
+              activeTab === 'dashboard' ? 'bg-primary/15 text-primary' : ''
             }`}
           >
             <Home className="w-5 h-5" />
           </div>
-          <span className="text-[11px] mt-0.5">דף הבית</span>
+          <span className="text-xs font-bold mt-0.5">דף הבית</span>
         </button>
 
         {/* יומן */}
@@ -46,23 +46,23 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           }`}
         >
           <div
-            className={`p-1.5 rounded-xl transition-all ${
-              activeTab === 'diary' ? 'bg-primary/10 text-primary' : ''
+            className={`p-2 rounded-xl transition-all ${
+              activeTab === 'diary' ? 'bg-primary/15 text-primary' : ''
             }`}
           >
             <BookOpen className="w-5 h-5" />
           </div>
-          <span className="text-[11px] mt-0.5">יומן</span>
+          <span className="text-xs font-bold mt-0.5">יומן</span>
         </button>
 
         {/* כפתור הוספה ראשי מודגש */}
-        <div className="flex-1 flex justify-center -mt-5">
+        <div className="flex-1 flex justify-center -mt-6">
           <button
             onClick={onOpenQuickAdd}
-            aria-label="הוסף מזון או סרוק ברקוד"
-            className="w-12 h-12 rounded-full bg-gradient-to-tr from-tertiary to-tertiary-container text-white shadow-lg shadow-tertiary/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
+            aria-label="הוסף מזון או ארוחה"
+            className="w-13 h-13 rounded-full bg-gradient-to-tr from-tertiary to-tertiary-container text-white shadow-xl shadow-tertiary/35 flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
           >
-            <PlusCircle className="w-7 h-7" />
+            <PlusCircle className="w-8 h-8 stroke-[2.2]" />
           </button>
         </div>
 
@@ -76,13 +76,13 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           }`}
         >
           <div
-            className={`p-1.5 rounded-xl transition-all ${
-              activeTab === 'plans' ? 'bg-primary/10 text-primary' : ''
+            className={`p-2 rounded-xl transition-all ${
+              activeTab === 'plans' ? 'bg-primary/15 text-primary' : ''
             }`}
           >
             <BookMarked className="w-5 h-5" />
           </div>
-          <span className="text-[11px] mt-0.5">תפריטים</span>
+          <span className="text-xs font-bold mt-0.5">תפריטים</span>
         </button>
 
         {/* פרופיל */}
@@ -95,13 +95,13 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           }`}
         >
           <div
-            className={`p-1.5 rounded-xl transition-all ${
-              activeTab === 'profile' ? 'bg-primary/10 text-primary' : ''
+            className={`p-2 rounded-xl transition-all ${
+              activeTab === 'profile' ? 'bg-primary/15 text-primary' : ''
             }`}
           >
             <User className="w-5 h-5" />
           </div>
-          <span className="text-[11px] mt-0.5">פרופיל</span>
+          <span className="text-xs font-bold mt-0.5">פרופיל</span>
         </button>
       </div>
     </nav>

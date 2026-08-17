@@ -404,7 +404,7 @@ export function App() {
       />
 
       {/* Main Container with Page Fade Transition & iPhone Safe Bottom Scroll */}
-      <main className="flex-1 w-full max-w-[480px] mx-auto px-4 pt-3 main-scroll-padding">
+      <main className="flex-1 w-full max-w-[540px] sm:max-w-xl mx-auto px-4 pt-3.5 main-scroll-padding">
         <div key={activeTab} className="animate-page-enter">
           {activeTab === 'dashboard' && (
             <DashboardView

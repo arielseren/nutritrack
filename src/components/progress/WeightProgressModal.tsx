@@ -184,27 +184,27 @@ export const WeightProgressModal: React.FC<WeightProgressModalProps> = ({
         <div className="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1 text-xs">
           
           {/* 3 Main Stat Cards */}
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2.5">
             {/* Initial Weight */}
-            <div className="p-3 rounded-2xl bg-surface-container-low border border-surface-container-high text-center">
-              <span className="text-[11px] font-bold text-outline block mb-0.5">משקל התחלתי</span>
-              <span className="font-headline text-base sm:text-lg font-bold text-on-surface">
+            <div className="p-3.5 sm:p-4 rounded-3xl bg-surface-container-low border border-surface-container-high text-center">
+              <span className="text-xs font-bold text-outline block mb-1">משקל התחלתי</span>
+              <span className="font-headline text-lg sm:text-xl font-black text-on-surface">
                 {initialWeight} <span className="text-xs font-normal text-outline">ק"ג</span>
               </span>
             </div>
 
             {/* Current Weight */}
-            <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20 text-center shadow-xs">
-              <span className="text-[11px] font-bold text-primary block mb-0.5">משקל נוכחי</span>
-              <span className="font-headline text-lg sm:text-xl font-extrabold text-primary">
-                {currentWeight} <span className="text-xs font-normal">ק"ג</span>
+            <div className="p-3.5 sm:p-4 rounded-3xl bg-primary/10 border border-primary/20 text-center shadow-xs">
+              <span className="text-xs font-bold text-primary block mb-1">משקל נוכחי</span>
+              <span className="font-headline text-xl sm:text-2xl font-black text-primary">
+                {currentWeight} <span className="text-xs font-semibold">ק"ג</span>
               </span>
             </div>
 
             {/* Target Weight */}
-            <div className="p-3 rounded-2xl bg-surface-container-low border border-surface-container-high text-center">
-              <span className="text-[11px] font-bold text-outline block mb-0.5">משקל יעד</span>
-              <span className="font-headline text-base sm:text-lg font-bold text-tertiary">
+            <div className="p-3.5 sm:p-4 rounded-3xl bg-surface-container-low border border-surface-container-high text-center">
+              <span className="text-xs font-bold text-outline block mb-1">משקל יעד</span>
+              <span className="font-headline text-lg sm:text-xl font-black text-tertiary">
                 {targetWeight} <span className="text-xs font-normal text-outline">ק"ג</span>
               </span>
             </div>
