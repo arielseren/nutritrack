@@ -124,6 +124,12 @@
   --color-surface-container-highest: var(--color-surface-container-highest);
 }
 
+html {
+  font-size: 16.5px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+
 body {
   font-family: var(--font-body);
   background-color: var(--color-background);

@@ -120,7 +120,8 @@ export const NotificationService = {
     waterEnabled: boolean,
     waterGlasses: number,
     waterTarget: number,
-    mealTimes: { breakfast?: string; lunch?: string; dinner?: string }
+    mealTimes: { breakfast?: string; lunch?: string; dinner?: string },
+    weeklyWeightReminder?: { enabled?: boolean; day?: number; time?: string }
   ) {
     if (this.getPermission() !== 'granted') return;
 
@@ -167,14 +168,19 @@ export const NotificationService = {
       }
     }
 
-    if (mealTimes.dinner && mealTimes.dinner === currentTimeStr) {
-      const key = `nutritrack_meal_notice_dinner_${now.toISOString().split('T')[0]}`;
+    // 3. Weekly Weight Update Reminder
+    if (
+      weeklyWeightReminder?.enabled &&
+      now.getDay() === (weeklyWeightReminder.day ?? 0) &&
+      (!weeklyWeightReminder.time || weeklyWeightReminder.time === currentTimeStr)
+    ) {
+      const key = `nutritrack_weight_notice_${now.toISOString().split('T')[0]}`;
       if (!localStorage.getItem(key)) {
         localStorage.setItem(key, 'sent');
         this.sendNotification(
-          '🍽️ זמן לארוחת ערב!',
-          'סכם את היום ביומן התזונה ובדוק את עמידתך ביעדי הקלוריות והחלבון.',
-          { tag: 'nutritrack-meal-dinner' }
+          '⚖️ תזכורת שקילה שבועית - NutriTrack',
+          'בוקר טוב! זה הזמן לעדכן את משקלך השבועי כדי לעקוב אחר קצב ההתקדמות לעבר היעד.',
+          { tag: 'nutritrack-weight-reminder' }
         );
       }
     }

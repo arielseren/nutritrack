@@ -11,6 +11,8 @@ import {
   ChevronDown,
   ChevronUp,
   Edit3,
+  Scale,
+  TrendingDown,
 } from 'lucide-react';
 import type { DayLog, UserProfile, MealType, WorkoutDayType } from '../../types';
 import {
@@ -30,6 +32,7 @@ interface DashboardViewProps {
   onOpenQuickAdd: () => void;
   onOpenMealPlans: () => void;
   onOpenProfile: () => void;
+  onOpenWeightProgress?: () => void;
   onNavigateToDiary: () => void;
   onUpdateWater: (glasses: number) => void;
   onDeleteItem: (mealType: MealType, logId: string) => void;
@@ -48,6 +51,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onOpenQuickAdd,
   onOpenMealPlans,
   onOpenProfile,
+  onOpenWeightProgress,
   onNavigateToDiary,
   onUpdateWater,
   onDeleteItem,
@@ -202,6 +206,36 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <span className="text-xs font-bold text-on-surface">תפריט מוכן</span>
         </button>
       </section>
+
+      {/* Quick Weight & Progress Banner */}
+      {onOpenWeightProgress && (
+        <section
+          onClick={onOpenWeightProgress}
+          className="p-3 rounded-2xl bg-surface-container-lowest ambient-shadow soft-ui-border flex items-center justify-between gap-2 cursor-pointer hover:bg-surface-container-low transition-all active:scale-98"
+        >
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold">
+              <Scale className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-bold text-on-surface">מעקב משקל וגרפים</span>
+                <span className="text-[10px] px-1.5 py-0.2 bg-primary/10 text-primary rounded-md font-bold">
+                  {userProfile.currentWeight} ק"ג
+                </span>
+              </div>
+              <p className="text-[10px] text-outline">
+                התחלה: {userProfile.initialWeight || userProfile.currentWeight}kg • יעד: {userProfile.targetWeight}kg
+              </p>
+            </div>
+          </div>
+
+          <span className="text-[11px] font-bold text-primary flex items-center gap-1">
+            <span>גרף התקדמות</span>
+            <TrendingDown className="w-3.5 h-3.5" />
+          </span>
+        </section>
+      )}
 
       {/* Calorie Ring with Adjusted Daily Target */}
       <CalorieRing

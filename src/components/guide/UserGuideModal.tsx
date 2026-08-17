@@ -13,6 +13,7 @@ import {
   Smartphone,
   ChevronDown,
   ChevronUp,
+  Scale,
 } from 'lucide-react';
 
 interface UserGuideModalProps {
@@ -236,6 +237,27 @@ export const UserGuideModal: React.FC<UserGuideModalProps> = ({
             <li><strong className="text-on-surface">באייפון (Safari iOS):</strong> לחץ על כפתור השיתוף בתחתית ובחר <em>"הוסף למסך הבית"</em>.</li>
             <li><strong className="text-on-surface">באנדרואיד (Chrome):</strong> לחץ על תפריט 3 הנקודות ובחר <em>"התקן אפליקציה"</em> או <em>"הוסף למסך הבית"</em>.</li>
             <li><strong className="text-on-surface">מצב יום / לילה:</strong> מעבר בלחיצה אחת על סמל השמש / ירח בסרגל העליון לנוחות מרבית בחושך.</li>
+          </ul>
+        </div>
+      ),
+    },
+    {
+      id: 'weight_tracking',
+      title: '9. מעקב משקל, גרפים ותזכורת שקילה שבועית',
+      badge: 'משקל וגרפים',
+      icon: <Scale className="w-4 h-4 text-primary" />,
+      summary: 'מעקב אחר משקל התחלתי, משקל נוכחי ומשקל יעד, גרף מגמה ותזכורות',
+      keywords: ['משקל', 'שקילה', 'גרף', 'התקדמות', 'יעד', 'משקל התחלתי', 'משקל יעד', 'תזכורת שקילה'],
+      content: (
+        <div className="space-y-2.5 text-xs text-on-surface leading-relaxed">
+          <p>
+            מסך <strong>"מעקב משקל, גרפים והתקדמות"</strong> (נגיש מדף הבית ומהפרופיל) מאפשר לך:
+          </p>
+          <ul className="space-y-1.5 list-disc list-inside text-outline">
+            <li><strong className="text-on-surface">3 מדדי מפתח:</strong> משקל התחלתי, משקל נוכחי ומשקל יעד עם חישוב אחוז ההתקדמות וק״ג שנותרו.</li>
+            <li><strong className="text-on-surface">גרף מגמה אינטראקטיבי:</strong> מציג את עקומת השינוי לאורך הזמן ביחס לקו היעד.</li>
+            <li><strong className="text-on-surface">רישום שקילה מהיר:</strong> הזנת משקל (ק"ג), תאריך והערות בכל שקילה.</li>
+            <li><strong className="text-on-surface">תזכורת שקילה שבועית:</strong> קבלת התראת Push שבועית ביום ובשעה שתבחר (למשל: כל יום ראשון ב-08:00).</li>
           </ul>
         </div>
       ),

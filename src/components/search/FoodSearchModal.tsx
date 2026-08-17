@@ -15,6 +15,8 @@ import {
   Flame,
   Utensils,
   Layers,
+  Edit2,
+  Trash2,
 } from 'lucide-react';
 import type { FoodCategory, FoodItem, MealType } from '../../types';
 import { calculateItemNutrition } from '../../services/nutritionCalculator';
@@ -26,6 +28,8 @@ interface FoodSearchModalProps {
   defaultMealType?: MealType;
   onLogFood: (mealType: MealType, food: FoodItem, grams: number, amount: number, unit: string) => void;
   onOpenCustomFoodModal: () => void;
+  onEditCustomFood?: (food: FoodItem) => void;
+  onDeleteCustomFood?: (foodId: string) => void;
   onToggleFavorite: (foodId: string) => void;
   onLogDirectMeal?: (
     mealType: MealType,
@@ -45,6 +49,8 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
   defaultMealType = 'lunch',
   onLogFood,
   onOpenCustomFoodModal,
+  onEditCustomFood,
+  onDeleteCustomFood,
   onToggleFavorite,
   onLogDirectMeal,
 }) => {
@@ -492,6 +498,41 @@ export const FoodSearchModal: React.FC<FoodSearchModalProps> = ({
                       </div>
 
                       <div className="flex items-center gap-1.5">
+                        {food.isCustom && (
+                          <>
+                            {onEditCustomFood && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onEditCustomFood(food);
+                                }}
+                                className="p-1.5 rounded-xl hover:bg-surface-container text-outline hover:text-primary transition-all"
+                                title="ערוך מאכל אישי"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                            )}
+                            {onDeleteCustomFood && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (window.confirm(`האם אתה בטוח שברצונך למחוק את "${food.name}" ממאגר המאכלים שלך?`)) {
+                                    onDeleteCustomFood(food.id);
+                                    if (selectedFood?.id === food.id) {
+                                      setSelectedFood(null);
+                                    }
+                                  }
+                                }}
+                                className="p-1.5 rounded-xl hover:bg-surface-container text-outline hover:text-error transition-all"
+                                title="מחק מאכל אישי"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            )}
+                          </>
+                        )}
                         <button
                           type="button"
                           onClick={(e) => {

@@ -88,6 +88,14 @@ export interface DayLog {
   notes?: string;
 }
 
+export interface WeightLogEntry {
+  id: string;
+  date: string; // YYYY-MM-DD
+  weight: number; // kg
+  note?: string;
+  timestamp?: string; // HH:mm
+}
+
 export interface UserProfile {
   id?: string;
   name: string;
@@ -100,8 +108,10 @@ export interface UserProfile {
   gender: 'male' | 'female';
   age: number;
   height: number; // cm
+  initialWeight?: number; // Starting weight in kg
   currentWeight: number; // kg
   targetWeight: number; // kg
+  weightLogs?: WeightLogEntry[];
   activityLevel: ActivityLevel;
   goal: FitnessGoal;
   dailyCalorieTarget: number;
@@ -119,6 +129,9 @@ export interface UserProfile {
   mealReminderBreakfast?: string; // HH:mm
   mealReminderLunch?: string;
   mealReminderDinner?: string;
+  weeklyWeightReminderEnabled?: boolean;
+  weeklyWeightReminderDay?: number; // 0=Sunday, 1=Monday...
+  weeklyWeightReminderTime?: string; // HH:mm
 }
 
 export interface MealPlanPreset {

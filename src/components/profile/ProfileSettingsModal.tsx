@@ -21,6 +21,7 @@ import {
   Dumbbell,
   Flame,
   BookOpen,
+  Scale,
 } from 'lucide-react';
 import type { UserProfile, FitnessGoal, ActivityLevel, WorkoutDayType } from '../../types';
 import {
@@ -42,6 +43,7 @@ interface ProfileSettingsModalProps {
   onLogout?: () => void;
   onOpenAuth?: () => void;
   onOpenUserGuide?: () => void;
+  onOpenWeightProgress?: () => void;
   isInline?: boolean;
 }
 
@@ -58,6 +60,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
   onLogout,
   onOpenAuth,
   onOpenUserGuide,
+  onOpenWeightProgress,
   isInline = false,
 }) => {
   // Active open accordion section
@@ -303,6 +306,32 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                   </div>
                 </div>
                 <span className="text-xs font-bold text-primary">פתח ←</span>
+              </button>
+            </div>
+          )}
+
+          {/* Weight & Progress Tracker Quick Banner */}
+          {onOpenWeightProgress && (
+            <div className="pb-1">
+              <button
+                type="button"
+                onClick={onOpenWeightProgress}
+                className="w-full p-3 rounded-2xl bg-secondary/10 hover:bg-secondary/15 border border-secondary/20 flex items-center justify-between transition-all group"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-secondary text-on-secondary flex items-center justify-center font-bold shadow-xs">
+                    <Scale className="w-4 h-4" />
+                  </div>
+                  <div className="text-right">
+                    <span className="font-bold text-xs text-on-surface block group-hover:underline">
+                      מעקב משקל, גרפים והתקדמות ⚖️
+                    </span>
+                    <span className="text-[10px] text-outline block">
+                      התחלה: {formData.initialWeight || formData.currentWeight}kg • נוכחי: <strong>{formData.currentWeight}kg</strong> • יעד: {formData.targetWeight}kg
+                    </span>
+                  </div>
+                </div>
+                <span className="text-xs font-bold text-secondary">פתח גרפים ←</span>
               </button>
             </div>
           )}

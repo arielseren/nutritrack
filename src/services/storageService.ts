@@ -31,8 +31,18 @@ export const DEFAULT_USER_PROFILE: UserProfile = {
   gender: 'male',
   age: 28,
   height: 178,
+  initialWeight: 76,
   currentWeight: 76,
   targetWeight: 72,
+  weightLogs: [
+    {
+      id: 'w_init',
+      date: getTodayDateString(),
+      weight: 76,
+      note: 'משקל התחלתי',
+      timestamp: '08:00',
+    },
+  ],
   activityLevel: 'moderate',
   goal: 'lose_weight',
   dailyCalorieTarget: 2000,
@@ -47,6 +57,9 @@ export const DEFAULT_USER_PROFILE: UserProfile = {
   mealReminderBreakfast: '08:30',
   mealReminderLunch: '13:30',
   mealReminderDinner: '19:30',
+  weeklyWeightReminderEnabled: true,
+  weeklyWeightReminderDay: 0, // יום ראשון
+  weeklyWeightReminderTime: '08:00',
 };
 
 export const INITIAL_TODAY_LOG: DayLog = {
@@ -511,6 +524,42 @@ export const StorageService = {
     return newFood;
   },
 
+  updateCustomFood(food: FoodItem, userId?: string): FoodItem {
+    const uid = userId || this.getActiveUserId();
+    const key = FOOD_DB_PREFIX + uid;
+
+    try {
+      const customData = localStorage.getItem(key);
+      const customFoods: FoodItem[] = customData ? JSON.parse(customData) : [];
+      const idx = customFoods.findIndex((f) => f.id === food.id);
+      if (idx >= 0) {
+        customFoods[idx] = { ...food, isCustom: true };
+      } else {
+        customFoods.unshift({ ...food, isCustom: true });
+      }
+      localStorage.setItem(key, JSON.stringify(customFoods));
+    } catch (e) {
+      console.warn(e);
+    }
+    return food;
+  },
+
+  deleteCustomFood(foodId: string, userId?: string): FoodItem[] {
+    const uid = userId || this.getActiveUserId();
+    const key = FOOD_DB_PREFIX + uid;
+
+    try {
+      const customData = localStorage.getItem(key);
+      const customFoods: FoodItem[] = customData ? JSON.parse(customData) : [];
+      const updated = customFoods.filter((f) => f.id !== foodId);
+      localStorage.setItem(key, JSON.stringify(updated));
+      return [...updated, ...INITIAL_FOOD_DATABASE];
+    } catch (e) {
+      console.warn(e);
+      return this.getFoodDatabase(uid);
+    }
+  },
+
   toggleFavorite(foodId: string, userId?: string): void {
     const uid = userId || this.getActiveUserId();
     const key = FOOD_DB_PREFIX + uid;
@@ -531,6 +580,69 @@ export const StorageService = {
         console.warn(e);
       }
     }
+  },
+
+  // Weight Tracking & Progress (Per-User Isolated)
+  logWeight(
+    weight: number,
+    date?: string,
+    note?: string,
+    userId?: string
+  ): UserProfile {
+    const uid = userId || this.getActiveUserId();
+    const profile = this.getProfile(uid);
+    const dateStr = date || getTodayDateString();
+
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    const newEntry: import('../types').WeightLogEntry = {
+      id: 'w_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+      date: dateStr,
+      weight: Number(weight),
+      note: note ? note.trim() : undefined,
+      timestamp: timeStr,
+    };
+
+    const currentLogs = Array.isArray(profile.weightLogs) ? [...profile.weightLogs] : [];
+    
+    // Replace if same date or insert sorted
+    const existingIdx = currentLogs.findIndex((l) => l.date === dateStr);
+    if (existingIdx >= 0) {
+      currentLogs[existingIdx] = newEntry;
+    } else {
+      currentLogs.push(newEntry);
+    }
+
+    // Sort logs chronologically (newest first for display, or oldest first)
+    currentLogs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    const updatedProfile: UserProfile = {
+      ...profile,
+      initialWeight: profile.initialWeight || profile.currentWeight || weight,
+      currentWeight: Number(weight),
+      weightLogs: currentLogs,
+    };
+
+    this.saveProfile(updatedProfile);
+    return updatedProfile;
+  },
+
+  deleteWeightLog(logId: string, userId?: string): UserProfile {
+    const uid = userId || this.getActiveUserId();
+    const profile = this.getProfile(uid);
+    const currentLogs = (profile.weightLogs || []).filter((l) => l.id !== logId);
+
+    const latestWeight = currentLogs.length > 0 ? currentLogs[0].weight : profile.initialWeight || profile.currentWeight;
+
+    const updatedProfile: UserProfile = {
+      ...profile,
+      currentWeight: latestWeight,
+      weightLogs: currentLogs,
+    };
+
+    this.saveProfile(updatedProfile);
+    return updatedProfile;
   },
 
   // Notifications (Per-User Isolated)

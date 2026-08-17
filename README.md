@@ -1,61 +1,52 @@
 # 🥗 NutriTrack - Daily Nutrition & Calorie Tracker
 
-[![Live App](https://img.shields.io/badge/Render-Live%20App-teal?style=for-the-badge&logo=render)](https://nutritrack-app-ck2v.onrender.com)
-[![React 19](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)](https://react.dev)
-[![Vite 8](https://img.shields.io/badge/Vite-8-purple?style=for-the-badge&logo=vite)](https://vitejs.dev)
-[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4-38bdf8?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com)
-[![PWA Ready](https://img.shields.io/badge/PWA-Installable-green?style=for-the-badge&logo=pwa)](https://nutritrack-app-ck2v.onrender.com)
-
-אפליקציית ווב ו-PWA מתקדמת למעקב תזונה יומי, ניהול קלוריות, מקרואים, שתיית מים, התראות Push חכמות, אימות ביומטרי (טביעת אצבע), תהליך קליטה אינטראקטיבי (Onboarding), תמיכה בעלייה נקייה במסת שריר (Lean Bulk) ובונה תפריטים מותאמים אישית בעברית מלאה (RTL). נבנתה במלואה בהשראת מסכי ה-UI מפרויקט ה-**Stitch** ("מעקב תזונה יומי").
+אפליקציית ווב ו-PWA מתקדמת למעקב תזונה יומי, ניהול קלוריות, מקרואים, מעקב משקל שבועי וגרפי התקדמות, שתיית מים, התראות Push חכמות, אימות ביומטרי (טביעת אצבע), תהליך קליטה אינטראקטיבי (Onboarding), תמיכה בעלייה נקייה במסת שריר (Lean Bulk) ובונה תפריטים מותאמים אישית בעברית מלאה (RTL).
 
 ---
 
-## 🌐 קישורים חיים
+## 🌐 קישורים חיים ופריסה
 
-- **🔗 אפליקציה חיה ב-Render:** [https://nutritrack-app-ck2v.onrender.com](https://nutritrack-app-ck2v.onrender.com)
-- **📂 מאגר GitHub:** [https://github.com/arielseren/nutritrack](https://github.com/arielseren/nutritrack)
-
----
-
-## ✨ תכונות מרכזיות (Key Features)
-
-- 🚀 **אשף קליטת משתמש חדש (Onboarding Wizard ב-3 שלבים):** הזנת פרטים אישיים, מדדי גוף, מטרת תזונה וחישוב יעדים מדעי אוטומטי, יחד עם התחלה של יומן נקי לחלוטין ללא מידע דמה מזויף.
-- 💪 **עלייה נקייה במסת שריר (Lean Bulk):** מודל מדעי ייעודי המחשב עודף קלורי מתון (+250 קק"ל) עם חלבון גבוה (32% מסך הקלוריות / 2.2g לק"ג) לתוספת שריר נקייה.
-- 🖐️ **מדריך כמויות חכם ללא משקל (שיטת כף היד):** אפשרות מעקב קלה למי שלא שוקל מזון במאזניים (כף יד = חלבון, אגרוף = פחמימה, אגודל = שומן, שתי כפות = ירקות, או לפי יחידות מנה שלמות).
-- 🖥️ **תצוגת כרטיסיות מותאמת לדסקטופ ולמובייל:** הצגה טבעית (Inline) של מסכי הפרופיל והתפריטים ללא חיתוך או כיסוי כהה.
-- 📊 **דף הבית חכם (Smart Home):** טבעת קלוריות מונפשת, מדדי חלבון/פחמימה/שומן, מעקב 8 כוסות מים עם אפקט קונפטי, ובאנר אימונים קומפקטי עם כפתור שינוי.
-- 📖 **יומן תזונה יומי (Day Diary):** חלוקה ל-4 ארוחות (בוקר, צהריים, ערב, נשנושים) עם סיכום מאקרו וניווט תאריכים.
-- 🥗 **מתכנן תפריט שבועי ורשימת קניות חכמה (Weekly Meal Planner & Grocery List):** תכנון מלא ל-7 ימי השבוע, שכפול תפריטים, החלה בלחיצה אחת על כל 7 הימים ביומן, והפקת רשימת קניות מרוכזת עם שיתוף לוואטסאפ.
-- ⚡ **הזנה ישירה של קלוריות ומאקרו ללא חישוב 100 גרם (Direct Macro & Meal Logging):** אפשרות להזין ישירות את סך הקלוריות, החלבון, הפחמימות והשומן של המנה ולהוסיף מיד ליומן ללא חישובי גרמים או מאזניים, עם כפתור הוספה נעוץ וברור.
-- ⚡ **סייקלינג קלוריות יומי והתאמת אימונים (Workout & Calorie Cycling):** התאמת קלוריות ופחמימות דינמית לפי סוג ועצימות האימון (מנוחה, כוח, אימון כבד, אירובי, HIIT) ולוח שבועי רספונסיבי מובנה.
-- 🔒 **בידוד נתונים מלא לכל משתמש (User-Scoped Data Isolation):** הפרדה מוחלטת של יומנים, מאכלים, תפריטים אישיים, מעקב מים והתראות עבור כל משתמש בנפרד (מעבר בין חשבונות מציג אך ורק את הנתונים שהמשתמש הספציפי הזין).
-- 👆 **אימות ביומטרי (WebAuthn Biometric Auth):** התחברות מהירה בטביעת אצבע / FaceID / TouchID ומערכת ניהול משתמשים.
-- 🔔 **התראות Web Push ותזכורות עצמאיות:** הגדרת שעות מדויקות לארוחות בוקר, צהריים, ערב ושתיית מים ישירות מפעמון ההתראות.
-- 🧆 **מאגר מזון ישראלי עשיר:** מגוון קציצות (בקר, עוף, דגים, ירק, עדשים), שווארמה, שניצל, פתיתים, מג'דרה, ממרחים, גבינות ועוד.
-- 📖 **מדריך למשתמש אינטראקטיבי מובנה (In-App User Guide):** מרכז עזרה והדרכה עם 8 פרקים מקיפים, אקורדיונים וחיפוש נושאים מהיר (סייקלינג, מתכנן שבועי, שיטת כף היד, אבטחה ביומטרית ועוד).
-- 🌙 **מצב לילה ו-PWA:** תמיכה מלאה בהתקנה למסך הבית בטלפון ומעבר בלחיצה בין Light ל-Dark Mode.
-- 🎨 **אייקונים וקטוריים נקיים:** שימוש באייקוני Lucide React מודרניים ואנימציות חלקות (`animate-page-enter`, `animate-modal-sheet`).
+- **🔗 כתובת האפליקציה החיה (Render Live HTTPS):**  
+  [https://nutritrack-app-ck2v.onrender.com](https://nutritrack-app-ck2v.onrender.com)
+- **📂 מאגר הקוד ב-GitHub:**  
+  [https://github.com/arielseren/nutritrack](https://github.com/arielseren/nutritrack)
 
 ---
 
-## 💻 הרצה מקומית (Local Development)
+## 🛠️ סטאק טכנולוגי (Tech Stack)
+
+- **Frontend Framework:** React 19 (TypeScript)
+- **Bundler & Build Tool:** Vite 8
+- **Styling:** Tailwind CSS v4 + Dynamic CSS Variables (Light & Dark Theme)
+- **Design Tokens & Brand:** גווני Emerald Teal (`#006b5f`, `#2dd4bf`) וענבר (`#ffab6d`), Glassmorphism, Rounded Squircles
+- **Typography & Fonts:** Hanken Grotesk, Plus Jakarta Sans, Heebo (Google Fonts)
+- **Icons & Visual Effects:** Lucide React (Clean Vector Icons), Google Material Symbols, Canvas Confetti
+- **Biometric Security:** WebAuthn API (`navigator.credentials`) להתחברות בטביעת אצבע / FaceID
+- **Push & Service Worker:** Service Worker API (`public/sw.js`) + Notification API לתזכורות מים, ארוחות ושקילה שבועית
+- **Data Persistence:** LocalStorage API + Local JSON Backup Export / Import
+
+---
+
+## 🌟 יכולות מרכזיות
+
+1. **מעקב משקל שבועי, גרפים והתקדמות:** משקל התחלתי, משקל נוכחי ומשקל יעד, גרף מגמה אינטראקטיבי ותזכורת שקילה שבועית.
+2. **בונה תפריטים מרווח עם יצירת מאכל והזנה ישירה על המקום.**
+3. **עריכה ומחיקה מלאה למאכלים אישיים ולתפריטים מותאמים.**
+4. **פונט מוגדל וקריא בכל המכשירים והרזולוציות.**
+5. **אשף קליטת משתמש חדש (Onboarding) עם יומן נקי.**
+6. **תמיכה בעלייה נקייה במסת שריר (Lean Bulk).**
+7. **הזנה ישירה של קלוריות ומאקרו ללא חישוב 100 גרם ושיטת כף היד.**
+8. **מתכנן תפריט שבועי (7 ימים) ורשימת קניות שבועית חכמה עם שיתוף לוואטסאפ.**
+9. **סייקלינג קלוריות יומי והתאמה לאימונים.**
+10. **בידוד נתונים מוחלט לכל משתמש ואבטחה ביומטרית (WebAuthn).**
+11. **התראות Web Push חכמות ומדריך למשתמש אינטראקטיבי (9 פרקים).**
+
+---
+
+## 💻 פיתוח מקומי
 
 ```bash
-# התקנת תלויות
 npm install
-
-# הרצת שרת פיתוח
 npm run dev
-
-# פתיחה למכשירים ברשת המקומית
-npm run dev -- --host
-
-# בניית גרסת ייצור
 npm run build
 ```
-
----
-
-## 🚀 פריסה אוטומטית (Deployment)
-
-הפרויקט מחובר ב-Continuous Deployment ל-Render: כל Push לענף `master` ב-GitHub פורס אוטומטית את האפליקציה ל-HTTPS בכתובת החיה.

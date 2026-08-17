@@ -16,6 +16,7 @@ import { NotificationsModal } from './components/notifications/NotificationsModa
 import { DatePickerModal } from './components/common/DatePickerModal';
 import { AuthModal } from './components/auth/AuthModal';
 import { UserGuideModal } from './components/guide/UserGuideModal';
+import { WeightProgressModal } from './components/progress/WeightProgressModal';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 export function App() {
@@ -31,12 +32,14 @@ export function App() {
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [searchDefaultMealType, setSearchDefaultMealType] = useState<MealType>('lunch');
   const [isCustomFoodModalOpen, setIsCustomFoodModalOpen] = useState(false);
+  const [editingCustomFood, setEditingCustomFood] = useState<FoodItem | null>(null);
   const [isMealPlansOpen, setIsMealPlansOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isNotificationsModalOpen, setIsNotificationsModalOpen] = useState(false);
   const [isDatePickerModalOpen, setIsDatePickerModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isUserGuideOpen, setIsUserGuideOpen] = useState(false);
+  const [isWeightProgressModalOpen, setIsWeightProgressModalOpen] = useState(false);
 
   // Toast feedback state
   const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
@@ -56,6 +59,11 @@ export function App() {
           breakfast: userProfile.mealReminderBreakfast,
           lunch: userProfile.mealReminderLunch,
           dinner: userProfile.mealReminderDinner,
+        },
+        {
+          enabled: userProfile.weeklyWeightReminderEnabled && userProfile.pushNotificationsEnabled,
+          day: userProfile.weeklyWeightReminderDay,
+          time: userProfile.weeklyWeightReminderTime,
         }
       );
     }, 60000);
@@ -297,6 +305,47 @@ export function App() {
     showToast(`מאכל חדש נוסף למאגר: ${saved.name}`);
   };
 
+  const handleUpdateCustomFood = (updatedFood: FoodItem) => {
+    StorageService.updateCustomFood(updatedFood, userProfile.id);
+    setFoodDatabase(StorageService.getFoodDatabase(userProfile.id));
+    setEditingCustomFood(null);
+    showToast(`המאכל "${updatedFood.name}" עודכן בהצלחה!`);
+  };
+
+  const handleDeleteCustomFood = (foodId: string) => {
+    const updated = StorageService.deleteCustomFood(foodId, userProfile.id);
+    setFoodDatabase(updated);
+    showToast('המאכל נמחק ממאגר המאכלים שלך');
+  };
+
+  const handleEditCustomFood = (food: FoodItem) => {
+    setEditingCustomFood(food);
+    setIsCustomFoodModalOpen(true);
+  };
+
+  const handleSaveWeight = (weight: number, date?: string, note?: string) => {
+    const updated = StorageService.logWeight(weight, date, note, userProfile.id);
+    syncUserData(updated);
+    showToast(`השקילה נשמרה בהצלחה (${weight} ק"ג) ⚖️`);
+  };
+
+  const handleDeleteWeightLog = (logId: string) => {
+    const updated = StorageService.deleteWeightLog(logId, userProfile.id);
+    syncUserData(updated);
+    showToast('השקילה נמחקה מההיסטוריה');
+  };
+
+  const handleUpdateWeightReminder = (settings: {
+    weeklyWeightReminderEnabled: boolean;
+    weeklyWeightReminderDay: number;
+    weeklyWeightReminderTime: string;
+  }) => {
+    const updated: UserProfile = { ...userProfile, ...settings };
+    StorageService.saveProfile(updated);
+    setUserProfile(updated);
+    showToast('הגדרות תזכורת השקילה השבועית עודכנו');
+  };
+
   const handleToggleFavorite = (foodId: string) => {
     StorageService.toggleFavorite(foodId, userProfile.id);
     setFoodDatabase(StorageService.getFoodDatabase(userProfile.id));
@@ -364,6 +413,7 @@ export function App() {
               onOpenQuickAdd={() => handleOpenQuickAdd('lunch')}
               onOpenMealPlans={() => setIsMealPlansOpen(true)}
               onOpenProfile={() => setIsProfileModalOpen(true)}
+              onOpenWeightProgress={() => setIsWeightProgressModalOpen(true)}
               onNavigateToDiary={() => setActiveTab('diary')}
               onUpdateWater={handleUpdateWater}
               onDeleteItem={handleDeleteItem}
@@ -408,6 +458,7 @@ export function App() {
               onLogout={handleLogout}
               onOpenAuth={() => setIsAuthModalOpen(true)}
               onOpenUserGuide={() => setIsUserGuideOpen(true)}
+              onOpenWeightProgress={() => setIsWeightProgressModalOpen(true)}
             />
           )}
         </div>
@@ -439,16 +490,26 @@ export function App() {
         foodDatabase={foodDatabase}
         defaultMealType={searchDefaultMealType}
         onLogFood={handleLogFood}
-        onOpenCustomFoodModal={() => setIsCustomFoodModalOpen(true)}
+        onOpenCustomFoodModal={() => {
+          setEditingCustomFood(null);
+          setIsCustomFoodModalOpen(true);
+        }}
+        onEditCustomFood={handleEditCustomFood}
+        onDeleteCustomFood={handleDeleteCustomFood}
         onToggleFavorite={handleToggleFavorite}
         onLogDirectMeal={handleLogDirectMeal}
       />
 
       <CustomFoodModal
         isOpen={isCustomFoodModalOpen}
-        onClose={() => setIsCustomFoodModalOpen(false)}
+        onClose={() => {
+          setIsCustomFoodModalOpen(false);
+          setEditingCustomFood(null);
+        }}
         defaultMealType={searchDefaultMealType}
+        editingFood={editingCustomFood}
         onSaveCustomFood={handleSaveCustomFood}
+        onUpdateCustomFood={handleUpdateCustomFood}
         onLogDirect={handleLogDirectMeal}
       />
 
@@ -474,8 +535,19 @@ export function App() {
           onLogout={handleLogout}
           onOpenAuth={() => setIsAuthModalOpen(true)}
           onOpenUserGuide={() => setIsUserGuideOpen(true)}
+          onOpenWeightProgress={() => setIsWeightProgressModalOpen(true)}
         />
       )}
+
+      {/* Weight & Progress Tracker Modal */}
+      <WeightProgressModal
+        isOpen={isWeightProgressModalOpen}
+        onClose={() => setIsWeightProgressModalOpen(false)}
+        userProfile={userProfile}
+        onSaveWeight={handleSaveWeight}
+        onDeleteWeightLog={handleDeleteWeightLog}
+        onUpdateReminderSettings={handleUpdateWeightReminder}
+      />
 
       <NotificationsModal
         isOpen={isNotificationsModalOpen}
