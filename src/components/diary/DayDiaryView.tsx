@@ -122,7 +122,7 @@ export const DayDiaryView: React.FC<DayDiaryViewProps> = ({
   ];
 
   return (
-    <div className="space-y-3.5 sm:space-y-4 pb-8 w-full max-w-full overflow-hidden">
+    <div className="space-y-3.5 sm:space-y-4 pb-8 w-full">
       {/* Date Switcher Bar */}
       <div className="p-2.5 sm:p-3 bg-surface-container-low rounded-2xl sm:rounded-3xl border border-surface-container-high flex items-center justify-between shadow-xs w-full">
         <button

@@ -89,7 +89,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   };
 
   return (
-    <div className="space-y-3.5 sm:space-y-4 pb-8 w-full max-w-full overflow-hidden">
+    <div className="space-y-3.5 sm:space-y-4 pb-8 w-full">
       {/* Greeting Banner */}
       <section className="pt-0.5 px-0.5">
         <h2 className="font-headline text-2xl sm:text-3xl font-black text-on-surface">
