@@ -1,5 +1,7 @@
 import type { MealType, FitnessGoal } from './index';
 
+export type CoachPersonaId = 'male_itai' | 'female_maya';
+
 export interface AIParsedFoodItem {
   name: string;
   amountDesc: string; // e.g. "1 חזה עוף בינוני", "כוס אורז"

@@ -31,6 +31,8 @@ import {
 import { NotificationService } from '../../services/notificationService';
 import { BiometricAuthService } from '../../services/biometricAuthService';
 import { StorageService } from '../../services/storageService';
+import { COACH_PERSONAS } from '../../data/coachPersonas';
+import type { CoachPersonaId } from '../../data/coachPersonas';
 
 interface ProfileSettingsModalProps {
   isOpen: boolean;
@@ -1133,8 +1135,59 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
             </div>
 
             {openSections.ai && (
-              <div className="mt-2.5 p-3.5 rounded-2xl bg-surface-container-lowest border border-surface-container-high space-y-3 animate-in fade-in duration-150 text-xs">
-                <div className="space-y-1.5">
+              <div className="mt-2.5 p-3.5 rounded-2xl bg-surface-container-lowest border border-surface-container-high space-y-4 animate-in fade-in duration-150 text-xs">
+                
+                {/* Persona Selector */}
+                <div className="space-y-2">
+                  <label className="text-[11px] font-bold text-outline block">
+                    יועץ / יועצת תזונה וספורט מועדפים:
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {(Object.keys(COACH_PERSONAS) as CoachPersonaId[]).map((pId) => {
+                      const persona = COACH_PERSONAS[pId];
+                      const isSelected = (formData.coachPersona || 'male_itai') === pId;
+                      return (
+                        <div
+                          key={pId}
+                          onClick={() => {
+                            const updated = { ...formData, coachPersona: pId };
+                            setFormData(updated);
+                            onSaveProfile(updated);
+                          }}
+                          className={`p-3 rounded-2xl border cursor-pointer transition-all ${
+                            isSelected
+                              ? 'bg-primary/10 border-primary shadow-xs'
+                              : 'bg-surface-container hover:bg-surface-container-high border-surface-container-high'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1.5">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xl">{persona.avatarEmoji}</span>
+                              <div>
+                                <span className="font-bold text-xs text-on-surface block leading-tight">
+                                  {persona.name}
+                                </span>
+                                <span className="text-[10px] text-outline">
+                                  {persona.roleTitle}
+                                </span>
+                              </div>
+                            </div>
+                            {isSelected && (
+                              <span className="p-1 rounded-full bg-primary text-on-primary">
+                                <Check className="w-3 h-3" />
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-outline line-clamp-2">
+                            {persona.tagline}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 pt-1 border-t border-surface-container-high">
                   <label className="text-[11px] font-bold text-outline block">
                     מפתח Google Gemini API (אופציונלי):
                   </label>

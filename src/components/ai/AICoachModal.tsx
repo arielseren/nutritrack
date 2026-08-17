@@ -3,17 +3,21 @@ import {
   X,
   Send,
   Loader2,
-  Bot,
   User,
   Brain,
   Trash2,
   Mic,
   MicOff,
+  Sparkles,
+  FileText,
+  Check,
 } from 'lucide-react';
 import type { UserProfile, DayLog, MealType } from '../../types';
 import type { AICoachMessage, AICoachMemory, AICoachSuggestedAction, AIParsedFoodItem } from '../../types/ai';
 import { AIService } from '../../services/aiService';
 import { StorageService } from '../../services/storageService';
+import { COACH_PERSONAS } from '../../data/coachPersonas';
+import type { CoachPersonaId } from '../../data/coachPersonas';
 
 interface AICoachModalProps {
   isOpen: boolean;
@@ -24,6 +28,7 @@ interface AICoachModalProps {
   onOpenMealGenerator?: () => void;
   onLogParsedItems?: (mealType: MealType, items: AIParsedFoodItem[]) => void;
   onAdjustDayTargets?: (calorieDelta: number) => void;
+  onUpdateCoachPersona?: (personaId: CoachPersonaId) => void;
 }
 
 export const AICoachModal: React.FC<AICoachModalProps> = ({
@@ -35,16 +40,36 @@ export const AICoachModal: React.FC<AICoachModalProps> = ({
   onOpenMealGenerator,
   onLogParsedItems,
   onAdjustDayTargets,
+  onUpdateCoachPersona,
 }) => {
-  const [messages, setMessages] = useState<AICoachMessage[]>(() =>
-    StorageService.getAICoachMessages(userProfile.id)
+  const [selectedPersonaId, setSelectedPersonaId] = useState<CoachPersonaId>(
+    userProfile.coachPersona || 'male_itai'
   );
+
+  const activePersona = COACH_PERSONAS[selectedPersonaId] || COACH_PERSONAS.male_itai;
+
+  const [messages, setMessages] = useState<AICoachMessage[]>(() => {
+    const existing = StorageService.getAICoachMessages(userProfile.id);
+    if (existing.length === 0) {
+      return [
+        {
+          id: `welcome_${Date.now()}`,
+          role: 'assistant',
+          content: `${activePersona.avatarEmoji} **שלום ${userProfile.name}!**\n${activePersona.welcomeMessage}`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        },
+      ];
+    }
+    return existing;
+  });
+
   const [memory, setMemory] = useState<AICoachMemory>(() =>
     StorageService.getAICoachMemory(userProfile.id)
   );
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showMemoryModal, setShowMemoryModal] = useState(false);
+  const [showPromptModal, setShowPromptModal] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -52,14 +77,55 @@ export const AICoachModal: React.FC<AICoachModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      setMessages(StorageService.getAICoachMessages(userProfile.id));
+      const storedPersona = userProfile.coachPersona || 'male_itai';
+      setSelectedPersonaId(storedPersona);
+      const history = StorageService.getAICoachMessages(userProfile.id);
+      if (history.length > 0) {
+        setMessages(history);
+      } else {
+        const persona = COACH_PERSONAS[storedPersona];
+        setMessages([
+          {
+            id: `welcome_${Date.now()}`,
+            role: 'assistant',
+            content: `${persona.avatarEmoji} **שלום ${userProfile.name}!**\n${persona.welcomeMessage}`,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          },
+        ]);
+      }
       setMemory(StorageService.getAICoachMemory(userProfile.id));
     }
-  }, [isOpen, userProfile.id]);
+  }, [isOpen, userProfile.id, userProfile.coachPersona]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
+
+  const handleSelectPersona = (newPersonaId: CoachPersonaId) => {
+    if (newPersonaId === selectedPersonaId) return;
+    setSelectedPersonaId(newPersonaId);
+
+    const updatedProfile: UserProfile = {
+      ...userProfile,
+      coachPersona: newPersonaId,
+    };
+    StorageService.saveProfile(updatedProfile);
+    if (onUpdateCoachPersona) {
+      onUpdateCoachPersona(newPersonaId);
+    }
+
+    const newPersona = COACH_PERSONAS[newPersonaId];
+    const personaSwitchMsg: AICoachMessage = {
+      id: `switch_${Date.now()}`,
+      role: 'assistant',
+      content: `${newPersona.avatarEmoji} **החלפת יועץ ל-${newPersona.name} (${newPersona.roleTitle}):**\n${newPersona.welcomeMessage}`,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    const newHistory = [...messages, personaSwitchMsg];
+    setMessages(newHistory);
+    StorageService.saveAICoachMessages(newHistory, userProfile.id);
+  };
 
   const quickQuestions = [
     { label: '🤢 מרגיש מפוצץ / כבד ולא יכול לאכול', text: 'אני מרגיש מפוצץ וכבד ולא מסוגל להמשיך לאכול את התפריט של היום. מה לעשות כדי להגיע ליעד החלבון בלי להעמיס על הבטן?' },
@@ -89,7 +155,7 @@ export const AICoachModal: React.FC<AICoachModalProps> = ({
       const { response: assistantMsg, updatedMemory } = await AIService.consultNutritionCoach(
         newHistory,
         {
-          profile: userProfile,
+          profile: { ...userProfile, coachPersona: selectedPersonaId },
           todayLog: dayLog,
           weightHistory: userProfile.weightLogs || [],
           memory,
@@ -151,7 +217,16 @@ export const AICoachModal: React.FC<AICoachModalProps> = ({
 
   const handleClearChat = () => {
     StorageService.clearAICoachHistory(userProfile.id);
-    setMessages(StorageService.getAICoachMessages(userProfile.id));
+    const persona = activePersona;
+    const fresh: AICoachMessage[] = [
+      {
+        id: `welcome_${Date.now()}`,
+        role: 'assistant',
+        content: `${persona.avatarEmoji} **שלום ${userProfile.name}!**\n${persona.welcomeMessage}`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      },
+    ];
+    setMessages(fresh);
     setMemory(StorageService.getAICoachMemory(userProfile.id));
   };
 
@@ -188,30 +263,41 @@ export const AICoachModal: React.FC<AICoachModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/65 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="w-full max-w-xl bg-surface rounded-3xl border border-surface-container-high shadow-2xl overflow-hidden flex flex-col h-[90vh] max-h-[800px]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-black/65 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="w-full max-w-xl bg-surface rounded-3xl border border-surface-container-high shadow-2xl overflow-hidden flex flex-col h-[92vh] max-h-[820px]">
+        
         {/* Modal Header */}
-        <div className="p-4 sm:p-5 border-b border-surface-container-high flex items-center justify-between bg-surface-container-low/80">
+        <div className="p-3.5 sm:p-4 border-b border-surface-container-high flex items-center justify-between bg-surface-container-low/80">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-primary to-primary-container text-on-primary flex items-center justify-center font-bold shadow-md">
-              <Bot className="w-6 h-6" />
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl overflow-hidden bg-primary/10 border border-primary/20 flex items-center justify-center text-xl shadow-xs flex-shrink-0">
+              {activePersona.avatarEmoji}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-headline font-black text-base sm:text-lg text-on-surface">
-                  מאמן תזונה וספורט AI
+                <h3 className="font-headline font-black text-sm sm:text-base text-on-surface">
+                  {activePersona.name} • {activePersona.roleTitle}
                 </h3>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
-                  פעיל
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold hidden sm:inline">
+                  {activePersona.badge}
                 </span>
               </div>
-              <p className="text-xs text-outline mt-0.5">
-                ייעוץ מותאם אישית, התמודדות עם שובע ונפיחות, וליווי מטרות
+              <p className="text-[11px] sm:text-xs text-outline mt-0.5 line-clamp-1">
+                {activePersona.tagline}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
+            {/* System Prompt / Clinical Guide Button */}
+            <button
+              onClick={() => setShowPromptModal(true)}
+              className="p-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-primary transition-colors flex items-center gap-1 text-xs font-bold"
+              title="ספר החוקים והפרוטוקול הקליני (System Prompt MD)"
+            >
+              <FileText className="w-4 h-4" />
+              <span className="hidden md:inline">פרוטוקול</span>
+            </button>
+
             {/* Memory Button */}
             <button
               onClick={() => setShowMemoryModal(true)}
@@ -226,7 +312,7 @@ export const AICoachModal: React.FC<AICoachModalProps> = ({
             <button
               onClick={handleClearChat}
               className="p-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-outline hover:text-error transition-colors"
-              title="איפוס היסטוריית שיחה"
+              title="איפוס שיחה"
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -241,8 +327,38 @@ export const AICoachModal: React.FC<AICoachModalProps> = ({
           </div>
         </div>
 
+        {/* Persona Switcher Selector Bar */}
+        <div className="px-3.5 py-2 bg-surface-container/60 border-b border-surface-container-high flex items-center justify-between gap-2 overflow-x-auto">
+          <span className="text-[11px] font-bold text-outline flex-shrink-0">
+            בחר יועץ/יועצת:
+          </span>
+
+          <div className="flex items-center gap-2">
+            {(Object.keys(COACH_PERSONAS) as CoachPersonaId[]).map((pId) => {
+              const p = COACH_PERSONAS[pId];
+              const isSelected = pId === selectedPersonaId;
+              return (
+                <button
+                  key={pId}
+                  onClick={() => handleSelectPersona(pId)}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+                    isSelected
+                      ? 'bg-primary text-on-primary shadow-xs ring-2 ring-primary/30'
+                      : 'bg-surface-container-high/60 text-on-surface hover:bg-surface-container-high'
+                  }`}
+                >
+                  <span>{p.avatarEmoji}</span>
+                  <span>{p.name}</span>
+                  <span className="text-[10px] opacity-80 hidden sm:inline">({p.gender === 'male' ? 'יועץ' : 'יועצת'})</span>
+                  {isSelected && <Check className="w-3.5 h-3.5 ms-1" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Quick Context Summary Header */}
-        <div className="px-4 py-2 bg-surface-container-low/40 border-b border-surface-container-high/60 flex items-center justify-between text-[11px] text-outline overflow-x-auto gap-3">
+        <div className="px-4 py-1.5 bg-surface-container-low/40 border-b border-surface-container-high/60 flex items-center justify-between text-[11px] text-outline overflow-x-auto gap-3">
           <div className="flex items-center gap-1.5 flex-shrink-0">
             <span className="font-bold text-on-surface">{userProfile.name}</span>
             <span>•</span>
@@ -261,7 +377,7 @@ export const AICoachModal: React.FC<AICoachModalProps> = ({
         </div>
 
         {/* Chat Messages Scroll Container */}
-        <div className="flex-1 p-4 sm:p-5 overflow-y-auto space-y-4">
+        <div className="flex-1 p-3.5 sm:p-4 overflow-y-auto space-y-3.5">
           {messages.map((msg) => {
             const isUser = msg.role === 'user';
             return (
@@ -274,15 +390,15 @@ export const AICoachModal: React.FC<AICoachModalProps> = ({
                   className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 font-bold text-xs shadow-xs ${
                     isUser
                       ? 'bg-primary text-on-primary'
-                      : 'bg-primary/10 text-primary border border-primary/20'
+                      : 'bg-primary/10 text-primary border border-primary/20 text-base'
                   }`}
                 >
-                  {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+                  {isUser ? <User className="w-4 h-4" /> : activePersona.avatarEmoji}
                 </div>
 
                 {/* Message Bubble */}
                 <div
-                  className={`max-w-[85%] rounded-3xl p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed space-y-2.5 shadow-xs ${
+                  className={`max-w-[86%] rounded-3xl p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed space-y-2.5 shadow-xs ${
                     isUser
                       ? 'bg-primary text-on-primary rounded-tr-xs'
                       : 'bg-surface-container-low text-on-surface border border-surface-container-high/80 rounded-tl-xs'
@@ -319,12 +435,12 @@ export const AICoachModal: React.FC<AICoachModalProps> = ({
 
           {isLoading && (
             <div className="flex gap-2.5 items-center">
-              <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
-                <Bot className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0 text-base">
+                {activePersona.avatarEmoji}
               </div>
               <div className="p-3.5 rounded-2xl bg-surface-container-low border border-surface-container-high flex items-center gap-2 text-xs font-bold text-outline">
                 <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                <span>המאמן חושב ומנתח את הנתונים...</span>
+                <span>{activePersona.name} מנתח/ת את הנתונים ומכינ/ה מענה מותאם...</span>
               </div>
             </div>
           )}
@@ -333,7 +449,7 @@ export const AICoachModal: React.FC<AICoachModalProps> = ({
         </div>
 
         {/* Quick Question Chips */}
-        <div className="px-4 py-2 bg-surface-container-low/50 border-t border-surface-container-high/60 overflow-x-auto">
+        <div className="px-3.5 py-2 bg-surface-container-low/50 border-t border-surface-container-high/60 overflow-x-auto">
           <div className="flex gap-1.5 whitespace-nowrap">
             {quickQuestions.map((q, idx) => (
               <button
@@ -354,7 +470,7 @@ export const AICoachModal: React.FC<AICoachModalProps> = ({
             e.preventDefault();
             handleSendMessage();
           }}
-          className="p-3 sm:p-4 border-t border-surface-container-high bg-surface-container-low/80 flex items-center gap-2"
+          className="p-3 sm:p-3.5 border-t border-surface-container-high bg-surface-container-low/80 flex items-center gap-2"
         >
           <button
             type="button"
@@ -373,18 +489,89 @@ export const AICoachModal: React.FC<AICoachModalProps> = ({
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder="שאל את המאמן (למשל: אני מרגיש כבד מדי, מה להחליף?)..."
-            className="flex-1 p-3 rounded-2xl bg-surface-container border border-surface-container-high text-xs sm:text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40"
+            placeholder={`שאל/י את ${activePersona.name} (למשל: אני מרגיש/ה כבד מדי, מה להחליף?)...`}
+            className="flex-1 p-2.5 sm:p-3 rounded-2xl bg-surface-container border border-surface-container-high text-xs sm:text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
 
           <button
             type="submit"
             disabled={!inputText.trim() || isLoading}
-            className="p-3 rounded-2xl bg-primary text-on-primary disabled:opacity-40 hover:bg-primary-dark font-bold text-xs transition-all shadow-md active:scale-95"
+            className="p-2.5 sm:p-3 rounded-2xl bg-primary text-on-primary disabled:opacity-40 hover:bg-primary-dark font-bold text-xs transition-all shadow-md active:scale-95"
           >
             <Send className="w-4 h-4" />
           </button>
         </form>
+
+        {/* Clinical System Prompt MD Modal Viewer */}
+        {showPromptModal && (
+          <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
+            <div className="w-full max-w-lg bg-surface rounded-3xl p-5 border border-surface-container-high shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
+              <div className="flex items-center justify-between pb-2 border-b border-surface-container-high">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-primary" />
+                  <h4 className="font-headline font-black text-sm text-on-surface">
+                    פרוטוקול וספר החוקים הקליני (System Prompt MD)
+                  </h4>
+                </div>
+                <button
+                  onClick={() => setShowPromptModal(false)}
+                  className="p-1.5 rounded-xl bg-surface-container text-on-surface"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto space-y-3 text-xs leading-relaxed text-on-surface-variant">
+                <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20 text-on-surface">
+                  <h5 className="font-bold text-primary mb-1 flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    קובץ מקור: <code>src/data/nutritionCoachSystemPrompt.md</code>
+                  </h5>
+                  <p className="text-[11px] text-outline">
+                    פרוטוקול המערכת מגדיר את המתודולוגיה המדעית, אופן ניתוח נתוני היומן והשקילות, מניעת אשמה ובושה, ופתרונות עומס מזון.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <h6 className="font-bold text-on-surface">1. עקרון דחיסות קלורית ונוזלים (Food Volume vs Density):</h6>
+                  <p>
+                    בשובע קיצוני או נפיחות, המערכת לעולם לא תכריח אכילה מוצקה אלא תעביר ישירות לקלוריות נוזליות קלות לעיכול (שייקים עתירי חלבון).
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <h6 className="font-bold text-on-surface">2. חוקי עשה ואל תעשה (Strict Do's & Don'ts):</h6>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>חובה להתבסס על נתוני האמת של המשתמש מהאפליקציה.</li>
+                    <li>איסור שימוש בשפה שיפוטית ("חטאת", "נפלת").</li>
+                    <li>איסור קידום גירעונות קיצוניים ומסוכנים.</li>
+                  </ul>
+                </div>
+
+                <div className="space-y-2">
+                  <h6 className="font-bold text-on-surface">3. דמויות היועצים המוסמכים:</h6>
+                  <div className="grid grid-cols-2 gap-2 text-[11px]">
+                    <div className="p-2.5 rounded-xl bg-surface-container border border-surface-container-high">
+                      <span className="font-bold block text-on-surface">👨‍⚕️ איתי (M.Sc)</span>
+                      <span className="text-outline">דיאטן קליני וספורט • ביצועים והיפרטרופיה</span>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-surface-container border border-surface-container-high">
+                      <span className="font-bold block text-on-surface">👩‍⚕️ מאיה (R.D)</span>
+                      <span className="text-outline">תזונאית קלינית • עיכול ואכילה קשובה</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowPromptModal(false)}
+                className="w-full py-2.5 rounded-2xl bg-primary text-on-primary font-bold text-xs shadow-md"
+              >
+                סגור
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* AI Memory Modal Preview */}
         {showMemoryModal && (
@@ -433,7 +620,7 @@ export const AICoachModal: React.FC<AICoachModalProps> = ({
                 </div>
 
                 <div>
-                  <span className="font-bold text-outline block mb-1">הערות מאמן:</span>
+                  <span className="font-bold text-outline block mb-1">הערות יועץ:</span>
                   {memory.userNotes.length > 0 ? (
                     <ul className="list-disc list-inside space-y-0.5 text-on-surface">
                       {memory.userNotes.map((n, i) => (
@@ -441,14 +628,14 @@ export const AICoachModal: React.FC<AICoachModalProps> = ({
                       ))}
                     </ul>
                   ) : (
-                    <span className="text-outline italic">המאמן לומד את ההרגלים שלך במהלך השיחות</span>
+                    <span className="text-outline italic">היועץ לומד את ההרגלים שלך במהלך השיחות</span>
                   )}
                 </div>
               </div>
 
               <button
                 onClick={() => setShowMemoryModal(false)}
-                className="w-full py-2.5 rounded-2xl bg-primary text-on-primary font-bold text-xs"
+                className="w-full py-2.5 rounded-2xl bg-primary text-on-primary font-bold text-xs shadow-md"
               >
                 הבנתי, סגור
               </button>

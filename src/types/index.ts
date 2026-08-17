@@ -134,6 +134,7 @@ export interface UserProfile {
   weeklyWeightReminderTime?: string; // HH:mm
   aiApiKey?: string;
   aiModel?: string;
+  coachPersona?: 'male_itai' | 'female_maya';
 }
 
 export * from './ai';

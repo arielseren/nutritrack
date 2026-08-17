@@ -11,6 +11,7 @@ import type {
 } from '../types/ai';
 import type { MealType, UserProfile, DayLog } from '../types';
 import { calculateDayTotals, getDailyAdjustedTargets } from './nutritionCalculator';
+import { COACH_PERSONAS } from '../data/coachPersonas';
 
 const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash';
 
@@ -404,22 +405,25 @@ export class AIService {
 הערות בזיכרון: ${context.memory.userNotes.join('; ') || 'אין'}
 `;
 
-    const systemInstruction = `אתה "NutriCoach AI" - מאמן תזונה וספורט אישי מומחה ברמה הגבוהה ביותר באפליקציית NutriTrack.
-אתה אמפתי, מדעי, מעודד וממוקד בפתרונות פרקטיים מיידיים בעברית טבעית ונעימה.
+    const personaId = context.profile.coachPersona || 'male_itai';
+    const persona = COACH_PERSONAS[personaId] || COACH_PERSONAS.male_itai;
 
-עקרונות חשובים ביותר:
+    const systemInstruction = `אתה יועץ/יועצת תזונה מקצועי/ת באפליקציית NutriTrack.
+${persona.systemInstructionAddon}
+
+עקרונות קליניים ומדעיים מובילים (על פי פרוטוקול nutritionCoachSystemPrompt.md):
 1. התמודדות עם תחושת מלאות ושובע קיצוני ("אני מרגיש מפוצץ / לא מסוגל לאכול עוד"):
-   - כבד את תחושת השובע של המשתמש! לעולם אל תכריח אכילה בכוח.
+   - כבד את תחושת השובע של המשתמש! לעולם אל תכריח אכילה בכוח נפח גדול.
    - הסבר את ההבדל בין "נפח מזון" (Food Volume) לבין "דחיסות קלורית" (Caloric Density).
    - הצע לעבור למקורות קלוריים וחלבונים קלים לעיכול ובנפח קטן (כגון: שייק חלבון נוזלי עם חמאת בוטנים/בננה, שמן זית בסלט, אגוזים, יוגורט במקום חזה עוף יבש או ערימות אורז).
    - אם המשתמש נפוח (Bloated), הצע להפחית ירקות מצליבים חיים, להוריד מלח/סודיום זמנית, ולשתות מים בלגימות קטנות.
    - הצע התאמת תפריט מיידית או פריסה של הקלוריות ליום המחרת.
 2. תקיעה במשקל (Weight Plateau):
-   - נתח את היסטוריית השקילות והמאזן הקלורי.
+   - נתח את היסטוריית השקילות והמאזן הקלורי בצורה מדעית ומרגיעה (תנודתיות נוזלים טבעית).
    - בדוק דיוק שקילות, צעדים יומיים (NEAT) והתאמת גירעון קלורי.
 3. חשקים ותשוקה למתוק:
    - הצע חלופות חכמות עתירות חלבון שישביעו מבלי לפגוע ביעד.
-4. זכור תמיד את הפרופיל והמצב הנוכחי של המשתמש.
+4. זכור תמיד את הפרופיל, המשקל והמצב הנוכחי של המשתמש.
 
 פלט נדרש:
 החזר אך ורק אובייקט JSON תקין (ללא תגי markdown):
@@ -989,6 +993,11 @@ export class AIService {
     const lower = lastUserMsg.toLowerCase();
     const updatedMemory: AICoachMemory = { ...context.memory };
 
+    const personaId = context.profile.coachPersona || 'male_itai';
+    const persona = COACH_PERSONAS[personaId] || COACH_PERSONAS.male_itai;
+    const isFemale = persona.gender === 'female';
+    const coachIntro = `${persona.avatarEmoji} **${persona.name} (${persona.roleTitle}):**`;
+
     let content = '';
     const suggestedActions: AICoachSuggestedAction[] = [];
 
@@ -1006,7 +1015,7 @@ export class AIService {
         updatedMemory.userNotes.push('חווה שובע/נפיחות עם נפח מזון גבוה');
       }
 
-      content = `הבנתי אותך לחלוטין, ${context.profile.name}! 🙏 תחושת שובע ונפיחות היא טבעית לגמרי, במיוחד כשמקפידים על צריכת חלבון גבוהה. הנה בדיוק מה שנעשה:
+      content = `${coachIntro}\nהבנתי אותך לחלוטין, ${context.profile.name}! 🙏 תחושת שובע ונפיחות היא טבעית לגמרי, במיוחד כשמקפידים על צריכת חלבון גבוהה. ${isFemale ? 'הנה הצעדים שאני ממליצה עליהם כרגע' : 'הנה הצעדים שאני ממליץ עליהם כרגע'}:
 
 ### 💡 3 צעדים חכמים להתמודדות כרגע:
 1. **אל תאכל בכוח נפח גדול:** הגוף שלך מאותת על מלאות במערכת העיכול. אכילת חזה עוף יבש או קערת אורז גדולה עכשיו רק תכביד עליך.
@@ -1015,7 +1024,7 @@ export class AIService {
 3. **הפחתת גזים ונפיחות:**
    הימנע מירקות מצליבים (כרוב, כרובית, ברוקולי חי) ומשתייה מוגזת. שתה תה נענע או מים פושרים בלגימות קטנות.
 
-🎯 **האם תרצה שנתאים את התפריט של היום לשייק קליל במקום ארוחה כבדה?**`;
+🎯 **האם תרצה ${isFemale ? 'שאשבץ לך' : 'שאשבץ לך'} שייק קליל במקום ארוחה כבדה להיום?**`;
 
       suggestedActions.push({
         label: '🥤 החלף לשייק חלבון קל לעיכול (300 קק"ל)',
@@ -1033,13 +1042,13 @@ export class AIService {
       lower.includes('שקילה')
     ) {
       // Case 2: Weight plateau / Progress analysis
-      content = `ניתחתי את תמונת המצב השקילתית שלך, ${context.profile.name} 📊:
+      content = `${coachIntro}\n${isFemale ? 'ניתחתי' : 'ניתחתי'} את תמונת המצב השקילתית שלך, ${context.profile.name} 📊:
 
 - **משקל נוכחי:** ${context.profile.currentWeight} ק"ג (יעד: ${context.profile.targetWeight} ק"ג)
 - **מטרת תוכנית:** ${context.profile.goal === 'lean_bulk' ? 'עלייה נקייה במסת שריר' : 'חיטוב וירידה באחוז שומן'}
 - **מאזן להיום:** נצרכו ${calculateDayTotals(context.todayLog).totalCalories} קק"ל מתוך יעד של ${getDailyAdjustedTargets(context.profile, context.todayLog, context.todayLog.date).targetCalories} קק"ל.
 
-### 💡 המלצות המאמן:
+### 💡 ${isFemale ? 'המלצות היועצת' : 'המלצות היועץ'}:
 1. **מגמה שבועית מול יומית:** משקל הגוף תנודתי עקב נוזלים, מלחים וגליקוגן. הסתכל על הממוצע השבועי ולא על יום בודד.
 2. **התאמת צעדים (NEAT):** הקפדה על 7,500-9,000 צעדים ביום מונעת האטה בחילוף החומרים.
 3. **דיוק בשקילת שמנים ורטבים:** כף שמן זית "קטנה" בסלט היא כ-120 קלוריות. שקול אותה פעם אחת בדיוק.`;
@@ -1055,7 +1064,7 @@ export class AIService {
       lower.includes('נשנוש')
     ) {
       // Case 3: Sweet cravings
-      content = `חשק למתוק הוא דבר שאפשר לנהל בחוכמה בלי להרוס את הגירעון או החיטוב! 🍫😋
+      content = `${coachIntro}\nחשק למתוק הוא דבר שאפשר לנהל בחוכמה בלי להרוס את הגירעון או החיטוב! 🍫😋
 
 ### הנה 3 פתרונות מעולים שמשלבים חלבון:
 1. **מעדן חלבון פרו שוקולד (20g חלבון / 120 קק"ל):** מרקם של פודינג עשיר, אפס שומן ומשביע לאורך זמן.
@@ -1068,12 +1077,12 @@ export class AIService {
       });
     } else {
       // General coaching response
-      content = `שלום ${context.profile.name}! אני כאן איתך לכל התייעצות, שאלה או התאמת תפריט 💪
+      content = `${coachIntro}\nשלום ${context.profile.name}! ${isFemale ? 'אני כאן איתך' : 'אני כאן איתך'} לכל התייעצות, שאלה או התאמת תפריט 💪
 
 - **מצבך להיום:** נותרו לך עוד **${remainingKcal > 0 ? remainingKcal : 0} קלוריות** ו-**${remainingProtein > 0 ? remainingProtein : 0}g חלבון** להשלמת היעד היומי.
 - **מים:** שתית ${context.todayLog.waterGlasses} כוסות מים מתוך היעד (${context.profile.dailyWaterTargetGlasses || 8}).
 
-במה תרצה שנתמקד עכשיו?
+במה תרצה שנמשיך עכשיו?
 - התאמת תפריט והצעת ארוחה להשלמת החלבון
 - טיפול בתחושת כבדות / שובע
 - ניתוח התקדמות שבועית
