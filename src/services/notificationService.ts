@@ -246,4 +246,44 @@ export const NotificationService = {
       }
     }
   },
+
+  /**
+   * Sync active schedule with Service Worker for background execution & Periodic Sync
+   */
+  async syncScheduleWithServiceWorker(schedule: {
+    waterEnabled: boolean;
+    waterGlasses: number;
+    waterTarget: number;
+    breakfast?: string;
+    lunch?: string;
+    dinner?: string;
+    weeklyWeightReminder?: { enabled?: boolean; day?: number; time?: string };
+  }): Promise<void> {
+    if (!('serviceWorker' in navigator)) return;
+
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      if (reg.active) {
+        reg.active.postMessage({
+          type: 'SCHEDULE_REMINDERS',
+          schedule,
+        });
+      }
+
+      // Register for Periodic Background Sync if available in browser
+      if ('periodicSync' in reg) {
+        try {
+          // @ts-ignore
+          await reg.periodicSync.register('nutritrack-reminders', {
+            minInterval: 15 * 60 * 1000, // 15 minutes
+          });
+        } catch (e) {
+          // Periodic sync permission might be restricted by browser
+          console.debug('Periodic sync not granted by browser policy:', e);
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to sync schedule with service worker:', err);
+    }
+  },
 };

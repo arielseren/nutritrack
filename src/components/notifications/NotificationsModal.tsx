@@ -266,6 +266,18 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
                   </div>
                 </div>
 
+                {/* Background Notifications Tip */}
+                <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20 space-y-1 text-xs">
+                  <div className="flex items-center gap-1.5 font-bold text-primary">
+                    <Info className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>טיפ חשוב לקבלת התראות ברקע כשהאפליקציה סגורה:</span>
+                  </div>
+                  <ul className="text-[11px] text-outline space-y-1 list-disc list-inside">
+                    <li><strong className="text-on-surface">באייפון (iOS):</strong> יש להתקין את האפליקציה למסך הבית (כפתור שיתוף ⎋ ← "הוסף למסך הבית"). אפל מאפשרת התראות רקע רק לאפליקציות שהותקנו למסך הבית.</li>
+                    <li><strong className="text-on-surface">באנדרואיד:</strong> יש לוודא שהאפליקציה מותקנת כאפליקציה ושלא הופעל מצב "חיסכון בסוללה מחמיר" לאפליקציה.</li>
+                  </ul>
+                </div>
+
                 {/* Test Notification Button */}
                 <button
                   onClick={handleSendTestPush}

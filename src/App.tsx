@@ -63,26 +63,46 @@ export function App() {
   useEffect(() => {
     NotificationService.registerServiceWorker();
 
-    // Check reminders every 60 seconds
-    const interval = setInterval(() => {
+    const syncReminders = () => {
       const todayStr = getTodayDateString();
       const currentLog = StorageService.getDayLog(todayStr, userProfile.id);
-      NotificationService.checkAndTriggerReminders(
-        !!userProfile.waterReminderEnabled && !!userProfile.pushNotificationsEnabled,
-        currentLog.waterGlasses,
-        userProfile.dailyWaterTargetGlasses || 8,
-        {
-          breakfast: userProfile.mealReminderBreakfast,
-          lunch: userProfile.mealReminderLunch,
-          dinner: userProfile.mealReminderDinner,
-        },
-        {
-          enabled: userProfile.weeklyWeightReminderEnabled && userProfile.pushNotificationsEnabled,
+
+      const scheduleData = {
+        waterEnabled: !!userProfile.waterReminderEnabled && !!userProfile.pushNotificationsEnabled,
+        waterGlasses: currentLog.waterGlasses,
+        waterTarget: userProfile.dailyWaterTargetGlasses || 8,
+        breakfast: userProfile.mealReminderBreakfast,
+        lunch: userProfile.mealReminderLunch,
+        dinner: userProfile.mealReminderDinner,
+        weeklyWeightReminder: {
+          enabled: !!userProfile.weeklyWeightReminderEnabled && !!userProfile.pushNotificationsEnabled,
           day: userProfile.weeklyWeightReminderDay,
           time: userProfile.weeklyWeightReminderTime,
-        }
+        },
+      };
+
+      // 1. Sync with Service Worker for Background triggers & Periodic Sync
+      NotificationService.syncScheduleWithServiceWorker(scheduleData);
+
+      // 2. Perform in-app check
+      NotificationService.checkAndTriggerReminders(
+        scheduleData.waterEnabled,
+        scheduleData.waterGlasses,
+        scheduleData.waterTarget,
+        {
+          breakfast: scheduleData.breakfast,
+          lunch: scheduleData.lunch,
+          dinner: scheduleData.dinner,
+        },
+        scheduleData.weeklyWeightReminder
       );
-    }, 60000);
+    };
+
+    // Initial sync
+    syncReminders();
+
+    // Check reminders every 60 seconds
+    const interval = setInterval(syncReminders, 60000);
 
     return () => clearInterval(interval);
   }, [userProfile]);
